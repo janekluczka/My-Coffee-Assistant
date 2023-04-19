@@ -9,9 +9,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.coffee.mycoffeeassistant.R
 
 @Composable
-fun BrewAssistantFloatingActionButton() {
+fun BrewAssistantFloatingActionButton(onClick: () -> Unit) {
     ExtendedFloatingActionButton(
-        onClick = { /* TODO: Add navigation to Brew Assistant */ },
+        onClick = onClick,
         icon = {
             Icon(
                 painterResource(R.drawable.ic_baseline_coffee_maker),
@@ -25,5 +25,5 @@ fun BrewAssistantFloatingActionButton() {
 @Preview
 @Composable
 fun BrewAssistantFloatingActionButtonPreview() {
-    BrewAssistantFloatingActionButton()
+    BrewAssistantFloatingActionButton {}
 }

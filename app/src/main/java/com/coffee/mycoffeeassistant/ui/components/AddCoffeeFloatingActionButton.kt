@@ -8,10 +8,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
-fun AddCoffeeFloatingActionButton() {
-    FloatingActionButton(
-        onClick = { /* TODO: Add navigation to Add Coffee */ }
-    ) {
+fun AddCoffeeFloatingActionButton(onClick: () -> Unit) {
+    FloatingActionButton(onClick = onClick) {
         Icon(Icons.Filled.Add, contentDescription = null)
     }
 }
@@ -19,5 +17,5 @@ fun AddCoffeeFloatingActionButton() {
 @Preview
 @Composable
 fun AddCoffeeFloatingActionButtonPreview() {
-    AddCoffeeFloatingActionButton()
+    AddCoffeeFloatingActionButton {}
 }
