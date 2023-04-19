@@ -1,3 +1,21 @@
 <resources>
-    <string name="app_name">myCoffee Assistant</string>
+    <string name="app_name_full">myCoffee Assistant</string>
+    <string name="app_name_short">myCoffee</string>
+
+    <!--  Screen Default Value  -->
+    <string name="unknown">Unknown</string>
+
+    <!--  Navigation Bar Tabs  -->
+    <string name="home">Home</string>
+    <string name="cupboard">Cupboard</string>
+    <string name="recipes">Recipes</string>
+
+    <!--  Home Screen Sections  -->
+    <string name="section_title_old">Getting old</string>
+    <string name="section_title_low">Running low</string>
+
+    <!--  Cupboard Tabs  -->
+    <string name="tab_cupboard_my_stock">My stock</string>
+    <string name="tab_cupboard_my_favourites">Favourites</string>
+
 </resources>
