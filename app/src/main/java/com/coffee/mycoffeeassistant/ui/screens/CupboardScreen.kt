@@ -7,13 +7,13 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.coffee.mycoffeeassistant.R
+import com.coffee.mycoffeeassistant.ui.components.CoffeeCardHorizontal
 import com.coffee.mycoffeeassistant.ui.components.CoffeeCardVertical
 import com.coffee.mycoffeeassistant.ui.navigation.Screen
 
@@ -42,25 +42,14 @@ fun CupboardScreen(navController: NavController) {
                 contentPadding = PaddingValues(24.dp)
             ) {
                 items(10) { index ->
-//                    Card(
-//                        onClick = {
-//                            navController.navigate(Screen.CoffeeDetails.route + "/$index")
-//                        },
-//                        modifier = Modifier
-//                            .height(height = 200.dp)
-//                            .fillMaxWidth()
-//                    ) {
-//                        Box(Modifier.fillMaxSize()) {
-//                            Text("Coffee $index", Modifier.align(Alignment.Center))
-//                        }
-//                    }
                     CoffeeCardVertical(
-                        navController = navController,
                         modifier = Modifier
                             .fillMaxWidth()
                             .wrapContentHeight(),
                         index = index
-                    )
+                    ) {
+                        navController.navigate(Screen.CoffeeDetails.route + "/$index")
+                    }
                 }
             }
             1 -> LazyVerticalGrid(
@@ -70,18 +59,13 @@ fun CupboardScreen(navController: NavController) {
                 contentPadding = PaddingValues(24.dp)
             ) {
                 items(5) { index ->
-                    Card(
-                        onClick = {
-                            navController.navigate(Screen.CoffeeDetails.route + "/$index")
-                        },
+                    CoffeeCardHorizontal(
                         modifier = Modifier
-                            .height(height = 100.dp)
                             .fillMaxWidth()
-
+                            .height(80.dp),
+                        index = index
                     ) {
-                        Box(Modifier.fillMaxSize()) {
-                            Text("Coffee", Modifier.align(Alignment.Center))
-                        }
+                        navController.navigate(Screen.CoffeeDetails.route + "/$index")
                     }
                 }
             }

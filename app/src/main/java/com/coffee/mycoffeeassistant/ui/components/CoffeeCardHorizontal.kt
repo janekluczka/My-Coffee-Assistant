@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.dp
 import com.coffee.mycoffeeassistant.R
 
 @Composable
-fun CoffeeCardVertical(
+fun CoffeeCardHorizontal(
     modifier: Modifier,
     index: Int,
     onClick: () -> Unit
@@ -30,41 +30,44 @@ fun CoffeeCardVertical(
         border = BorderStroke(1.dp, Color.LightGray),
         modifier = modifier
     ) {
-        // TODO: Add coffee status item in right top corner
-        Image(
-            painter = painterResource(id = R.drawable.img_coffee_bag),
-            contentDescription = "",
-            contentScale = ContentScale.FillHeight,
-            modifier = Modifier
-                .fillMaxWidth()
-                .aspectRatio(4f / 5f)
-                .clip(RoundedCornerShape(12.dp))
-        )
-        Column(
-            Modifier
-                .fillMaxWidth()
-                .wrapContentHeight()
-                .padding(8.dp)
-        ) {
-            Text(
-                text = "Coffee num $index",
-                modifier = Modifier.padding(bottom = 4.dp)
+        Row {
+            Image(
+                painter = painterResource(id = R.drawable.img_coffee_bag),
+                contentDescription = "",
+                contentScale = ContentScale.FillHeight,
+                modifier = Modifier
+                    .width(80.dp)
+                    .aspectRatio(1f / 1f)
+                    .clip(RoundedCornerShape(12.dp))
             )
-            Text(
-                "Brand name",
-                modifier = Modifier.padding(bottom = 4.dp)
-            )
+            Column(
+                Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight()
+                    .padding(8.dp)
+            ) {
+                Text(
+                    text = "Coffee num $index",
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
+                Text(
+                    "Brand name",
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
+            }
         }
     }
 }
 
 @Preview
 @Composable
-fun CoffeeCardVerticalPreview() {
-    CoffeeCardVertical(
+fun CoffeeCardHorizontalPreview() {
+    CoffeeCardHorizontal(
         modifier = Modifier
-            .width(150.dp)
-            .wrapContentHeight(),
+            .width(300.dp)
+            .height(100.dp),
         index = 0
-    ) {}
+    ) {
+
+    }
 }

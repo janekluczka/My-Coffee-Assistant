@@ -13,6 +13,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.coffee.mycoffeeassistant.ui.components.CoffeeCardVertical
 import com.coffee.mycoffeeassistant.ui.components.HomeSectionHeader
+import com.coffee.mycoffeeassistant.ui.navigation.Screen
 
 
 @Composable
@@ -24,11 +25,12 @@ fun HomeSection(navController: NavController, sectionTitle: String) {
     ) {
         items(3) { index ->
             CoffeeCardVertical(
-                navController = navController,
                 modifier = Modifier
                     .width(120.dp)
                     .wrapContentHeight(),
-                index = index)
+                index = index) {
+                navController.navigate(Screen.CoffeeDetails.route + "/$index")
+            }
         }
     }
 }
