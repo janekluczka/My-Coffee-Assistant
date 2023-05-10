@@ -4,8 +4,8 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.coffee.mycoffeeassistant.ui.MyCoffeeAssistantAppState
-import com.coffee.mycoffeeassistant.ui.components.UserGreeting
 import com.coffee.mycoffeeassistant.ui.screens.MethodRecipesScreen
+import com.coffee.mycoffeeassistant.ui.screens.recipedetails.RecipeDetailsScreen
 import com.coffee.mycoffeeassistant.ui.screens.RecipesScreen
 
 fun NavGraphBuilder.recipesNavGraph(appState: MyCoffeeAssistantAppState) {
@@ -20,7 +20,7 @@ fun NavGraphBuilder.recipesNavGraph(appState: MyCoffeeAssistantAppState) {
             MethodRecipesScreen(navController = appState.navController)
         }
         composable(Screen.RecipeDetails.route) {
-            UserGreeting("Recipe")
+            RecipeDetailsScreen()
         }
     }
 }
