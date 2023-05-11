@@ -6,7 +6,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import com.coffee.mycoffeeassistant.R
 import com.coffee.mycoffeeassistant.ui.components.UserGreeting
-import com.coffee.mycoffeeassistant.ui.theme.HomeSection
+import com.coffee.mycoffeeassistant.ui.components.HomeSection
 
 @Composable
 fun HomeScreen(navController: NavController) {

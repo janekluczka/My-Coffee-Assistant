@@ -1,4 +1,4 @@
-package com.coffee.mycoffeeassistant.ui.theme
+package com.coffee.mycoffeeassistant.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
@@ -11,8 +11,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.coffee.mycoffeeassistant.ui.components.CoffeeCardVertical
-import com.coffee.mycoffeeassistant.ui.components.HomeSectionHeader
 import com.coffee.mycoffeeassistant.ui.navigation.Screen
 
 
@@ -20,13 +18,13 @@ import com.coffee.mycoffeeassistant.ui.navigation.Screen
 fun HomeSection(navController: NavController, sectionTitle: String) {
     HomeSectionHeader(text = sectionTitle)
     LazyRow(
-        horizontalArrangement = Arrangement.spacedBy(24.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
         contentPadding = PaddingValues(24.dp)
     ) {
         items(3) { index ->
             CoffeeCardVertical(
                 modifier = Modifier
-                    .width(120.dp)
+                    .width(150.dp)
                     .wrapContentHeight(),
                 index = index) {
                 navController.navigate(Screen.CoffeeDetails.route + "/$index")

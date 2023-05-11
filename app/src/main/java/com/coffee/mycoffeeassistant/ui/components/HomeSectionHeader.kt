@@ -19,6 +19,6 @@ fun HomeSectionHeader(text: String) {
 
 @Preview
 @Composable
-fun HomeSectionPreview() {
+fun HomeSectionHeaderPreview() {
     HomeSectionHeader(text = "My coffee bags")
 }

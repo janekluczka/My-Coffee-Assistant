@@ -13,7 +13,13 @@ fun UserGreeting(text: String = "Welcome!") {
     Text(
         text = text,
         fontSize = 30.sp,
-        modifier = Modifier.padding(24.dp)
+        modifier = Modifier
+            .padding(
+                start = 24.dp,
+                top = 24.dp,
+                end = 24.dp,
+                bottom = 8.dp
+            )
     )
 }
 

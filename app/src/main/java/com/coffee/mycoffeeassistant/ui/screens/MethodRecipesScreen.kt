@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
-
 package com.coffee.mycoffeeassistant.ui.screens
 
 import androidx.compose.foundation.layout.*
@@ -15,12 +13,13 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.coffee.mycoffeeassistant.ui.navigation.Screen
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MethodRecipesScreen(navController: NavController) {
     LazyVerticalGrid(
         columns = GridCells.Adaptive(300.dp),
-        verticalArrangement = Arrangement.spacedBy(24.dp),
-        horizontalArrangement = Arrangement.spacedBy(24.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
         contentPadding = PaddingValues(24.dp)
     ) {
         items(5) { index ->
