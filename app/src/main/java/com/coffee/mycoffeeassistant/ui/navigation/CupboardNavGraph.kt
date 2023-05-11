@@ -6,8 +6,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
 import com.coffee.mycoffeeassistant.ui.MyCoffeeAssistantAppState
-import com.coffee.mycoffeeassistant.ui.components.UserGreeting
-import com.coffee.mycoffeeassistant.ui.screens.CupboardScreen
+import com.coffee.mycoffeeassistant.ui.screens.addcoffee.AddCoffeeScreen
+import com.coffee.mycoffeeassistant.ui.screens.cupboard.CupboardScreen
 
 fun NavGraphBuilder.cupboardNavGraph(appState: MyCoffeeAssistantAppState) {
     navigation(
@@ -18,14 +18,13 @@ fun NavGraphBuilder.cupboardNavGraph(appState: MyCoffeeAssistantAppState) {
             CupboardScreen(appState.navController)
         }
         composable(Screen.AddCoffee.route) {
-            UserGreeting("Add")
+            AddCoffeeScreen(appState.navController)
         }
         composable(
             Screen.CoffeeDetails.route + "/{coffeeId}",
             arguments = listOf(navArgument("coffeeId") { type = NavType.IntType })
         ) { backStackEntry ->
             val coffeeId = backStackEntry.arguments?.getInt("coffeeId")
-            UserGreeting("My coffee beans $coffeeId")
         }
     }
 }

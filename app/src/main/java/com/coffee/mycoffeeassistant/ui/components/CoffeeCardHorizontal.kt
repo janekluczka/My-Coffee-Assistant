@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
-
 package com.coffee.mycoffeeassistant.ui.components
 
 import androidx.compose.foundation.BorderStroke
@@ -10,6 +8,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -17,8 +16,10 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.coffee.mycoffeeassistant.R
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CoffeeCardHorizontal(
     modifier: Modifier,
@@ -28,31 +29,32 @@ fun CoffeeCardHorizontal(
     Card(
         onClick = onClick,
         border = BorderStroke(1.dp, Color.LightGray),
-        modifier = modifier
+        modifier = modifier.height(IntrinsicSize.Min).fillMaxWidth()
     ) {
-        Row {
+        Row(verticalAlignment = Alignment.CenterVertically) {
             Image(
                 painter = painterResource(id = R.drawable.img_coffee_bag),
                 contentDescription = "",
-                contentScale = ContentScale.FillHeight,
+                contentScale = ContentScale.Crop,
                 modifier = Modifier
-                    .width(80.dp)
-                    .aspectRatio(1f / 1f)
+                    .size(100.dp)
                     .clip(RoundedCornerShape(12.dp))
             )
             Column(
                 Modifier
                     .fillMaxWidth()
                     .wrapContentHeight()
-                    .padding(8.dp)
+                    .padding(16.dp)
             ) {
                 Text(
                     text = "Coffee num $index",
-                    modifier = Modifier.padding(bottom = 4.dp)
+                    maxLines = 1,
+                    fontSize = 20.sp,
                 )
                 Text(
                     "Brand name",
-                    modifier = Modifier.padding(bottom = 4.dp)
+                    maxLines = 1,
+                    fontSize = 16.sp
                 )
             }
         }
@@ -64,8 +66,7 @@ fun CoffeeCardHorizontal(
 fun CoffeeCardHorizontalPreview() {
     CoffeeCardHorizontal(
         modifier = Modifier
-            .width(300.dp)
-            .height(100.dp),
+            .width(300.dp),
         index = 0
     ) {
 

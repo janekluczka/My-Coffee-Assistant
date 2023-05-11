@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalMaterial3Api::class)
 
-package com.coffee.mycoffeeassistant.ui.screens
+package com.coffee.mycoffeeassistant.ui.screens.cupboard
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -37,11 +37,11 @@ fun CupboardScreen(navController: NavController) {
         when (state) {
             0 -> LazyVerticalGrid(
                 columns = GridCells.Adaptive(150.dp),
-                verticalArrangement = Arrangement.spacedBy(24.dp),
-                horizontalArrangement = Arrangement.spacedBy(24.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
                 contentPadding = PaddingValues(24.dp)
             ) {
-                items(10) { index ->
+                items(5) { index ->
                     CoffeeCardVertical(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -53,16 +53,16 @@ fun CupboardScreen(navController: NavController) {
                 }
             }
             1 -> LazyVerticalGrid(
-                columns = GridCells.Adaptive(250.dp),
-                verticalArrangement = Arrangement.spacedBy(24.dp),
-                horizontalArrangement = Arrangement.spacedBy(24.dp),
+                columns = GridCells.Adaptive(300.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
                 contentPadding = PaddingValues(24.dp)
             ) {
                 items(5) { index ->
                     CoffeeCardHorizontal(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(80.dp),
+                            .wrapContentHeight(),
                         index = index
                     ) {
                         navController.navigate(Screen.CoffeeDetails.route + "/$index")

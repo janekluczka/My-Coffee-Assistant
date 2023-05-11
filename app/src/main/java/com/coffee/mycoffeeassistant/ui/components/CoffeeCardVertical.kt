@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
-
 package com.coffee.mycoffeeassistant.ui.components
 
 import androidx.compose.foundation.BorderStroke
@@ -17,8 +15,10 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.coffee.mycoffeeassistant.R
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CoffeeCardVertical(
     modifier: Modifier,
@@ -41,18 +41,20 @@ fun CoffeeCardVertical(
                 .clip(RoundedCornerShape(12.dp))
         )
         Column(
-            Modifier
+            modifier = Modifier
                 .fillMaxWidth()
                 .wrapContentHeight()
-                .padding(8.dp)
+                .padding(16.dp),
         ) {
             Text(
-                text = "Coffee num $index",
-                modifier = Modifier.padding(bottom = 4.dp)
+                text = "Coffee $index",
+                modifier = Modifier.padding(bottom = 4.dp),
+                fontSize = 20.sp,
             )
             Text(
                 "Brand name",
-                modifier = Modifier.padding(bottom = 4.dp)
+                modifier = Modifier.padding(bottom = 4.dp),
+                fontSize = 16.sp
             )
         }
     }
