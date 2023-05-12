@@ -12,34 +12,38 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.coffee.mycoffeeassistant.ui.AppViewModelProvider
 
+@Suppress("SpellCheckingInspection")
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
 fun RecipeDetailsScreen(
     recipeDetailsViewModel: RecipeDetailsViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
-//    TODO: Change background color for iframe in dark mode
-
-    val videoId = "tltBHjmIUJ0"
+    // TODO: Change background color for iframe in dark mode if possible
+    val recipeUiState = recipeDetailsViewModel.recipeUiState
+    val iframeWidth = 640
+    val iframeHeight = 640 * 9/ 16
     val iframeHtml = "<html>" +
-            "<meta name=\"viewport\" content=\"width=640\">" +
+            "<meta name=\"viewport\" content=\"width=${iframeWidth}\">" +
+            "<style>iframe { overflow:hidden; }</style>" +
             "<body style=\"margin: 0px; padding: 0px\">" +
             "<iframe " +
             "id=\"player\" " +
             "frameborder=\"0\" " +
             "allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\" " +
-            "width=\"640\" " +
-            "height=\"360\" " +
-            "src=\"https://www.youtube.com/embed/${videoId}?version=3&amp;enablejsapi=1&amp;controls=1&amp;fs=0\">" +
+            "width=\"${iframeWidth}\" " +
+            "height=\"${iframeHeight}\" " +
+            "src=\"https://www.youtube.com/embed/${recipeUiState.youtubeId}?version=3&amp;enablejsapi=1&amp;controls=1&amp;fs=0\">" +
             "</iframe>" +
             "</body>" +
             "</html>"
 
-    Column() {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Box(modifier = Modifier.aspectRatio(16f / 9f)) {
             AndroidView(
                 factory = {
@@ -53,7 +57,7 @@ fun RecipeDetailsScreen(
                             loadWithOverviewMode = true
                             useWideViewPort = true
                         }
-
+                        setLayerType(ViewGroup.LAYER_TYPE_HARDWARE, null)
                         webViewClient = IFrameWebViewClient(it)
                         loadData(iframeHtml, "text/html", "utf-8")
                     }
