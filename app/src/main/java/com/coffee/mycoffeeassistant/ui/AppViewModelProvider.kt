@@ -6,12 +6,16 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.coffee.mycoffeeassistant.MyCoffeeAssistantApplication
 import com.coffee.mycoffeeassistant.ui.screens.addcoffee.AddCoffeeViewModel
+import com.coffee.mycoffeeassistant.ui.screens.coffeedetails.CoffeeDetailsViewModel
 import com.coffee.mycoffeeassistant.ui.screens.recipedetails.RecipeDetailsViewModel
 
 object AppViewModelProvider {
     val Factory = viewModelFactory {
         initializer {
             AddCoffeeViewModel(myCoffeeAssistantApplication().container.coffeeRepository)
+        }
+        initializer {
+            CoffeeDetailsViewModel(myCoffeeAssistantApplication().container.coffeeRepository)
         }
         initializer {
             RecipeDetailsViewModel()
