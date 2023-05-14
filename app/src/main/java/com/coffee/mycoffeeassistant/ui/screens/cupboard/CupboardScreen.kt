@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
-
 package com.coffee.mycoffeeassistant.ui.screens.cupboard
 
 import androidx.compose.foundation.layout.*
@@ -11,54 +9,66 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.coffee.mycoffeeassistant.R
+import com.coffee.mycoffeeassistant.ui.AppViewModelProvider
 import com.coffee.mycoffeeassistant.ui.components.CoffeeCardHorizontal
 import com.coffee.mycoffeeassistant.ui.components.CoffeeCardVertical
 import com.coffee.mycoffeeassistant.ui.navigation.Screen
 
 @Composable
-fun CupboardScreen(navController: NavController) {
-    var state by remember { mutableStateOf(0) }
-    val titles = listOf(
-        stringResource(id = R.string.tab_cupboard_my_stock),
-        stringResource(id = R.string.tab_cupboard_my_favourites)
-    )
+fun CupboardScreen(
+    navController: NavController,
+    cupboardViewModel: CupboardViewModel = viewModel(factory = AppViewModelProvider.Factory)
+) {
+    val cupboardUiState by cupboardViewModel.uiState.collectAsState()
+    val coffeeUiStateList = cupboardViewModel.coffeeUiStateList
+    cupboardViewModel.getCoffeeUiStateList()
+
     Column {
-        TabRow(selectedTabIndex = state) {
-            titles.forEachIndexed { index, title ->
+        TabRow(selectedTabIndex = cupboardUiState.state) {
+            cupboardUiState.titleResources.forEachIndexed { index, titleResource ->
                 Tab(
-                    selected = state == index,
-                    onClick = { state = index },
-                    text = { Text(text = title, maxLines = 2, overflow = TextOverflow.Ellipsis) }
+                    selected = cupboardUiState.state == index,
+                    onClick = { cupboardViewModel.updateCupboardUsState(cupboardUiState.copy(state = index)) },
+                    text = {
+                        Text(
+                            text = stringResource(id = titleResource),
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
                 )
             }
         }
-        when (state) {
+        when (cupboardUiState.state) {
             0 -> LazyVerticalGrid(
                 columns = GridCells.Adaptive(150.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 contentPadding = PaddingValues(24.dp)
             ) {
-                items(5) { index ->
+                items(coffeeUiStateList.size) { index ->
+                    val coffeeUiState = coffeeUiStateList[index]
                     CoffeeCardVertical(
+                        name = coffeeUiState.name,
+                        brand = coffeeUiState.brand,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .wrapContentHeight(),
-                        index = index
+                            .wrapContentHeight()
                     ) {
-                        navController.navigate(Screen.CoffeeDetails.route + "/$index")
+                        navController.navigate(Screen.CoffeeDetails.route + "/${coffeeUiState.id}")
                     }
                 }
             }
+
             1 -> LazyVerticalGrid(
                 columns = GridCells.Adaptive(300.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 contentPadding = PaddingValues(24.dp)
             ) {
-                items(5) { index ->
+                items(1) { index ->
                     CoffeeCardHorizontal(
                         modifier = Modifier
                             .fillMaxWidth()
