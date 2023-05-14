@@ -1,19 +1,15 @@
 package com.coffee.mycoffeeassistant.ui.screens
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.material3.Card
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.coffee.mycoffeeassistant.ui.components.RecipeCard
 import com.coffee.mycoffeeassistant.ui.navigation.Screen
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MethodRecipesScreen(navController: NavController) {
     LazyVerticalGrid(
@@ -22,16 +18,12 @@ fun MethodRecipesScreen(navController: NavController) {
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         contentPadding = PaddingValues(24.dp)
     ) {
-        items(5) { index ->
-            Card(
-                onClick = { navController.navigate(Screen.RecipeDetails.route) },
-                modifier = Modifier
-                    .height(height = 150.dp)
-                    .fillMaxWidth()
+        items(1) { index ->
+            RecipeCard(
+                title = "",
+                author = ""
             ) {
-                Box(Modifier.fillMaxSize()) {
-                    Text("Recipe $index", Modifier.align(Alignment.Center))
-                }
+                navController.navigate(Screen.RecipeDetails.route)
             }
         }
     }

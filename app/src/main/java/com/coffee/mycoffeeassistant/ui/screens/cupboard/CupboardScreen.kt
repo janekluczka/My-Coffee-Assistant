@@ -70,10 +70,11 @@ fun CupboardScreen(
             ) {
                 items(1) { index ->
                     CoffeeCardHorizontal(
+                        name = "",
+                        brand = "",
                         modifier = Modifier
                             .fillMaxWidth()
-                            .wrapContentHeight(),
-                        index = index
+                            .wrapContentHeight()
                     ) {
                         navController.navigate(Screen.CoffeeDetails.route + "/$index")
                     }

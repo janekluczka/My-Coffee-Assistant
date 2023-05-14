@@ -16,12 +16,12 @@ import com.coffee.mycoffeeassistant.ui.navigation.Screen
 fun RecipesScreen(navController: NavController) {
     LazyVerticalGrid(
         columns = GridCells.Adaptive(300.dp),
-        verticalArrangement = Arrangement.spacedBy(24.dp),
-        horizontalArrangement = Arrangement.spacedBy(24.dp),
-        contentPadding = PaddingValues(24.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        contentPadding = PaddingValues(24.dp)
     ) {
         items(3) { index ->
-            MethodCard(index = index) {
+            MethodCard {
                 navController.navigate(Screen.MethodRecipes.route)
             }
         }

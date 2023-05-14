@@ -7,9 +7,10 @@ import com.coffee.mycoffeeassistant.ui.components.UserGreeting
 
 @Composable
 fun CoffeeDetailsScreen(
+    coffeeId: Int,
     coffeeDetailsViewModel: CoffeeDetailsViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
     val coffeeUiState = coffeeDetailsViewModel.coffeeUiState
-    coffeeDetailsViewModel.getCoffeeUiState(1)
+    coffeeDetailsViewModel.getCoffeeUiState(coffeeId)
     UserGreeting(text = coffeeUiState.name)
 }

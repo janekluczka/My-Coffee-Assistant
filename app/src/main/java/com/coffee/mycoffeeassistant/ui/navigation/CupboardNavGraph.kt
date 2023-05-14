@@ -26,7 +26,9 @@ fun NavGraphBuilder.cupboardNavGraph(appState: MyCoffeeAssistantAppState) {
             arguments = listOf(navArgument("coffeeId") { type = NavType.IntType })
         ) { backStackEntry ->
             val coffeeId = backStackEntry.arguments?.getInt("coffeeId")
-            CoffeeDetailsScreen()
+            if (coffeeId != null) {
+                CoffeeDetailsScreen(coffeeId = coffeeId)
+            }
         }
     }
 }

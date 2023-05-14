@@ -21,12 +21,15 @@ fun HomeSection(navController: NavController, sectionTitle: String) {
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         contentPadding = PaddingValues(24.dp)
     ) {
-        items(3) { index ->
+        items(5) { index ->
             CoffeeCardVertical(
+                name = "name",
+                brand = "brand",
+                imageAspectRatio = 1f / 1f,
                 modifier = Modifier
-                    .width(150.dp)
-                    .wrapContentHeight(),
-                index = index) {
+                    .width(120.dp)
+                    .wrapContentHeight()
+            ) {
                 navController.navigate(Screen.CoffeeDetails.route + "/$index")
             }
         }
