@@ -16,10 +16,12 @@ fun NavGraphBuilder.cupboardNavGraph(appState: MyCoffeeAssistantAppState) {
         route = "cupboard"
     ) {
         composable(Screen.Cupboard.route) {
-            CupboardScreen(appState.navController)
+            CupboardScreen(navigateToDetails = {
+                appState.navController.navigate(Screen.CoffeeDetails.createRoute(id = it))
+            })
         }
         composable(Screen.AddCoffee.route) {
-            AddCoffeeScreen(appState.navController)
+            AddCoffeeScreen(navController = appState.navController)
         }
         composable(
             Screen.CoffeeDetails.route + "/{coffeeId}",
@@ -27,7 +29,10 @@ fun NavGraphBuilder.cupboardNavGraph(appState: MyCoffeeAssistantAppState) {
         ) { backStackEntry ->
             val coffeeId = backStackEntry.arguments?.getInt("coffeeId")
             if (coffeeId != null) {
-                CoffeeDetailsScreen(coffeeId = coffeeId)
+                CoffeeDetailsScreen(
+                    navController = appState.navController,
+                    coffeeId = coffeeId
+                )
             }
         }
     }

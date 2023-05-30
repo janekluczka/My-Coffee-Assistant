@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
-
 package com.coffee.mycoffeeassistant.ui.navigation
 
 import androidx.annotation.DrawableRes
@@ -8,12 +6,15 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
 import com.coffee.mycoffeeassistant.R
 
+@OptIn(ExperimentalMaterial3Api::class)
 sealed class Screen(
     val route: String,
     @StringRes val stringResource: Int = R.string.unknown,
     @DrawableRes val painterResource: Int = R.drawable.ic_launcher_foreground,
     val fabPosition: FabPosition = FabPosition.Center
 ) {
+    fun createRoute(id: Any) = route + "/${id}"
+
     object Home : Screen(
         route = "home_screen",
         stringResource = R.string.home,

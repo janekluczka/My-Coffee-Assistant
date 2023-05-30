@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.coffee.mycoffeeassistant.data.CoffeeRepository
 import com.coffee.mycoffeeassistant.ui.model.CoffeeUiState
+import com.coffee.mycoffeeassistant.ui.model.toCoffee
 import com.coffee.mycoffeeassistant.ui.model.toCoffeeUiState
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
@@ -19,10 +20,23 @@ class CoffeeDetailsViewModel(private val coffeeRepository: CoffeeRepository) : V
     fun getCoffeeUiState(id: Int) {
         viewModelScope.launch {
             coffeeRepository.getCoffeeStream(id).filterNotNull().collect { coffee ->
-                coffeeUiState = coffee.toCoffeeUiState()
+                if (coffeeUiState.id != coffee.id) coffeeUiState = coffee.toCoffeeUiState()
             }
         }
+    }
 
+    fun updateIsFavourite() {
+        coffeeUiState = coffeeUiState.copy(isFavourite = !coffeeUiState.isFavourite)
+        viewModelScope.launch {
+            coffeeRepository.updateCoffee(coffeeUiState.toCoffee())
+        }
+    }
+
+    fun deleteCoffee(onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            coffeeRepository.deleteCoffee(coffeeUiState.toCoffee())
+            onSuccess()
+        }
     }
 
 }

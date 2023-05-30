@@ -6,12 +6,22 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.coffee.mycoffeeassistant.MyCoffeeAssistantApplication
 import com.coffee.mycoffeeassistant.ui.screens.addcoffee.AddCoffeeViewModel
+import com.coffee.mycoffeeassistant.ui.screens.brewassistant.BrewAssistantViewModel
 import com.coffee.mycoffeeassistant.ui.screens.coffeedetails.CoffeeDetailsViewModel
 import com.coffee.mycoffeeassistant.ui.screens.cupboard.CupboardViewModel
+import com.coffee.mycoffeeassistant.ui.screens.home.HomeViewModel
+import com.coffee.mycoffeeassistant.ui.screens.methodrecipes.MethodRecipesViewModel
 import com.coffee.mycoffeeassistant.ui.screens.recipedetails.RecipeDetailsViewModel
+import com.coffee.mycoffeeassistant.ui.screens.methods.MethodsViewModel
 
 object AppViewModelProvider {
     val Factory = viewModelFactory {
+        initializer {
+            HomeViewModel(myCoffeeAssistantApplication().container.coffeeRepository)
+        }
+        initializer {
+            BrewAssistantViewModel(myCoffeeAssistantApplication().container.coffeeRepository)
+        }
         initializer {
             CupboardViewModel(myCoffeeAssistantApplication().container.coffeeRepository)
         }
@@ -22,7 +32,13 @@ object AppViewModelProvider {
             CoffeeDetailsViewModel(myCoffeeAssistantApplication().container.coffeeRepository)
         }
         initializer {
-            RecipeDetailsViewModel()
+            MethodsViewModel(myCoffeeAssistantApplication().container.firebaseRepository)
+        }
+        initializer {
+            MethodRecipesViewModel(myCoffeeAssistantApplication().container.firebaseRepository)
+        }
+        initializer {
+            RecipeDetailsViewModel(myCoffeeAssistantApplication().container.firebaseRepository)
         }
     }
 }

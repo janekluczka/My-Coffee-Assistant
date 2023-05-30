@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
-
 package com.coffee.mycoffeeassistant.ui
 
 import androidx.compose.foundation.layout.Box
@@ -10,6 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -18,33 +17,16 @@ import com.coffee.mycoffeeassistant.ui.components.AddCoffeeFloatingActionButton
 import com.coffee.mycoffeeassistant.ui.components.BrewAssistantFloatingActionButton
 import com.coffee.mycoffeeassistant.ui.navigation.Screen
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyCoffeeAssistantApp() {
     val appState = rememberMyCoffeeAssistantAppState()
     val navBackStackEntry by appState.navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
+
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Text(
-                        stringResource(R.string.app_name_short),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                },
-                navigationIcon = {
-                    if (!appState.navigationBarDestinations.any { it.route == currentDestination?.route })
-                        if (appState.navController.previousBackStackEntry != null) {
-                            IconButton(onClick = { appState.navController.navigateUp() }) {
-                                Icon(
-                                    painterResource(id = R.drawable.ic_baseline_arrow_back),
-                                    contentDescription = "Back"
-                                )
-                            }
-                        }
-                }
-            )
+            MyCoffeeAssistantTopBar(appState, currentDestination)
         },
         floatingActionButton = {
             when (currentDestination?.route) {
@@ -98,6 +80,57 @@ fun MyCoffeeAssistantApp() {
     ) { innerPadding ->
         Box(modifier = Modifier.fillMaxSize()) {
             MyCoffeeAssistantNavHost(appState, innerPadding)
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun MyCoffeeAssistantTopBar(
+    appState: MyCoffeeAssistantAppState,
+    currentDestination: NavDestination?
+) {
+    if (currentDestination?.route?.contains(Screen.CoffeeDetails.route) == true) {
+        TopAppBar(
+            title = {
+                Text(
+                    stringResource(R.string.app_name_short),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            },
+            navigationIcon = { BackNavigationIcon(appState, currentDestination) },
+            actions = {
+
+            }
+        )
+    } else {
+        CenterAlignedTopAppBar(
+            title = {
+                Text(
+                    stringResource(R.string.app_name_short),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            },
+            navigationIcon = { BackNavigationIcon(appState, currentDestination) }
+        )
+    }
+}
+
+@Composable
+private fun BackNavigationIcon(
+    appState: MyCoffeeAssistantAppState,
+    currentDestination: NavDestination?
+) {
+    if (!appState.navigationBarDestinations.any { it.route == currentDestination?.route }) {
+        if (appState.navController.previousBackStackEntry != null) {
+            IconButton(onClick = { appState.navController.navigateUp() }) {
+                Icon(
+                    painterResource(id = R.drawable.ic_baseline_arrow_back),
+                    contentDescription = "Back"
+                )
+            }
         }
     }
 }

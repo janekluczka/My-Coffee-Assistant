@@ -4,8 +4,8 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.coffee.mycoffeeassistant.ui.MyCoffeeAssistantAppState
-import com.coffee.mycoffeeassistant.ui.components.UserGreeting
-import com.coffee.mycoffeeassistant.ui.screens.HomeScreen
+import com.coffee.mycoffeeassistant.ui.screens.brewassistant.BrewAssistantScreen
+import com.coffee.mycoffeeassistant.ui.screens.home.HomeScreen
 
 fun NavGraphBuilder.homeNavGraph(appState: MyCoffeeAssistantAppState) {
     navigation(
@@ -16,7 +16,7 @@ fun NavGraphBuilder.homeNavGraph(appState: MyCoffeeAssistantAppState) {
             HomeScreen(navController = appState.navController)
         }
         composable(Screen.BrewAssistant.route) {
-            UserGreeting("Assistant")
+            BrewAssistantScreen()
         }
     }
 }

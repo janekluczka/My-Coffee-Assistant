@@ -6,7 +6,13 @@ interface CoffeeRepository {
 
     fun getAllCoffeesStream(): Flow<List<Coffee>>
 
+    fun getFavouriteCoffeesStream(): Flow<List<Coffee>>
+
     fun getCoffeeStream(id: Int): Flow<Coffee?>
+
+    fun getAmountLowerThanStream(amount: Float): Flow<List<Coffee>>
+
+    fun getOlderThanStream(date: String): Flow<List<Coffee>>
 
     suspend fun insertCoffee(coffee: Coffee)
 

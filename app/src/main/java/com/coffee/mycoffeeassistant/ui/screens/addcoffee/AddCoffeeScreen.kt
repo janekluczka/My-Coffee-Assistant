@@ -1,17 +1,22 @@
 package com.coffee.mycoffeeassistant.ui.screens.addcoffee
 
-import androidx.compose.foundation.Image
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
@@ -19,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import coil.compose.AsyncImage
 import com.coffee.mycoffeeassistant.R
 import com.coffee.mycoffeeassistant.ui.AppViewModelProvider
 import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
@@ -26,24 +32,37 @@ import com.maxkeppeler.sheets.calendar.CalendarDialog
 import com.maxkeppeler.sheets.calendar.models.CalendarConfig
 import com.maxkeppeler.sheets.calendar.models.CalendarSelection
 import com.maxkeppeler.sheets.calendar.models.CalendarStyle
-import kotlinx.coroutines.launch
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddCoffeeScreen(
     navController: NavController,
-    addCoffeeViewModel: AddCoffeeViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    viewModel: AddCoffeeViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
-    val addCoffeeUiState by addCoffeeViewModel.uiState.collectAsState()
-    val coffeeUiState = addCoffeeViewModel.coffeeUiState
+    val context = LocalContext.current
 
-    val coroutineScope = rememberCoroutineScope()
+    val addCoffeeUiState by viewModel.uiState.collectAsState()
 
-    var photoSelected by remember { mutableStateOf(false) }
+    val coffeeUiState = viewModel.coffeeUiState
+
     var roastExpanded by remember { mutableStateOf(false) }
     var processExpanded by remember { mutableStateOf(false) }
     var calendarOpened by remember { mutableStateOf(false) }
+
+    val singlePhotoPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia(),
+        onResult = { uri ->
+            uri?.let {
+                viewModel.addImage(
+                    contentResolver = context.contentResolver,
+                    uri = it
+                )
+            }
+        }
+    )
 
     if (calendarOpened) {
         CalendarDialog(
@@ -60,7 +79,7 @@ fun AddCoffeeScreen(
                 boundary = LocalDate.now().minusYears(100)..LocalDate.now()
             ),
             selection = CalendarSelection.Date {
-                addCoffeeViewModel.updateCoffeeUiState(coffeeUiState.copy(roastingDate = it))
+                viewModel.updateCoffeeUiState(coffeeUiState.copy(roastingDate = it))
                 calendarOpened = false
             }
         )
@@ -71,28 +90,46 @@ fun AddCoffeeScreen(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         item {
-            if (photoSelected) {
-                Image(
-                    painter = painterResource(id = R.drawable.img_coffee_bag),
-                    contentDescription = "",
-                    contentScale = ContentScale.Fit,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(16f / 9f)
-                )
-            } else {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(16f / 9f)
-                        .background(MaterialTheme.colorScheme.primaryContainer),
-                    contentAlignment = Alignment.Center
+            Card {
+                Column(
+                    modifier = Modifier.padding(4.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    OutlinedIconButton(onClick = { photoSelected = true }) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_baseline_photo_camera),
-                            contentDescription = ""
+                    if (coffeeUiState.image.isNotEmpty()) {
+                        AsyncImage(
+                            model = coffeeUiState.imageUri,
+                            contentDescription = "",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .aspectRatio(16f / 9f)
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp))
                         )
+                    } else {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .aspectRatio(16f / 9f)
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_baseline_photo_camera),
+                                contentDescription = "",
+                                modifier = Modifier.size(48.dp),
+                                tint = MaterialTheme.colorScheme.surfaceVariant
+                            )
+                        }
+                    }
+                    Button(onClick = {
+                        singlePhotoPickerLauncher.launch(
+                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                        )
+                    }) {
+                        Text(text = "Select photo")
                     }
                 }
             }
@@ -101,7 +138,7 @@ fun AddCoffeeScreen(
             OutlinedTextField(
                 value = coffeeUiState.name,
                 onValueChange = {
-                    addCoffeeViewModel.updateCoffeeUiState(coffeeUiState.copy(name = it))
+                    viewModel.updateCoffeeUiState(coffeeUiState.copy(name = it))
                 },
                 label = { Text("Name") },
                 singleLine = true,
@@ -113,7 +150,7 @@ fun AddCoffeeScreen(
             OutlinedTextField(
                 value = coffeeUiState.brand,
                 onValueChange = {
-                    addCoffeeViewModel.updateCoffeeUiState(coffeeUiState.copy(brand = it))
+                    viewModel.updateCoffeeUiState(coffeeUiState.copy(brand = it))
                 },
                 label = { Text("Brand") },
                 singleLine = true,
@@ -125,7 +162,7 @@ fun AddCoffeeScreen(
             OutlinedTextField(
                 value = coffeeUiState.currentAmount,
                 onValueChange = {
-                    addCoffeeViewModel.updateCoffeeUiState(
+                    viewModel.updateCoffeeUiState(
                         coffeeUiState.copy(
                             currentAmount = it,
                             startAmount = it
@@ -153,7 +190,9 @@ fun AddCoffeeScreen(
                     onValueChange = {},
                     maxLines = 1,
                     label = { Text("Roast") },
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = roastExpanded) },
+                    trailingIcon = {
+                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = roastExpanded)
+                    },
                     interactionSource = remember { MutableInteractionSource() }
                         .also { interactionSource ->
                             LaunchedEffect(interactionSource) {
@@ -173,7 +212,7 @@ fun AddCoffeeScreen(
                         DropdownMenuItem(
                             text = { Text(selectionOption) },
                             onClick = {
-                                addCoffeeViewModel.updateCoffeeUiState(coffeeUiState.copy(roast = selectionOption))
+                                viewModel.updateCoffeeUiState(coffeeUiState.copy(roast = selectionOption))
                                 roastExpanded = false
                             },
                             contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
@@ -196,7 +235,9 @@ fun AddCoffeeScreen(
                     onValueChange = {},
                     maxLines = 1,
                     label = { Text("Process") },
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = processExpanded) },
+                    trailingIcon = {
+                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = processExpanded)
+                    },
                     interactionSource = remember { MutableInteractionSource() }
                         .also { interactionSource ->
                             LaunchedEffect(interactionSource) {
@@ -217,7 +258,7 @@ fun AddCoffeeScreen(
                         DropdownMenuItem(
                             text = { Text(selectionOption) },
                             onClick = {
-                                addCoffeeViewModel.updateCoffeeUiState(coffeeUiState.copy(process = selectionOption))
+                                viewModel.updateCoffeeUiState(coffeeUiState.copy(process = selectionOption))
                                 processExpanded = false
                             },
                             contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
@@ -228,7 +269,11 @@ fun AddCoffeeScreen(
         }
         item {
             OutlinedTextField(
-                value = coffeeUiState.roastingDate.toString(),
+                value = coffeeUiState.roastingDate.format(
+                    DateTimeFormatter.ofLocalizedDate(
+                        FormatStyle.MEDIUM
+                    )
+                ),
                 onValueChange = {},
                 label = { Text("Roasting date") },
                 maxLines = 1,
@@ -262,10 +307,9 @@ fun AddCoffeeScreen(
                 }
                 Button(
                     onClick = {
-                        coroutineScope.launch {
-                            addCoffeeViewModel.saveCoffee()
+                        viewModel.saveCoffee {
+                            navController.navigateUp()
                         }
-//                        navController.navigateUp()
                     },
                     Modifier.fillMaxWidth()
                 ) {
@@ -273,6 +317,7 @@ fun AddCoffeeScreen(
                 }
             }
         }
+
     }
 }
 

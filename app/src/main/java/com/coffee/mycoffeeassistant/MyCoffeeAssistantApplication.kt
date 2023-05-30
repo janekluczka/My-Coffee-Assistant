@@ -4,7 +4,7 @@ import android.app.Application
 import com.coffee.mycoffeeassistant.data.AppContainer
 import com.coffee.mycoffeeassistant.data.AppDataContainer
 
-class MyCoffeeAssistantApplication: Application() {
+class MyCoffeeAssistantApplication : Application() {
 
     lateinit var container: AppContainer
 

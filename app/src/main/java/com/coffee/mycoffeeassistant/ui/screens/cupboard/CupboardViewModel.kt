@@ -21,18 +21,30 @@ class CupboardViewModel(private val coffeeRepository: CoffeeRepository) : ViewMo
 
     val uiState: StateFlow<CupboardUiState> = _uiState.asStateFlow()
 
-    var coffeeUiStateList by mutableStateOf(emptyList<CoffeeUiState>())
+    var allCoffeeUiStateList by mutableStateOf(emptyList<CoffeeUiState>())
         private set
 
-    fun updateCupboardUsState(newCupboardUiState: CupboardUiState) {
-        _uiState.update { newCupboardUiState.copy() }
+    var favouriteCoffeeUiStateList by mutableStateOf(emptyList<CoffeeUiState>())
+        private set
+
+    fun updateCurrentTab(currentTab: Int) {
+        _uiState.update { it.copy(currentTab = currentTab) }
     }
 
-    fun getCoffeeUiStateList() {
+    fun getAllCoffees() {
         viewModelScope.launch {
             coffeeRepository.getAllCoffeesStream().collect { coffeeList ->
-                coffeeUiStateList = coffeeList.map { it.toCoffeeUiState() }
+                allCoffeeUiStateList = coffeeList.map { it.toCoffeeUiState() }
             }
         }
     }
+
+    fun getFavouriteCoffees() {
+        viewModelScope.launch {
+            coffeeRepository.getFavouriteCoffeesStream().collect { coffeeList ->
+                favouriteCoffeeUiStateList = coffeeList.map { it.toCoffeeUiState() }
+            }
+        }
+    }
+
 }

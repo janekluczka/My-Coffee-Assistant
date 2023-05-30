@@ -7,7 +7,7 @@ import androidx.room.RoomDatabase
 
 @Database(
     entities = [Coffee::class],
-    version = 1,
+    version = 4,
     exportSchema = false
 )
 abstract class CoffeeDatabase : RoomDatabase() {
@@ -21,6 +21,7 @@ abstract class CoffeeDatabase : RoomDatabase() {
         fun getDatabase(context: Context): CoffeeDatabase {
             return Instance ?: synchronized(this) {
                 Room.databaseBuilder(context, CoffeeDatabase::class.java, "coffee_database")
+                    .fallbackToDestructiveMigration()
                     .build()
                     .also { Instance = it }
             }

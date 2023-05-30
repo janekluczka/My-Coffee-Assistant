@@ -14,8 +14,12 @@
     <string name="section_title_old">Getting old</string>
     <string name="section_title_low">Running low</string>
 
+    <!--  Brew Assistant  -->
+    <string name="choose_your_coffee_beans">Choose your coffee beans</string>
+
     <!--  Cupboard Tabs  -->
     <string name="tab_cupboard_my_stock">My stock</string>
     <string name="tab_cupboard_my_favourites">Favourites</string>
+
 
 </resources>

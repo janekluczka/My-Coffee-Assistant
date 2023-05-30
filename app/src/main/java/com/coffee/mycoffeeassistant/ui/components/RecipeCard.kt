@@ -1,5 +1,8 @@
+@file:Suppress("SpellCheckingInspection")
+
 package com.coffee.mycoffeeassistant.ui.components
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,21 +17,29 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+
+/* YouTube Video Thumbnail URLs
+   1280×720 https://i.ytimg.com/vi/[YOUTUBE VIDEO ID]/maxresdefault.jpg
+   640×480 https://i.ytimg.com/vi/[YOUTUBE VIDEO ID]/sddefault.jpg
+   480×360 https://i.ytimg.com/vi/[YOUTUBE VIDEO ID]/hqdefault.jpg
+   320×180 https://i.ytimg.com/vi/[YOUTUBE VIDEO ID]/mqdefault.jpg
+   120×90 https://i.ytimg.com/vi/[YOUTUBE VIDEO ID]/default.jpg */
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RecipeCard(
     title: String,
     author: String,
+    videoId: String,
     onClick: () -> Unit
 ) {
     Card(onClick = onClick) {
-        val videoId = "tltBHjmIUJ0"
         AsyncImage(
-            model = "https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg",
+            model = "https://i.ytimg.com/vi/${videoId}/sddefault.jpg",
             contentDescription = "",
             contentScale = ContentScale.Crop,
             modifier = Modifier
@@ -42,21 +53,32 @@ fun RecipeCard(
                 .fillMaxWidth()
                 .wrapContentHeight()
                 .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
-                text = "The Most Wonderfully Absurd Coffee Brewer Ever Made",
-                modifier = Modifier.padding(bottom = 4.dp),
+                text = title,
                 fontSize = 20.sp,
-                maxLines = 1,
+                maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
             Text(
-                text = "James Hoffmann",
-                modifier = Modifier.padding(bottom = 4.dp),
+                text = author,
                 fontSize = 16.sp,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
         }
+    }
+}
+
+@Preview
+@Composable
+fun RecipeCardPreview() {
+    RecipeCard(
+        title = "Rick Astley - Never Gonna Give You Up (Official Music Video)",
+        author = "Rick Astley",
+        videoId = "dQw4w9WgXcQ"
+    ) {
+
     }
 }
