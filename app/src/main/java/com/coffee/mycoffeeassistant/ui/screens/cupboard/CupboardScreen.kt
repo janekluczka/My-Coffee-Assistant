@@ -29,11 +29,12 @@ fun CupboardScreen(
 ) {
     val cupboardUiState by viewModel.uiState.collectAsState()
 
-    viewModel.getAllCoffees()
-    viewModel.getFavouriteCoffees()
-
     val pagerState = rememberPagerState()
     val coroutineScope = rememberCoroutineScope()
+
+    // TODO: Load data only on first composition
+    viewModel.getAllCoffees()
+    viewModel.getFavouriteCoffees()
 
     LaunchedEffect(pagerState) {
         snapshotFlow { pagerState.currentPage }.collect {
@@ -64,6 +65,7 @@ fun CupboardScreen(
         }
         HorizontalPager(
             pageCount = cupboardUiState.tabTitleResources.size,
+            beyondBoundsPageCount = 2,
             state = pagerState,
             userScrollEnabled = false,
         ) { page ->
@@ -100,7 +102,9 @@ private fun VerticalCoffeeCardGrid(
         ) {
             items(it) { coffeeUiState ->
                 VerticalCoffeeCard(
-                    coffeeUiState = coffeeUiState,
+                    name = coffeeUiState.name,
+                    brand = coffeeUiState.brand,
+                    bitmap = coffeeUiState.bitmap,
                     modifier = Modifier
                         .fillMaxWidth()
                         .wrapContentHeight()
@@ -128,7 +132,9 @@ private fun HorizontalCoffeeCardGrid(
     ) {
         items(coffeeUiStateList) { coffeeUiState ->
             HorizontalCoffeeCard(
-                coffeeUiState = coffeeUiState,
+                name = coffeeUiState.name,
+                brand = coffeeUiState.brand,
+                bitmap = coffeeUiState.bitmap,
                 modifier = Modifier
                     .fillMaxWidth()
                     .wrapContentHeight()

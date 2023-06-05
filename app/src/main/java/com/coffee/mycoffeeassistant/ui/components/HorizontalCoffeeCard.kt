@@ -1,5 +1,6 @@
 package com.coffee.mycoffeeassistant.ui.components
 
+import android.graphics.Bitmap
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -23,12 +24,13 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.coffee.mycoffeeassistant.R
-import com.coffee.mycoffeeassistant.ui.model.CoffeeUiState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HorizontalCoffeeCard(
-    coffeeUiState: CoffeeUiState,
+    name: String,
+    brand: String,
+    bitmap: Bitmap? = null,
     modifier: Modifier,
     onClick: () -> Unit
 ) {
@@ -50,51 +52,43 @@ fun HorizontalCoffeeCard(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(
-                    text = coffeeUiState.name,
+                    text = name,
                     fontSize = 20.sp,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = coffeeUiState.brand,
+                    text = brand,
                     fontSize = 16.sp,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
             }
-            Column(
+            Box(
                 modifier = Modifier
                     .size(100.dp)
                     .padding(top = 4.dp, end = 4.dp, bottom = 4.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp)),
+                contentAlignment = Alignment.Center
             ) {
-                if (coffeeUiState.bitmap != null) {
+                if (bitmap != null) {
                     val model = ImageRequest.Builder(LocalContext.current)
-                        .data(coffeeUiState.bitmap)
-                        .crossfade(true)
-                        .crossfade(1000)
+                        .data(bitmap)
+//                            .crossfade(true)
+//                            .crossfade(1000)
                         .build()
                     AsyncImage(
                         model = model,
                         contentDescription = "",
                         contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clip(RoundedCornerShape(8.dp))
                     )
                 } else {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_coffee_bean),
-                            contentDescription = "",
-                            tint = MaterialTheme.colorScheme.surfaceVariant
-                        )
-                    }
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_coffee_bean),
+                        contentDescription = "",
+                        tint = MaterialTheme.colorScheme.surfaceVariant
+                    )
                 }
             }
         }
@@ -106,10 +100,8 @@ fun HorizontalCoffeeCard(
 @Composable
 fun HorizontalCoffeeCardPreview() {
     HorizontalCoffeeCard(
-        coffeeUiState = CoffeeUiState(
-            name = "brazylia de ferro",
-            brand = "monko."
-        ),
+        name = "brazylia de ferro",
+        brand = "monko.",
         modifier = Modifier.width(250.dp)
     ) {
 

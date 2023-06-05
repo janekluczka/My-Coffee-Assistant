@@ -8,7 +8,7 @@ import androidx.navigation.NavController
 import com.coffee.mycoffeeassistant.R
 import com.coffee.mycoffeeassistant.ui.AppViewModelProvider
 import com.coffee.mycoffeeassistant.ui.components.UserGreeting
-import com.coffee.mycoffeeassistant.ui.components.HomeSection
+import com.coffee.mycoffeeassistant.ui.components.HomeSectionRow
 
 @Composable
 fun HomeScreen(
@@ -21,7 +21,7 @@ fun HomeScreen(
         item { UserGreeting() }
         if(viewModel.lowAmountCoffeeUiStateList.isNotEmpty()) {
             item {
-                HomeSection(
+                HomeSectionRow(
                     navController = navController,
                     list = viewModel.lowAmountCoffeeUiStateList,
                     sectionTitle = stringResource(id = R.string.section_title_low)
@@ -30,7 +30,7 @@ fun HomeScreen(
         }
         if (viewModel.oldCoffeeUiStateList.isNotEmpty()) {
             item {
-                HomeSection(
+                HomeSectionRow(
                     navController = navController,
                     list = viewModel.oldCoffeeUiStateList,
                     sectionTitle = stringResource(id = R.string.section_title_old)

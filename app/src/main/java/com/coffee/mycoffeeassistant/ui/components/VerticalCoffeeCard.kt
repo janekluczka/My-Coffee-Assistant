@@ -1,5 +1,6 @@
 package com.coffee.mycoffeeassistant.ui.components
 
+import android.graphics.Bitmap
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -23,12 +24,13 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.coffee.mycoffeeassistant.R
-import com.coffee.mycoffeeassistant.ui.model.CoffeeUiState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VerticalCoffeeCard(
-    coffeeUiState: CoffeeUiState,
+    name: String,
+    brand: String,
+    bitmap: Bitmap? = null,
     imageAspectRatio: Float = 4f / 5f,
     modifier: Modifier,
     onClick: () -> Unit
@@ -38,32 +40,27 @@ fun VerticalCoffeeCard(
         modifier = modifier
     ) {
         // TODO: Add coffee status item in right top corner
-        if (coffeeUiState.bitmap != null) {
-            val model = ImageRequest.Builder(LocalContext.current)
-                .data(coffeeUiState.bitmap)
-                .crossfade(true)
-                .crossfade(1000)
-                .build()
-            AsyncImage(
-                model = model,
-                contentDescription = "",
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .padding(top = 4.dp, start = 4.dp, end = 4.dp)
-                    .fillMaxWidth()
-                    .aspectRatio(imageAspectRatio)
-                    .clip(RoundedCornerShape(8.dp))
-            )
-        } else {
-            Box(
-                modifier = Modifier
-                    .padding(top = 4.dp, start = 4.dp, end = 4.dp)
-                    .fillMaxWidth()
-                    .aspectRatio(imageAspectRatio)
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp)),
-                contentAlignment = Alignment.Center
-            ) {
+        Box(
+            modifier = Modifier
+                .padding(top = 4.dp, start = 4.dp, end = 4.dp)
+                .fillMaxWidth()
+                .aspectRatio(imageAspectRatio)
+                .clip(RoundedCornerShape(8.dp))
+                .background(MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp)),
+            contentAlignment = Alignment.Center
+        ) {
+            if (bitmap != null) {
+                val model = ImageRequest.Builder(LocalContext.current)
+                    .data(bitmap)
+//                    .crossfade(true)
+//                    .crossfade(1000)
+                    .build()
+                AsyncImage(
+                    model = model,
+                    contentDescription = "",
+                    contentScale = ContentScale.Crop,
+                )
+            } else {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_coffee_bean),
                     contentDescription = "",
@@ -79,13 +76,13 @@ fun VerticalCoffeeCard(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
-                text = coffeeUiState.name,
+                text = name,
                 fontSize = 20.sp,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
             Text(
-                text = coffeeUiState.brand,
+                text = brand,
                 fontSize = 16.sp,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
@@ -99,10 +96,8 @@ fun VerticalCoffeeCard(
 @Composable
 fun VerticalCoffeeCardPreview() {
     VerticalCoffeeCard(
-        CoffeeUiState(
-            name = "salwador finca",
-            brand = "monko."
-        ),
+        name = "salwador finca",
+        brand = "monko.",
         modifier = Modifier
             .width(150.dp)
             .wrapContentHeight()

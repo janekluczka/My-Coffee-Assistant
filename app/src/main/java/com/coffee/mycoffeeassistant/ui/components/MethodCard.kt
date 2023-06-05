@@ -50,26 +50,21 @@ fun MethodCard(
 
     Card(onClick = onClick) {
         Crossfade(targetState = imageUri, animationSpec = tween(1500)) { uri ->
-            if (uri.isBlank()) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(21f / 9f)
-                        .padding(top = 4.dp, start = 4.dp, end = 4.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp))
-                )
-            } else {
-                AsyncImage(
-                    model = imageUri,
-                    contentDescription = "",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(21f / 9f)
-                        .padding(top = 4.dp, start = 4.dp, end = 4.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(21f / 9f)
+                    .padding(top = 4.dp, start = 4.dp, end = 4.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp))
+            ) {
+                if (uri.isNotBlank()) {
+                    AsyncImage(
+                        model = imageUri,
+                        contentDescription = "",
+                        contentScale = ContentScale.Crop,
+                    )
+                }
             }
         }
         Column(
@@ -94,6 +89,7 @@ fun MethodCardPreview() {
     MethodCard(
         name = "Aeropress",
         imageRef = "",
-        onClick = {}
-    )
+    ) {
+
+    }
 }
