@@ -7,7 +7,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.coffee.mycoffeeassistant.data.CoffeeRepository
 import com.coffee.mycoffeeassistant.ui.model.CoffeeUiState
-import com.coffee.mycoffeeassistant.ui.model.toCoffeeUiState
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter

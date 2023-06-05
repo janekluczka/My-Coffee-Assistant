@@ -90,21 +90,21 @@ private fun MyCoffeeAssistantTopBar(
     appState: MyCoffeeAssistantAppState,
     currentDestination: NavDestination?
 ) {
-    if (currentDestination?.route?.contains(Screen.CoffeeDetails.route) == true) {
-        TopAppBar(
-            title = {
-                Text(
-                    stringResource(R.string.app_name_short),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            },
-            navigationIcon = { BackNavigationIcon(appState, currentDestination) },
-            actions = {
-
-            }
-        )
-    } else {
+//    if (currentDestination?.route?.contains(Screen.CoffeeDetails.route) == true) {
+//        TopAppBar(
+//            title = {
+//                Text(
+//                    stringResource(R.string.app_name_short),
+//                    maxLines = 1,
+//                    overflow = TextOverflow.Ellipsis
+//                )
+//            },
+//            navigationIcon = { BackNavigationIcon(appState, currentDestination) },
+//            actions = {
+//
+//            }
+//        )
+//    } else {
         CenterAlignedTopAppBar(
             title = {
                 Text(
@@ -115,7 +115,7 @@ private fun MyCoffeeAssistantTopBar(
             },
             navigationIcon = { BackNavigationIcon(appState, currentDestination) }
         )
-    }
+//    }
 }
 
 @Composable

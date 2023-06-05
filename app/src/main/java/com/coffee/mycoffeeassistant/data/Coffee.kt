@@ -1,7 +1,12 @@
 package com.coffee.mycoffeeassistant.data
 
+import android.net.Uri
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.coffee.mycoffeeassistant.ui.model.CoffeeUiState
+import com.coffee.mycoffeeassistant.ui.model.dateTimeFormatter
+import com.coffee.mycoffeeassistant.util.BitmapUtil
+import java.time.LocalDate
 
 @Entity(tableName = "coffee_table")
 data class Coffee(
@@ -50,4 +55,19 @@ data class Coffee(
         result = 31 * result + image.contentHashCode()
         return result
     }
+
+    fun toCoffeeUiState(): CoffeeUiState = CoffeeUiState(
+        id = id,
+        name = name,
+        brand = brand,
+        currentAmount = currentAmount.toString(),
+        startAmount = startAmount.toString(),
+        roast = roast,
+        process = process,
+        roastingDate = LocalDate.parse(roastingDate, dateTimeFormatter),
+        isFavourite = isFavourite,
+        imageUri = Uri.parse(imageUri),
+        image = image,
+        bitmap = if (image.isNotEmpty()) BitmapUtil.decodeByteArrayWithOrientation(image) else null
+    )
 }

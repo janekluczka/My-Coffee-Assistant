@@ -32,7 +32,7 @@ fun MethodsScreen(
                     MethodCard(
                         name = methodUiState.name,
                         imageRef = methodUiState.imageRef,
-                        onClick = { navigateToMethodRecipes(methodUiState.methodId) }
+                        onClick = { navigateToMethodRecipes(methodUiState.name.lowercase()) }
                     )
                 }
             }

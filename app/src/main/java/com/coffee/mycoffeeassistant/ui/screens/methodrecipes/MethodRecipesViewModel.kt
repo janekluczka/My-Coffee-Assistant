@@ -9,7 +9,7 @@ import com.coffee.mycoffeeassistant.data.FirebaseRepository
 import com.coffee.mycoffeeassistant.ui.model.RecipeUiState
 import kotlinx.coroutines.launch
 
-class MethodRecipesViewModel(private val firebaseRepository: FirebaseRepository): ViewModel() {
+class MethodRecipesViewModel(private val firebaseRepository: FirebaseRepository) : ViewModel() {
 
     var recipeUiStateList by mutableStateOf(emptyList<RecipeUiState>())
         private set
@@ -17,7 +17,7 @@ class MethodRecipesViewModel(private val firebaseRepository: FirebaseRepository)
     fun getRecipeUiStateList(methodId: String) {
         viewModelScope.launch {
             firebaseRepository.getRecipes(methodId = methodId) { recipeList ->
-                recipeUiStateList = recipeList
+                recipeUiStateList = recipeList.map { it.toRecipeUiState() }
             }
         }
     }

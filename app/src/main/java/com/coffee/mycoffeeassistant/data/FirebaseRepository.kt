@@ -1,15 +1,14 @@
 package com.coffee.mycoffeeassistant.data
 
-import com.coffee.mycoffeeassistant.ui.model.MethodUiState
-import com.coffee.mycoffeeassistant.ui.model.RecipeDetailsUiState
-import com.coffee.mycoffeeassistant.ui.model.RecipeUiState
+import com.coffee.mycoffeeassistant.models.Method
+import com.coffee.mycoffeeassistant.models.Recipe
 
 interface FirebaseRepository {
 
-    fun getMethods(onSuccess: (MutableList<MethodUiState>) -> Unit)
+    fun getMethods(onSuccess: (List<Method>) -> Unit)
 
-    fun getRecipes(methodId: String, onSuccess: (MutableList<RecipeUiState>) -> Unit)
+    fun getRecipes(methodId: String, onSuccess: (List<Recipe>) -> Unit)
 
-    fun getRecipe(youtubeId: String, onSuccess: (RecipeDetailsUiState) -> Unit)
+    fun getRecipe(youtubeId: String, onSuccess: (Recipe) -> Unit)
 
 }

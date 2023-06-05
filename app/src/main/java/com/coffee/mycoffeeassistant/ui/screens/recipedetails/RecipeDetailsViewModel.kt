@@ -17,7 +17,7 @@ class RecipeDetailsViewModel(private val firebaseRepository: FirebaseRepository)
     fun getRecipe(youtubeId: String) {
         viewModelScope.launch {
             firebaseRepository.getRecipe(youtubeId = youtubeId) { recipe ->
-                recipeDetailsUiState = recipe
+                recipeDetailsUiState = recipe.toRecipeDetailsUiState()
             }
         }
     }

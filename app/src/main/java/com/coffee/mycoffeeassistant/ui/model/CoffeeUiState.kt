@@ -3,7 +3,6 @@ package com.coffee.mycoffeeassistant.ui.model
 import android.graphics.Bitmap
 import android.net.Uri
 import com.coffee.mycoffeeassistant.data.Coffee
-import com.coffee.mycoffeeassistant.util.BitmapUtil
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -86,21 +85,6 @@ fun CoffeeUiState.toCoffee(): Coffee = Coffee(
     isFavourite = isFavourite,
     imageUri = imageUri.toString(),
     image = image
-)
-
-fun Coffee.toCoffeeUiState(): CoffeeUiState = CoffeeUiState(
-    id = id,
-    name = name,
-    brand = brand,
-    currentAmount = currentAmount.toString(),
-    startAmount = startAmount.toString(),
-    roast = roast,
-    process = process,
-    roastingDate = LocalDate.parse(roastingDate, dateTimeFormatter),
-    isFavourite = isFavourite,
-    imageUri = Uri.parse(imageUri),
-    image = image,
-    bitmap = if (image.isNotEmpty()) BitmapUtil.decodeByteArrayWithOrientation(image) else null
 )
 
 fun CoffeeUiState.markWrongFields(): AddCoffeeUiState = AddCoffeeUiState(

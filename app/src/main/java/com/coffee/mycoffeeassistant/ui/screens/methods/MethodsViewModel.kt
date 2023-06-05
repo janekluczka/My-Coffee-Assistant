@@ -17,7 +17,7 @@ class MethodsViewModel(private val firebaseRepository: FirebaseRepository) : Vie
     fun getMethodUiStateList() {
         viewModelScope.launch {
             firebaseRepository.getMethods { methodList ->
-                methodUiStateList = methodList.sortedBy { it.methodId }
+                methodUiStateList = methodList.map { it.toMethodUiState() }.sortedBy { it.name }
             }
         }
     }

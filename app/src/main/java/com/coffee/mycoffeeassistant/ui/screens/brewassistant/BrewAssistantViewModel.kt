@@ -9,7 +9,6 @@ import com.coffee.mycoffeeassistant.data.CoffeeRepository
 import com.coffee.mycoffeeassistant.ui.model.BrewAssistantUiState
 import com.coffee.mycoffeeassistant.ui.model.CoffeeUiState
 import com.coffee.mycoffeeassistant.ui.model.toCoffee
-import com.coffee.mycoffeeassistant.ui.model.toCoffeeUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

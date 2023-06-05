@@ -27,7 +27,6 @@ interface CoffeeDao {
     @Query("SELECT * from coffee_table WHERE currentAmount < :amount ORDER BY currentAmount ASC")
     fun getAmountLowerThan(amount: Float): Flow<List<Coffee>>
 
-    // TODO: Change query
     @Query("SELECT * from coffee_table WHERE roastingDate < :date ORDER BY currentAmount ASC")
     fun getOlderThan(date: String): Flow<List<Coffee>>
 
