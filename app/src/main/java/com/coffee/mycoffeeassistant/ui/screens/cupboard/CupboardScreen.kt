@@ -32,10 +32,6 @@ fun CupboardScreen(
     val pagerState = rememberPagerState()
     val coroutineScope = rememberCoroutineScope()
 
-    // TODO: Load data only on first composition
-    viewModel.getAllCoffees()
-    viewModel.getFavouriteCoffees()
-
     LaunchedEffect(pagerState) {
         snapshotFlow { pagerState.currentPage }.collect {
             viewModel.updateCurrentTab(currentTab = it)

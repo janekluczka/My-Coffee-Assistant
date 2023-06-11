@@ -12,9 +12,6 @@ import androidx.lifecycle.viewModelScope
 import com.coffee.mycoffeeassistant.data.CoffeeRepository
 import com.coffee.mycoffeeassistant.ui.model.AddCoffeeUiState
 import com.coffee.mycoffeeassistant.ui.model.CoffeeUiState
-import com.coffee.mycoffeeassistant.ui.model.markWrongFields
-import com.coffee.mycoffeeassistant.ui.model.toCoffee
-import com.coffee.mycoffeeassistant.ui.model.isValid
 import com.coffee.mycoffeeassistant.util.BitmapUtil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -34,22 +31,28 @@ class AddCoffeeViewModel(private val coffeeRepository: CoffeeRepository) : ViewM
     var coffeeUiState by mutableStateOf(CoffeeUiState())
         private set
 
-    private fun updateUiState(newAddCoffeeUiState: AddCoffeeUiState) {
-        _uiState.update { newAddCoffeeUiState.copy() }
-    }
-
     fun updateCoffeeUiState(newCoffeeUiState: CoffeeUiState) {
         coffeeUiState = newCoffeeUiState.copy()
     }
 
     fun saveCoffee(onValid: () -> Unit) {
         viewModelScope.launch {
-            updateUiState(coffeeUiState.markWrongFields())
+            updateUiState(
+                AddCoffeeUiState().markWrongFields(
+                    name = coffeeUiState.name,
+                    brand = coffeeUiState.brand,
+                    currentAmount = coffeeUiState.currentAmount
+                )
+            )
             if (coffeeUiState.isValid()) {
                 coffeeRepository.insertCoffee(coffeeUiState.toCoffee())
                 onValid()
             }
         }
+    }
+
+    private fun updateUiState(newAddCoffeeUiState: AddCoffeeUiState) {
+        _uiState.update { newAddCoffeeUiState.copy() }
     }
 
     fun addImage(contentResolver: ContentResolver, uri: Uri) {

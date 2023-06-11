@@ -3,8 +3,6 @@ package com.coffee.mycoffeeassistant.ui.screens.brewassistant
 import android.media.MediaPlayer
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -19,10 +17,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -30,7 +25,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -49,6 +43,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.coffee.mycoffeeassistant.R
 import com.coffee.mycoffeeassistant.ui.AppViewModelProvider
+import com.coffee.mycoffeeassistant.ui.components.CustomExposedDropdownMenuWithBox
+import com.coffee.mycoffeeassistant.ui.components.FilteredOutlinedTextField
 import com.coffee.mycoffeeassistant.ui.model.BrewAssistantUiState
 import com.coffee.mycoffeeassistant.ui.model.CoffeeUiState
 
@@ -63,12 +59,10 @@ fun BrewAssistantScreen(
 
     viewModel.getCoffees()
 
-    var coffeeExpanded by remember { mutableStateOf(false) }
     var optionSelected by remember { mutableStateOf(0) }
 
     var isCoffeeAmountWrong by remember { mutableStateOf(false) }
     var isWaterAmountWrong by remember { mutableStateOf(false) }
-    var ratioExpanded by remember { mutableStateOf(false) }
 
     var coffeeAmount by remember { mutableStateOf("") }
     var waterAmount by remember { mutableStateOf("") }
@@ -80,27 +74,22 @@ fun BrewAssistantScreen(
     ) {
         item {
             Card {
-                if (brewAssistantUiState.selectedCoffee?.bitmap != null) {
-                    AsyncImage(
-                        model = brewAssistantUiState.selectedCoffee!!.bitmap,
-                        contentDescription = "",
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .aspectRatio(16f / 9f)
-                            .padding(4.dp)
-                            .clip(RoundedCornerShape(8.dp))
-                    )
-                } else {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .aspectRatio(16f / 9f)
-                            .padding(4.dp)
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp)),
-                        contentAlignment = Alignment.Center
-                    ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(16f / 9f)
+                        .padding(4.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (brewAssistantUiState.selectedCoffee?.bitmap != null) {
+                        AsyncImage(
+                            model = brewAssistantUiState.selectedCoffee!!.bitmap,
+                            contentDescription = "",
+                            contentScale = ContentScale.Crop,
+                        )
+                    } else {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_baseline_photo_camera),
                             contentDescription = "",
@@ -112,51 +101,24 @@ fun BrewAssistantScreen(
             }
         }
         item {
-            ExposedDropdownMenuBox(
-                expanded = coffeeExpanded,
-                onExpandedChange = { /* Change handled by interactionSource */ },
-            ) {
-                OutlinedTextField(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .menuAnchor(),
-                    readOnly = true,
-                    value = selectedCoffeeValue(brewAssistantUiState),
-                    onValueChange = {},
-                    maxLines = 1,
-                    label = { Text("Coffee beans") },
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = coffeeExpanded) },
-                    interactionSource = remember { MutableInteractionSource() }
-                        .also { interactionSource ->
-                            LaunchedEffect(interactionSource) {
-                                interactionSource.interactions.collect {
-                                    if (it is PressInteraction.Release) {
-                                        coffeeExpanded = !coffeeExpanded
-                                    }
-                                }
-                            }
-                        }
-                )
-                ExposedDropdownMenu(
-                    expanded = coffeeExpanded,
-                    onDismissRequest = { coffeeExpanded = false },
-                ) {
-                    viewModel.coffeeUiStateList.forEach { selectionOption ->
-                        DropdownMenuItem(
-                            text = { CoffeeDescription(selectionOption) },
-                            onClick = {
-                                viewModel.selectCoffee(selectionOption)
-                                coffeeExpanded = false
-                            },
-                            contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
-                        )
+            CustomExposedDropdownMenuWithBox(
+                value = selectedCoffeeValue(brewAssistantUiState),
+                label = { Text("Coffee beans") },
+                menuItems = viewModel.coffeeUiStateList,
+                formatItemText = {
+                    if (it is CoffeeUiState) buildDescription(it) else it.toString()
+                },
+                onItemSelected = {
+                    if (it is CoffeeUiState) {
+                        viewModel.selectCoffee(it)
                     }
                 }
-            }
+            )
         }
         item {
             Row(horizontalArrangement = Arrangement.spacedBy((8).dp)) {
                 OutlinedButton(
+                    onClick = { optionSelected = 0 },
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f),
@@ -165,10 +127,8 @@ fun BrewAssistantScreen(
                     } else {
                         ButtonDefaults.outlinedButtonColors()
                     },
-                    onClick = { optionSelected = 0 }
-                ) {
-                    Text(text = "Amount")
-                }
+                    content = { Text(text = "Amount") }
+                )
                 OutlinedButton(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -178,10 +138,9 @@ fun BrewAssistantScreen(
                     } else {
                         ButtonDefaults.outlinedButtonColors()
                     },
-                    onClick = { optionSelected = 1 }
-                ) {
-                    Text(text = "Ratio")
-                }
+                    onClick = { optionSelected = 1 },
+                    content = { Text(text = "Ratio") }
+                )
             }
         }
         item {
@@ -212,7 +171,7 @@ fun BrewAssistantScreen(
         item {
             Crossfade(targetState = optionSelected) {
                 if (it == 0) {
-                    OutlinedTextField(
+                    FilteredOutlinedTextField(
                         value = waterAmount,
                         onValueChange = { value ->
                             waterAmount = value
@@ -226,59 +185,28 @@ fun BrewAssistantScreen(
                                 isWaterAmountWrong = true
                             }
                         },
-                        label = { Text("Water amount") },
+                        regex = Regex("[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)"),
                         singleLine = true,
                         isError = isWaterAmountWrong,
                         modifier = Modifier.fillMaxWidth(),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                     )
 
                 } else {
-                    ExposedDropdownMenuBox(
-                        expanded = ratioExpanded,
-                        onExpandedChange = { /* Change handled by interactionSource */ },
-                    ) {
-                        OutlinedTextField(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .menuAnchor(),
-                            readOnly = true,
-                            value = "1:${coffeeRatio}",
-                            onValueChange = {},
-                            maxLines = 1,
-                            label = { Text("Ratio") },
-                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = ratioExpanded) },
-                            interactionSource = remember { MutableInteractionSource() }
-                                .also { interactionSource ->
-                                    LaunchedEffect(interactionSource) {
-                                        interactionSource.interactions.collect { interaction ->
-                                            if (interaction is PressInteraction.Release) {
-                                                ratioExpanded = !ratioExpanded
-                                            }
-                                        }
-                                    }
+                    CustomExposedDropdownMenuWithBox(
+                        value = "1:${coffeeRatio}",
+                        label = { Text("Ratio") },
+                        menuItems = listOf(5..30),
+                        onItemSelected = { itemSelected ->
+                            if (itemSelected is Int) {
+                                coffeeRatio = itemSelected
+                                if (coffeeAmount.isNotBlank()) {
+                                    waterAmount =
+                                        (coffeeAmount.toFloat() * coffeeRatio.toFloat()).toString()
                                 }
-                        )
-                        ExposedDropdownMenu(
-                            expanded = ratioExpanded,
-                            onDismissRequest = { ratioExpanded = false },
-                        ) {
-                            (5..30).forEach { selectionOption ->
-                                DropdownMenuItem(
-                                    text = { Text(text = "1:${selectionOption}") },
-                                    onClick = {
-                                        coffeeRatio = selectionOption
-                                        if (coffeeAmount.isNotBlank()) {
-                                            waterAmount =
-                                                (coffeeAmount.toFloat() * coffeeRatio.toFloat()).toString()
-                                        }
-                                        ratioExpanded = false
-                                    },
-                                    contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
-                                )
                             }
                         }
-                    }
+                    )
                 }
             }
 
@@ -308,7 +236,9 @@ fun BrewAssistantScreen(
         }
         item {
             Button(
-                modifier = Modifier.padding(top = 8.dp, bottom = 8.dp).fillMaxWidth(),
+                modifier = Modifier
+                    .padding(top = 8.dp, bottom = 8.dp)
+                    .fillMaxWidth(),
                 onClick = {
                     if (coffeeAmount.toFloatOrNull() != null) {
                         viewModel.reduceAmount(coffeeAmount.toFloat()) {
@@ -331,12 +261,6 @@ private fun selectedCoffeeValue(brewAssistantUiState: BrewAssistantUiState) =
     } else {
         stringResource(id = R.string.choose_your_coffee_beans)
     }
-
-@Composable
-private fun CoffeeDescription(coffeeUiState: CoffeeUiState) {
-    val description = buildDescription(coffeeUiState)
-    Text(description)
-}
 
 
 private fun buildDescription(coffeeUiState: CoffeeUiState): String {

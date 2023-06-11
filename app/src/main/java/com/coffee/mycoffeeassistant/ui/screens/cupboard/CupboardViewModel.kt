@@ -26,6 +26,11 @@ class CupboardViewModel(private val coffeeRepository: CoffeeRepository) : ViewMo
     var favouriteCoffeeUiStateList by mutableStateOf(emptyList<CoffeeUiState>())
         private set
 
+    init {
+        getAllCoffees()
+        getFavouriteCoffees()
+    }
+
     fun updateCurrentTab(currentTab: Int) {
         _uiState.update { it.copy(currentTab = currentTab) }
     }

@@ -4,8 +4,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -27,6 +25,9 @@ import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import com.coffee.mycoffeeassistant.R
 import com.coffee.mycoffeeassistant.ui.AppViewModelProvider
+import com.coffee.mycoffeeassistant.ui.components.CustomExposedDropdownMenuWithBox
+import com.coffee.mycoffeeassistant.ui.components.FilteredOutlinedTextField
+import com.coffee.mycoffeeassistant.ui.components.ClickableOutlinedTextField
 import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
 import com.maxkeppeler.sheets.calendar.CalendarDialog
 import com.maxkeppeler.sheets.calendar.models.CalendarConfig
@@ -48,19 +49,12 @@ fun AddCoffeeScreen(
 
     val coffeeUiState = viewModel.coffeeUiState
 
-    var roastExpanded by remember { mutableStateOf(false) }
-    var processExpanded by remember { mutableStateOf(false) }
     var calendarOpened by remember { mutableStateOf(false) }
 
     val singlePhotoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
         onResult = { uri ->
-            uri?.let {
-                viewModel.addImage(
-                    contentResolver = context.contentResolver,
-                    uri = it
-                )
-            }
+            uri?.let { viewModel.addImage(contentResolver = context.contentResolver, uri = it) }
         }
     )
 
@@ -96,26 +90,24 @@ fun AddCoffeeScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    if (coffeeUiState.image.isNotEmpty()) {
-                        AsyncImage(
-                            model = coffeeUiState.imageUri,
-                            contentDescription = "",
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .aspectRatio(16f / 9f)
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp))
-                        )
-                    } else {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .aspectRatio(16f / 9f)
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp)),
-                            contentAlignment = Alignment.Center
-                        ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(16f / 9f)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (coffeeUiState.image.isNotEmpty()) {
+                            AsyncImage(
+                                model = coffeeUiState.imageUri,
+                                contentDescription = "",
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier.background(
+                                    MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp)
+                                )
+                            )
+                        } else {
                             Icon(
                                 painter = painterResource(id = R.drawable.ic_baseline_photo_camera),
                                 contentDescription = "",
@@ -124,42 +116,35 @@ fun AddCoffeeScreen(
                             )
                         }
                     }
-                    Button(onClick = {
-                        singlePhotoPickerLauncher.launch(
-                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                        )
-                    }) {
-                        Text(text = "Select photo")
-                    }
+                    Button(
+                        onClick = {
+                            singlePhotoPickerLauncher.launch(
+                                PickVisualMediaRequest(
+                                    ActivityResultContracts.PickVisualMedia.ImageOnly
+                                )
+                            )
+                        },
+                        content = { Text(text = "Select photo") }
+                    )
                 }
             }
-        }
-        item {
             OutlinedTextField(
                 value = coffeeUiState.name,
-                onValueChange = {
-                    viewModel.updateCoffeeUiState(coffeeUiState.copy(name = it))
-                },
+                onValueChange = { viewModel.updateCoffeeUiState(coffeeUiState.copy(name = it)) },
                 label = { Text("Name") },
                 singleLine = true,
                 isError = addCoffeeUiState.isNameWrong,
                 modifier = Modifier.fillMaxWidth()
             )
-        }
-        item {
             OutlinedTextField(
                 value = coffeeUiState.brand,
-                onValueChange = {
-                    viewModel.updateCoffeeUiState(coffeeUiState.copy(brand = it))
-                },
+                onValueChange = { viewModel.updateCoffeeUiState(coffeeUiState.copy(brand = it)) },
                 label = { Text("Brand") },
                 singleLine = true,
                 isError = addCoffeeUiState.isBrandWrong,
                 modifier = Modifier.fillMaxWidth()
             )
-        }
-        item {
-            OutlinedTextField(
+            FilteredOutlinedTextField(
                 value = coffeeUiState.currentAmount,
                 onValueChange = {
                     viewModel.updateCoffeeUiState(
@@ -169,155 +154,55 @@ fun AddCoffeeScreen(
                         )
                     )
                 },
+                regex = Regex("[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)"),
                 label = { Text("Amount") },
                 singleLine = true,
                 isError = addCoffeeUiState.isAmountWrong,
                 modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
-        }
-        item {
-            ExposedDropdownMenuBox(
-                expanded = roastExpanded,
-                onExpandedChange = { /* Change handled by interactionSource */ },
-            ) {
-                OutlinedTextField(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .menuAnchor(),
-                    readOnly = true,
-                    value = coffeeUiState.roast,
-                    onValueChange = {},
-                    maxLines = 1,
-                    label = { Text("Roast") },
-                    trailingIcon = {
-                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = roastExpanded)
-                    },
-                    interactionSource = remember { MutableInteractionSource() }
-                        .also { interactionSource ->
-                            LaunchedEffect(interactionSource) {
-                                interactionSource.interactions.collect {
-                                    if (it is PressInteraction.Release) {
-                                        roastExpanded = !roastExpanded
-                                    }
-                                }
-                            }
-                        }
-                )
-                ExposedDropdownMenu(
-                    expanded = roastExpanded,
-                    onDismissRequest = { roastExpanded = false },
-                ) {
-                    coffeeUiState.roastOptions.forEach { selectionOption ->
-                        DropdownMenuItem(
-                            text = { Text(selectionOption) },
-                            onClick = {
-                                viewModel.updateCoffeeUiState(coffeeUiState.copy(roast = selectionOption))
-                                roastExpanded = false
-                            },
-                            contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
-                        )
-                    }
+            CustomExposedDropdownMenuWithBox(
+                value = coffeeUiState.roast,
+                label = { Text("Roast") },
+                menuItems = coffeeUiState.roastOptions,
+                onItemSelected = {
+                    viewModel.updateCoffeeUiState(coffeeUiState.copy(roast = it.toString()))
                 }
-            }
-        }
-        item {
-            ExposedDropdownMenuBox(
-                expanded = processExpanded,
-                onExpandedChange = { /* Change handled by interactionSource */ },
-            ) {
-                OutlinedTextField(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .menuAnchor(),
-                    readOnly = true,
-                    value = coffeeUiState.process,
-                    onValueChange = {},
-                    maxLines = 1,
-                    label = { Text("Process") },
-                    trailingIcon = {
-                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = processExpanded)
-                    },
-                    interactionSource = remember { MutableInteractionSource() }
-                        .also { interactionSource ->
-                            LaunchedEffect(interactionSource) {
-                                interactionSource.interactions.collect {
-                                    if (it is PressInteraction.Release) {
-                                        processExpanded = !processExpanded
-                                    }
-                                }
-                            }
-                        }
-                )
-                ExposedDropdownMenu(
-                    expanded = processExpanded,
-                    onDismissRequest = { processExpanded = false },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    coffeeUiState.processOptions.forEach { selectionOption ->
-                        DropdownMenuItem(
-                            text = { Text(selectionOption) },
-                            onClick = {
-                                viewModel.updateCoffeeUiState(coffeeUiState.copy(process = selectionOption))
-                                processExpanded = false
-                            },
-                            contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
-                        )
-                    }
+            )
+            CustomExposedDropdownMenuWithBox(
+                value = coffeeUiState.process,
+                label = { Text("Process") },
+                menuItems = coffeeUiState.processOptions,
+                onItemSelected = {
+                    viewModel.updateCoffeeUiState(coffeeUiState.copy(process = it.toString()))
                 }
-            }
-        }
-        item {
-            OutlinedTextField(
+            )
+            ClickableOutlinedTextField(
                 value = coffeeUiState.roastingDate.format(
                     DateTimeFormatter.ofLocalizedDate(
                         FormatStyle.MEDIUM
                     )
                 ),
-                onValueChange = {},
                 label = { Text("Roasting date") },
                 maxLines = 1,
                 modifier = Modifier.fillMaxWidth(),
                 trailingIcon = {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_baseline_date_range),
-                        contentDescription = ""
+                        contentDescription = null
                     )
                 },
                 readOnly = true,
-                interactionSource = remember { MutableInteractionSource() }
-                    .also { interactionSource ->
-                        LaunchedEffect(interactionSource) {
-                            interactionSource.interactions.collect {
-                                if (it is PressInteraction.Release) {
-                                    calendarOpened = true
-                                }
-                            }
-                        }
-                    }
+                onClick = { calendarOpened = true }
+            )
+            Button(
+                onClick = { viewModel.saveCoffee { navController.navigateUp() } },
+                modifier = Modifier
+                    .padding(top = 24.dp, bottom = 24.dp)
+                    .fillMaxWidth(),
+                content = { Text(text = "Save") }
             )
         }
-        item {
-            Row(modifier = Modifier.padding(top = 24.dp, bottom = 24.dp)) {
-                OutlinedButton(
-                    onClick = { navController.navigateUp() },
-                    Modifier.padding(end = 16.dp)
-                ) {
-                    Text(text = "Cancel")
-                }
-                Button(
-                    onClick = {
-                        viewModel.saveCoffee {
-                            navController.navigateUp()
-                        }
-                    },
-                    Modifier.fillMaxWidth()
-                ) {
-                    Text(text = "Save")
-                }
-            }
-        }
-
     }
 }
 

@@ -7,7 +7,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.coffee.mycoffeeassistant.data.CoffeeRepository
 import com.coffee.mycoffeeassistant.ui.model.CoffeeUiState
-import com.coffee.mycoffeeassistant.ui.model.toCoffee
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 

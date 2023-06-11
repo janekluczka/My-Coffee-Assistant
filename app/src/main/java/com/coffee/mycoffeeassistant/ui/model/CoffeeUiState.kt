@@ -71,33 +71,26 @@ data class CoffeeUiState(
         result = 31 * result + (bitmap?.hashCode() ?: 0)
         return result
     }
+
+    fun toCoffee(): Coffee = Coffee(
+        id = id,
+        name = name,
+        brand = brand,
+        currentAmount = currentAmount.toFloat(),
+        startAmount = startAmount.toFloat(),
+        roast = roast,
+        process = process,
+        roastingDate = roastingDate.format(dateTimeFormatter),
+        isFavourite = isFavourite,
+        imageUri = imageUri.toString(),
+        image = image
+    )
+
+    fun isValid(): Boolean =
+        name.isNotEmpty() &&
+                name.isNotBlank() &&
+                brand.isNotEmpty() &&
+                brand.isNotBlank() &&
+                currentAmount.toIntOrNull() != null &&
+                currentAmount.toInt() > 0
 }
-
-fun CoffeeUiState.toCoffee(): Coffee = Coffee(
-    id = id,
-    name = name,
-    brand = brand,
-    currentAmount = currentAmount.toFloat(),
-    startAmount = startAmount.toFloat(),
-    roast = roast,
-    process = process,
-    roastingDate = roastingDate.format(dateTimeFormatter),
-    isFavourite = isFavourite,
-    imageUri = imageUri.toString(),
-    image = image
-)
-
-fun CoffeeUiState.markWrongFields(): AddCoffeeUiState = AddCoffeeUiState(
-    isNameWrong = name.isEmpty() || name.isBlank(),
-    isBrandWrong = brand.isEmpty() || brand.isBlank(),
-    isAmountWrong = currentAmount.toIntOrNull() == null || currentAmount.toInt() <= 0,
-)
-
-fun CoffeeUiState.isValid(): Boolean =
-    name.isNotEmpty() &&
-            name.isNotBlank() &&
-            brand.isNotEmpty() &&
-            brand.isNotBlank() &&
-            currentAmount.toIntOrNull() != null &&
-            currentAmount.toInt() > 0
-
