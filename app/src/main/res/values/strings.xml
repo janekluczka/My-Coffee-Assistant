@@ -6,20 +6,65 @@
     <string name="unknown">Unknown</string>
 
     <!--  Navigation Bar Tabs  -->
-    <string name="home">Home</string>
-    <string name="cupboard">Cupboard</string>
-    <string name="recipes">Recipes</string>
-
-    <!--  Home Screen Sections  -->
-    <string name="section_title_old">Getting old</string>
-    <string name="section_title_low">Running low</string>
-
-    <!--  Brew Assistant  -->
-    <string name="choose_your_coffee_beans">Choose your coffee beans</string>
+    <string name="tab_home">Home</string>
+    <string name="tab_cupboard">Cupboard</string>
+    <string name="tab_recipes">Recipes</string>
 
     <!--  Cupboard Tabs  -->
     <string name="tab_cupboard_my_stock">My stock</string>
     <string name="tab_cupboard_my_favourites">Favourites</string>
 
+    <!--  Navigation Bar Tabs  -->
+    <string name="screen_brew_assistant">Brew assistant</string>
+    <string name="screen_add_coffee">Add coffee</string>
 
+    <!--  Home Screen Sections  -->
+    <string name="section_title_old">Getting old</string>
+    <string name="section_title_low">Running low</string>
+
+    <!--  Cupboard Fab  -->
+    <string name="fab_home_brew_assistant">Brew assistant</string>
+
+    <!--  Cupboard Fab  -->
+    <string name="fab_cupboard_add_coffee">Add coffee</string>
+
+    <!--  Brew Assistant  -->
+    <string name="choose_your_coffee_beans">Choose your coffee beans</string>
+
+    <!--  Coffee parameters  -->
+    <string name="coffee_parameters_name">Name</string>
+    <string name="coffee_parameters_brand">Brand</string>
+    <string name="coffee_parameters_amount">Amount</string>
+    <string name="coffee_parameters_process">Process</string>
+    <string name="coffee_parameters_roast">Roast</string>
+    <string name="coffee_parameters_roasting_date">Roasting date</string>
+
+    <!--  Dialog titles  -->
+    <string name="dialog_title_delete">Delete?</string>
+    <string name="dialog_title_remove">Remove?</string>
+    <string name="dialog_title_discard">Discard?</string>
+
+    <!--  Dialog texts  -->
+    <string name="dialog_text_discard">Coffee has not been added yet</string>
+
+    <!--  Dialog actions  -->
+    <string name="dialog_action_save">Save</string>
+    <string name="dialog_action_delete">Delete</string>
+    <string name="dialog_action_discard">Discard</string>
+    <string name="dialog_action_remove_and_delete">Remove and delete</string>
+    <string name="dialog_action_cancel">Cancel</string>
+
+    <!--  Units  -->
+    <string name="unit_gram_short">g</string>
+
+    <!--  Enum coffee process  -->
+    <string name="process_natural">Natural</string>
+    <string name="process_washed">Washed</string>
+    <string name="process_honey">Honey</string>
+
+    <!--  Enum coffee roast  -->
+    <string name="roast_light">Light</string>
+    <string name="roast_medium">Medium</string>
+    <string name="roast_medium_dark">Medium Dark</string>
+    <string name="roast_dark">Dark</string>
 </resources>

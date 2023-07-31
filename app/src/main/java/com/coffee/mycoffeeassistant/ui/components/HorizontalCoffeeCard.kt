@@ -1,6 +1,5 @@
 package com.coffee.mycoffeeassistant.ui.components
 
-import android.graphics.Bitmap
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -20,65 +19,68 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.coffee.mycoffeeassistant.R
+import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HorizontalCoffeeCard(
     name: String,
     brand: String,
-    bitmap: Bitmap? = null,
+    imageFile: String? = null,
     modifier: Modifier,
     onClick: () -> Unit
 ) {
+    val context = LocalContext.current
+
     Card(
         onClick = onClick,
         modifier = modifier
     ) {
         Row(
             modifier = Modifier
+                .padding(4.dp)
                 .fillMaxWidth()
-                .height(IntrinsicSize.Min),
+                .wrapContentHeight(),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(
                 modifier = Modifier
-                    .padding(16.dp)
+                    .padding(8.dp)
                     .fillMaxWidth()
+                    .wrapContentHeight()
                     .weight(1f),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Text(
                     text = name,
-                    fontSize = 20.sp,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
+                    style = MaterialTheme.typography.titleMedium
                 )
                 Text(
                     text = brand,
-                    fontSize = 16.sp,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
+                    style = MaterialTheme.typography.bodyMedium
                 )
             }
             Box(
                 modifier = Modifier
-                    .size(100.dp)
-                    .padding(top = 4.dp, end = 4.dp, bottom = 4.dp)
+                    .size(92.dp)
                     .clip(RoundedCornerShape(8.dp))
                     .background(MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp)),
                 contentAlignment = Alignment.Center
             ) {
-                if (bitmap != null) {
+                if (imageFile != null) {
+                    val cacheFile = File(context.filesDir, imageFile)
                     val model = ImageRequest.Builder(LocalContext.current)
-                        .data(bitmap)
-//                            .crossfade(true)
-//                            .crossfade(1000)
+                        .data(cacheFile)
                         .build()
                     AsyncImage(
+                        modifier = Modifier.fillMaxSize(),
                         model = model,
                         contentDescription = "",
                         contentScale = ContentScale.Crop,
@@ -102,7 +104,7 @@ fun HorizontalCoffeeCardPreview() {
     HorizontalCoffeeCard(
         name = "brazylia de ferro",
         brand = "monko.",
-        modifier = Modifier.width(250.dp)
+        modifier = Modifier.width(300.dp)
     ) {
 
     }

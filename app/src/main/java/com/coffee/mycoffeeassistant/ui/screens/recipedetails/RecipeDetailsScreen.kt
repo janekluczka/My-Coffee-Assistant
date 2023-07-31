@@ -9,85 +9,112 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.coffee.mycoffeeassistant.ui.AppViewModelProvider
-import com.coffee.mycoffeeassistant.ui.components.BrewingStepCard
+import com.coffee.mycoffeeassistant.ui.components.BrewingStepListItem
+import com.coffee.mycoffeeassistant.ui.model.components.RecipeDetailsUiState
+import com.google.accompanist.web.AccompanistWebViewClient
+import com.google.accompanist.web.WebView
+import com.google.accompanist.web.rememberWebViewState
 
-@Suppress("SpellCheckingInspection")
+@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
 fun RecipeDetailsScreen(
-    youtubeId: String,
-    viewModel: RecipeDetailsViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    recipeDetailsUiState: RecipeDetailsUiState,
+    navigateUp: () -> Unit,
 ) {
-    val recipeDetailsUiState = viewModel.recipeDetailsUiState
-    val iframeWidth = 640
-    val iframeHeight = 640 * 9 / 16
+    val context = LocalContext.current
 
-    // TODO: Change background color for iframe in dark mode if possible
-    val iframeHtml = "<html>" +
-            "<meta name=\"viewport\" content=\"width=${iframeWidth}\">" +
-            "<style>iframe { overflow:hidden; }</style>" +
-            "<body style=\"margin: 0px; padding: 0px\">" +
-            "<iframe " +
-            "id=\"player\" " +
-            "frameborder=\"0\" " +
-            "allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\" " +
-            "width=\"${iframeWidth}\" " +
-            "height=\"${iframeHeight}\" " +
-            "src=\"https://www.youtube.com/embed/${youtubeId}?version=3&amp;enablejsapi=1&amp;controls=1&amp;fs=0\">" +
-            "</iframe>" +
-            "</body>" +
-            "</html>"
+    // TODO: https://github.com/google/accompanist/pull/1557
 
-    viewModel.getRecipe(youtubeId)
+    val webViewState = rememberWebViewState(url = recipeDetailsUiState.iframeHtml)
 
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Box(modifier = Modifier.aspectRatio(16f / 9f)) {
-            AndroidView(
-                factory = {
-                    WebView(it).apply {
-                        layoutParams = ViewGroup.LayoutParams(
-                            ViewGroup.LayoutParams.MATCH_PARENT,
-                            ViewGroup.LayoutParams.MATCH_PARENT,
-                        )
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                navigationIcon = {
+                    IconButton(
+                        onClick = { navigateUp() },
+                        content = {
+                            Icon(
+                                imageVector = Icons.Filled.ArrowBack,
+                                contentDescription = null
+                            )
+                        }
+                    )
+                },
+                title = {}
+            )
+        }
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier.padding(innerPadding),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            WebView(
+                modifier = Modifier.aspectRatio(16f / 9f),
+                state = webViewState,
+                client = IFrameAccompanistWebViewClient(context = context),
+                onCreated = { webView ->
+                    webView.apply {
                         settings.apply {
                             javaScriptEnabled = true
                             loadWithOverviewMode = true
                             useWideViewPort = true
                         }
                         setLayerType(ViewGroup.LAYER_TYPE_HARDWARE, null)
-                        webViewClient = IFrameWebViewClient(it)
-                        loadData(iframeHtml, "text/html", "utf-8")
+                        webViewClient = IFrameWebViewClient(context)
+                        loadData(recipeDetailsUiState.iframeHtml, "text/html", "utf-8")
                     }
-                },
-                update = {
-
                 }
             )
-        }
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            items(recipeDetailsUiState.steps.size) { index ->
-                BrewingStepCard(
-                    number = (index + 1).toString(),
-                    description = recipeDetailsUiState.steps[index]["description"].toString(),
-                    time = recipeDetailsUiState.steps[index]["time"].toString()
-                )
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(bottom = 8.dp)
+            ) {
+                item {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Text(
+                            text = recipeDetailsUiState.title,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Text(
+                            text = recipeDetailsUiState.author,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                }
+                items(recipeDetailsUiState.steps) { stepUiState ->
+                    BrewingStepListItem(stepUiState = stepUiState)
+                }
             }
         }
     }
@@ -97,9 +124,18 @@ fun RecipeDetailsScreen(
 class IFrameWebViewClient(private val context: Context) : WebViewClient() {
     @Override
     override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
-        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(request?.url.toString()))
+        val uri = Uri.parse(request?.url.toString())
+        val intent = Intent(Intent.ACTION_VIEW, uri)
         context.startActivity(intent)
         return true
     }
 }
 
+class IFrameAccompanistWebViewClient(private val context: Context) : AccompanistWebViewClient() {
+    override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
+        val uri = Uri.parse(request?.url.toString())
+        val intent = Intent(Intent.ACTION_VIEW, uri)
+        context.startActivity(intent)
+        return true
+    }
+}

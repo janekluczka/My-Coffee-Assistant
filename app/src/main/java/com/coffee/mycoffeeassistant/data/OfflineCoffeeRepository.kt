@@ -13,6 +13,9 @@ class OfflineCoffeeRepository(private val coffeeDao: CoffeeDao) : CoffeeReposito
     override fun getCoffeeStream(id: Int): Flow<Coffee?> =
         coffeeDao.getCoffee(id)
 
+    override fun getInStockCoffeesStream(): Flow<List<Coffee>> =
+        coffeeDao.getInStockCoffees()
+
     override fun getAmountLowerThanStream(amount: Float): Flow<List<Coffee>> =
         coffeeDao.getAmountLowerThan(amount)
 

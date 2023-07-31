@@ -23,7 +23,4 @@ class MyCoffeeAssistantAppState(
         Screen.Cupboard,
         Screen.Recipes
     )
-    var onAddToFavouritesAction: () -> Unit = {}
-    var onEditAction: () -> Unit = {}
-
 }

@@ -10,6 +10,8 @@ interface CoffeeRepository {
 
     fun getCoffeeStream(id: Int): Flow<Coffee?>
 
+    fun getInStockCoffeesStream(): Flow<List<Coffee>>
+
     fun getAmountLowerThanStream(amount: Float): Flow<List<Coffee>>
 
     fun getOlderThanStream(date: String): Flow<List<Coffee>>

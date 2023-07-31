@@ -29,16 +29,40 @@ object AppViewModelProvider {
             AddCoffeeViewModel(myCoffeeAssistantApplication().container.coffeeRepository)
         }
         initializer {
-            CoffeeDetailsViewModel(myCoffeeAssistantApplication().container.coffeeRepository)
-        }
-        initializer {
             MethodsViewModel(myCoffeeAssistantApplication().container.firebaseRepository)
         }
-        initializer {
-            MethodRecipesViewModel(myCoffeeAssistantApplication().container.firebaseRepository)
+    }
+
+    fun coffeeDetailsViewModelFactory(coffeeId: Int): ViewModelProvider.Factory {
+        return viewModelFactory {
+            initializer {
+                CoffeeDetailsViewModel(
+                    coffeeId = coffeeId,
+                    coffeeRepository = myCoffeeAssistantApplication().container.coffeeRepository
+                )
+            }
         }
-        initializer {
-            RecipeDetailsViewModel(myCoffeeAssistantApplication().container.firebaseRepository)
+    }
+
+    fun methodRecipesViewModelFactory(methodId: String): ViewModelProvider.Factory {
+        return viewModelFactory {
+            initializer {
+                MethodRecipesViewModel(
+                    methodId = methodId,
+                    firebaseRepository = myCoffeeAssistantApplication().container.firebaseRepository
+                )
+            }
+        }
+    }
+
+    fun recipeDetailsViewModelFactory(youtubeId: String): ViewModelProvider.Factory {
+        return viewModelFactory {
+            initializer {
+                RecipeDetailsViewModel(
+                    youtubeId = youtubeId,
+                    firebaseRepository = myCoffeeAssistantApplication().container.firebaseRepository
+                )
+            }
         }
     }
 }

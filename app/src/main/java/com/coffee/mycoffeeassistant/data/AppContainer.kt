@@ -9,7 +9,8 @@ interface AppContainer {
 
 class AppDataContainer(private val context: Context) : AppContainer {
     override val coffeeRepository: CoffeeRepository by lazy {
-        OfflineCoffeeRepository(CoffeeDatabase.getDatabase(context).coffeeDao())
+        val coffeeDao = CoffeeDatabase.getDatabase(context).coffeeDao()
+        OfflineCoffeeRepository(coffeeDao = coffeeDao)
     }
     override val firebaseRepository: FirebaseRepository by lazy {
         OnlineFirebaseRepository()

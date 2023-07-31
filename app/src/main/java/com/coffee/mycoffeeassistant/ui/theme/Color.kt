@@ -2,8 +2,9 @@ package com.coffee.mycoffeeassistant.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
+// TODO: Change colors
 val PrimaryLight = Color(0xff984716)
-val SecondaryLight = Color(0xff1d5db1)
+val SecondaryLight = Color(0xFF015DB1)
 val TertiaryLight = Color(0xff984061)
 val ErrorLight = Color(0xffba1a1a)
 val BackgroundLight = Color(0xfffffbff)

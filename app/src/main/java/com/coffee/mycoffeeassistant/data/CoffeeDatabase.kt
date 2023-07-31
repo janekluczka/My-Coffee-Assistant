@@ -7,7 +7,7 @@ import androidx.room.RoomDatabase
 
 @Database(
     entities = [Coffee::class],
-    version = 4,
+    version = 11,
     exportSchema = false
 )
 abstract class CoffeeDatabase : RoomDatabase() {

@@ -2,22 +2,18 @@ package com.coffee.mycoffeeassistant.ui.navigation
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FabPosition
 import com.coffee.mycoffeeassistant.R
 
-@OptIn(ExperimentalMaterial3Api::class)
 sealed class Screen(
     val route: String,
     @StringRes val stringResource: Int = R.string.unknown,
     @DrawableRes val painterResource: Int = R.drawable.ic_launcher_foreground,
-    val fabPosition: FabPosition = FabPosition.Center
 ) {
     fun createRoute(id: Any) = route + "/${id}"
 
     object Home : Screen(
         route = "home_screen",
-        stringResource = R.string.home,
+        stringResource = R.string.tab_home,
         painterResource = R.drawable.ic_baseline_home
     )
 
@@ -27,22 +23,25 @@ sealed class Screen(
 
     object Cupboard : Screen(
         route = "cupboard_screen",
-        stringResource = R.string.cupboard,
-        painterResource = R.drawable.ic_baseline_view_carousel,
-        fabPosition = FabPosition.End
+        stringResource = R.string.tab_cupboard,
+        painterResource = R.drawable.ic_baseline_view_carousel
     )
 
     object AddCoffee : Screen(
-        route = "cupboard_screen/add_coffee"
+        route = "cupboard_screen/add_coffee",
     )
 
-    object CoffeeDetails : Screen(
+    object HomeCoffeeDetails : Screen(
+        route = "home_screen/coffee_details"
+    )
+
+    object CupboardCoffeeDetails : Screen(
         route = "cupboard_screen/coffee_details"
     )
 
     object Recipes : Screen(
         route = "recipes_screen",
-        stringResource = R.string.recipes,
+        stringResource = R.string.tab_recipes,
         painterResource = R.drawable.ic_baseline_format_list_bulleted
     )
 

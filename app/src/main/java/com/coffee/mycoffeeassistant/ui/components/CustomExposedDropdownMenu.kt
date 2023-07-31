@@ -12,15 +12,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import com.coffee.mycoffeeassistant.ui.model.components.DropdownMenuItemUiState
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-fun CustomExposedDropdownMenuWithBox(
+fun <T> CustomExposedDropdownMenu(
     value: String,
     label: @Composable (() -> Unit)?,
-    menuItems: List<Any>,
-    formatItemText: (Any) -> String = { it.toString() },
-    onItemSelected: (Any) -> Unit
+    menuItems: List<DropdownMenuItemUiState<T>>,
+    onItemSelected: (T) -> Unit
 ) {
     var menuExpanded by remember { mutableStateOf(false) }
     ExposedDropdownMenuBox(
@@ -42,12 +43,16 @@ fun CustomExposedDropdownMenuWithBox(
             expanded = menuExpanded,
             onDismissRequest = { menuExpanded = false },
         ) {
-            menuItems.forEach { selectedItem ->
-                val itemText = formatItemText(selectedItem)
+            menuItems.forEach { item ->
+                val text = when {
+                    item.stringResource != null -> stringResource(id = item.stringResource)
+                    item.description != null -> item.description
+                    else -> ""
+                }
                 DropdownMenuItem(
-                    text = { Text(text = itemText) },
+                    text = { Text(text = text) },
                     onClick = {
-                        onItemSelected(selectedItem)
+                        onItemSelected(item.id)
                         menuExpanded = false
                     },
                     contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
