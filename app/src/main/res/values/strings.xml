@@ -2,57 +2,115 @@
     <string name="app_name_full">myCoffee Assistant</string>
     <string name="app_name_short">myCoffee</string>
 
-    <!--  Screen Default Value  -->
-    <string name="unknown">Unknown</string>
-
     <!--  Navigation Bar Tabs  -->
     <string name="tab_home">Home</string>
-    <string name="tab_cupboard">Cupboard</string>
+    <string name="tab_my_bags">My bags</string>
     <string name="tab_recipes">Recipes</string>
 
-    <!--  Cupboard Tabs  -->
-    <string name="tab_cupboard_my_stock">My stock</string>
-    <string name="tab_cupboard_my_favourites">Favourites</string>
-
-    <!--  Navigation Bar Tabs  -->
-    <string name="screen_brew_assistant">Brew assistant</string>
-    <string name="screen_add_coffee">Add coffee</string>
-
     <!--  Home Screen Sections  -->
-    <string name="section_title_old">Getting old</string>
-    <string name="section_title_low">Running low</string>
+    <string name="section_title_old">Older beans</string>
+    <string name="section_title_low">Low amount</string>
 
-    <!--  Cupboard Fab  -->
+    <!--  Floating action buttons  -->
     <string name="fab_home_brew_assistant">Brew assistant</string>
+    <string name="fab_my_bags_add_coffee">Add coffee</string>
 
-    <!--  Cupboard Fab  -->
-    <string name="fab_cupboard_add_coffee">Add coffee</string>
+    <!--  Brew assistant screen  -->
+    <string name="assistant_top_bar_title">Brew assistant</string>
+    <string name="assistant_screen_1_title">Select coffee beans</string>
+    <string name="assistant_screen_2_title">Select amount and ratio</string>
+    <string name="assistant_screen_3_title">Brew summary</string>
+    <string name="assistant_button_previous">Previous</string>
+    <string name="assistant_button_next">Next</string>
+    <string name="assistant_button_finish">Finish</string>
+    <string name="assistant_selected_coffee">Selected coffee</string>
+    <string name="assistant_selected_coffees">Selected coffees</string>
+    <string name="assistant_coffee_index">Coffee %1$d</string>
+    <!--
+        %1$d: Coffee index
+    -->
+    <string name="assistant_select_amount">Select amount</string>
+    <string name="assistant_selected_amount">Selected amount</string>
+    <string name="assistant_selected_amount_with_coffee_index">Selected amount (Coffee %1$d)</string>
+    <!--
+        %1$d: Coffee index
+    -->
+    <string name="assistant_select_amount_error">"Amount can not be greater than %1$s g"</string>
+    <!--
+        %1$d: Coffee amount [grams]
+    -->
+    <string name="assistant_select_ratio">Select ratio</string>
+    <string name="assistant_ratio_format">%1$d:%2$d</string>
+    <string name="assistant_selected_ratio">Selected ratio</string>
+    <string name="assistant_select_ratio_error">"Must be greater than 0"</string>
+    <string name="assistant_water_amount">Water amount</string>
+    <string name="assistant_taken_amount"> -%1$s g</string>
+    <!--
+        %1$s: Amount taken [grams]
+    -->
+    <string name="assistant_selected_parameters">Selected parameters</string>
 
-    <!--  Brew Assistant  -->
-    <string name="choose_your_coffee_beans">Choose your coffee beans</string>
+    <!--  Coffee input screen  -->
+    <string name="input_top_bar_title_add">Add</string>
+    <string name="input_top_bar_title_edit">Edit</string>
+    <string name="input_required_text_field_label_name">Name*</string>
+    <string name="input_required_text_field_label_brand">Brand*</string>
+    <string name="input_required_text_field_supporting_text_neutral">*required</string>
+    <string name="input_required_text_field_supporting_text_error">Field can not be empty</string>
+    <string name="input_text_field_placeholder_amount">0.0</string>
+    <string name="input_assist_chip_select">Select</string>
+    <string name="input_assist_chip_delete">Delete</string>
 
     <!--  Coffee parameters  -->
+    <string name="coffee_parameters_name_and_brand">%1$s, %2$s</string>
+    <!--
+        %1$s: Coffee name
+        %2$s: Coffee brand
+    -->
     <string name="coffee_parameters_name">Name</string>
     <string name="coffee_parameters_brand">Brand</string>
     <string name="coffee_parameters_amount">Amount</string>
+    <string name="coffee_parameters_amount_with_unit">%1$s g</string>
+    <!--
+        %1$s: Amount [grams]
+    -->
     <string name="coffee_parameters_process">Process</string>
     <string name="coffee_parameters_roast">Roast</string>
     <string name="coffee_parameters_roasting_date">Roasting date</string>
 
     <!--  Dialog titles  -->
     <string name="dialog_title_delete">Delete?</string>
-    <string name="dialog_title_remove">Remove?</string>
     <string name="dialog_title_discard">Discard?</string>
+    <string name="dialog_title_abort">Abort brew?</string>
+    <string name="dialog_title_finish">Finish brew?</string>
+    <string name="dialog_title_select_amount">Select amount</string>
+    <string name="dialog_title_select_ratio">Select ratio</string>
 
     <!--  Dialog texts  -->
+    <string name="dialog_text_delete">%1$s %2$s will be deleted and gone forever</string>
+    <!--
+        %1$s: Coffee name
+        %2$s: Coffee brand
+    -->
     <string name="dialog_text_discard">Coffee has not been added yet</string>
+    <string name="dialog_text_abort">
+        You have not finished yor brew. Are you sure you want to abort it?
+    </string>
+    <string name="dialog_text_finish">%1$s grams will be taken from %2$s %3$s</string>
+    <!--
+        %1$s: Amount taken [grams]
+        %2$s: Coffee name
+        %3$s: Coffee brand
+    -->
 
     <!--  Dialog actions  -->
     <string name="dialog_action_save">Save</string>
     <string name="dialog_action_delete">Delete</string>
     <string name="dialog_action_discard">Discard</string>
-    <string name="dialog_action_remove_and_delete">Remove and delete</string>
+    <string name="dialog_action_abort">Abort</string>
     <string name="dialog_action_cancel">Cancel</string>
+    <string name="dialog_action_finish">Finish</string>
+    <string name="dialog_action_select">Select</string>
 
     <!--  Units  -->
     <string name="unit_gram_short">g</string>
@@ -67,4 +125,12 @@
     <string name="roast_medium">Medium</string>
     <string name="roast_medium_dark">Medium Dark</string>
     <string name="roast_dark">Dark</string>
+
+    <!--  Enum coffee filter  -->
+    <string name="filter_current">Current</string>
+    <string name="filter_all">All</string>
+    <string name="filter_favourites">Favourites</string>
+    <string name="filter_low">Low amount</string>
+    <string name="filter_older">Older</string>
+
 </resources>
