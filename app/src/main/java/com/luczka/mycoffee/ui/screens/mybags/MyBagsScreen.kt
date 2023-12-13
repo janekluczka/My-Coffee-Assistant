@@ -32,6 +32,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -45,7 +47,7 @@ import com.luczka.mycoffee.ui.components.TopAppBarTitle
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyBagsScreen(
     widthSizeClass: WindowWidthSizeClass,
@@ -59,6 +61,10 @@ fun MyBagsScreen(
 
     val filterListState = rememberLazyListState()
     val coffeeListState = rememberLazyListState()
+
+    val buttonExpanded by remember {
+        derivedStateOf { coffeeListState.firstVisibleItemIndex == 0 }
+    }
 
     when (uiState) {
         is MyBagsUiState.HasCoffees -> {
@@ -96,9 +102,10 @@ fun MyBagsScreen(
         },
         floatingActionButton = {
             ExtendedFloatingActionButton(
-                text = { Text(text = stringResource(id = R.string.fab_my_bags_add_coffee)) },
+                text = { Text(text = stringResource(id = R.string.fab_add_coffee)) },
                 icon = { Icon(imageVector = Icons.Filled.Add, contentDescription = null) },
                 onClick = navigateToAddCoffee,
+                expanded = buttonExpanded
             )
         }
     ) { innerPadding ->

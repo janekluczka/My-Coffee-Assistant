@@ -1,23 +1,15 @@
 package com.luczka.mycoffee.ui.screens.brewassistant
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ListItem
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.luczka.mycoffee.R
@@ -31,8 +23,6 @@ import com.luczka.mycoffee.ui.screens.brewassistant.components.SelectedCoffeeLis
 @Composable
 fun AssistantSummaryScreen(uiState: BrewAssistantUiState) {
     if (uiState.selectedCoffees.isEmpty()) return
-
-    val moreThanOneCoffeeSelected = uiState.selectedCoffees.size > 1
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -48,10 +38,10 @@ fun AssistantSummaryScreen(uiState: BrewAssistantUiState) {
             SectionSpacer()
         }
         item {
-            val title = if (uiState.selectedCoffees.size == 1) {
-                stringResource(id = R.string.assistant_selected_coffee)
-            } else {
+            val title = if (uiState.moreThanOneCoffeeSelected) {
                 stringResource(id = R.string.assistant_selected_coffees)
+            } else {
+                stringResource(id = R.string.assistant_selected_coffee)
             }
             SectionTitle(
                 modifier = Modifier.padding(horizontal = 16.dp),
@@ -64,7 +54,7 @@ fun AssistantSummaryScreen(uiState: BrewAssistantUiState) {
                 val amountSelectionUiState = entry.value
                 SelectedCoffeeListItem(
                     index = index,
-                    showCoffeeIndex = moreThanOneCoffeeSelected,
+                    showCoffeeIndex = uiState.moreThanOneCoffeeSelected,
                     coffeeUiState = selectedCoffee,
                     selectedAmount = amountSelectionUiState.selectedAmount
                 )
@@ -76,7 +66,7 @@ fun AssistantSummaryScreen(uiState: BrewAssistantUiState) {
         item {
             SectionTitle(
                 modifier = Modifier.padding(horizontal = 16.dp),
-                text = "Selected parameters"
+                text = stringResource(id = R.string.assistant_selected_parameters)
             )
         }
         item {
@@ -123,40 +113,6 @@ fun AssistantSummaryScreen(uiState: BrewAssistantUiState) {
                         )
                     )
                 }
-            )
-        }
-    }
-}
-
-@Composable
-fun BrewParameterCard(
-    overlineText: String,
-    headlineText: String
-) {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        tonalElevation = 3.dp
-    ) {
-        Column(
-            Modifier
-                .fillMaxWidth()
-                .heightIn(min = 72.dp)
-                .padding(start = 16.dp, top = 8.dp, bottom = 8.dp, end = 24.dp),
-            verticalArrangement = Arrangement.Center,
-        ) {
-            Text(
-                text = overlineText,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
-            )
-            Text(
-                text = headlineText,
-                style = MaterialTheme.typography.titleMedium,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
             )
         }
     }

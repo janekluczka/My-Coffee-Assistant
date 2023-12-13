@@ -15,12 +15,13 @@ import kotlinx.coroutines.launch
 data class BrewAssistantUiState(
     val currentCoffees: List<CoffeeUiState> = emptyList(),
     val selectedCoffees: Map<CoffeeUiState, AmountSelectionUiState> = emptyMap(),
+    val moreThanOneCoffeeSelected: Boolean = false,
     val hasAmountValue: Boolean = false,
     val hasRatioValue: Boolean = false,
     val selectedAmountsSum: String = "0.0",
     val waterAmount: String = "0.0",
     val ratioSelectionUiState: RatioSelectionUiState = RatioSelectionUiState(),
-    val isFinished: Boolean = false,
+    val isFinished: Boolean = false
 )
 
 data class AmountSelectionUiState(
@@ -65,6 +66,7 @@ private data class AssistantViewModelState(
         return BrewAssistantUiState(
             currentCoffees = currentCoffees,
             selectedCoffees = selectedCoffees,
+            moreThanOneCoffeeSelected = selectedCoffees.size > 1,
             hasAmountValue = true,
             hasRatioValue = hasRatioValue,
             isFinished = isFinished,
@@ -122,50 +124,6 @@ class AssistantViewModel(private val coffeeRepository: CoffeeRepository) : ViewM
                 wholeNumbers = wholeNumbers
             )
         }
-
-        viewModelState.update { it.copy(selectedCoffees = updatedSelectedCoffees) }
-    }
-
-    fun updateAmountSelectionOpenPicker(key: CoffeeUiState, openPicker: Boolean) {
-//        val selectedCoffees = viewModelState.value.selectedCoffees.toMutableMap()
-//
-//        if (openPicker) {
-//            selectedCoffees.forEach { (coffeeUiState, amountSelectionUiState) ->
-//                if (coffeeUiState == key) {
-//                    val updatedAmountSelectionUiState = amountSelectionUiState.copy(
-//                        openDialog = openPicker
-//                    )
-//
-//                    selectedCoffees.replace(key, updatedAmountSelectionUiState)
-//                } else {
-//                    val updatedAmountSelectionUiState = amountSelectionUiState.copy(
-//                        openDialog = openPicker
-//                    )
-//
-//                    selectedCoffees.replace(key, updatedAmountSelectionUiState)
-//                }
-//            }
-//        } else {
-//            val amountSelectionUiState = selectedCoffees[key] ?: return
-//
-//            val updatedAmountSelectionUiState = amountSelectionUiState.copy(
-//                openDialog = openPicker
-//            )
-//
-//            selectedCoffees.replace(key, updatedAmountSelectionUiState)
-//        }
-//
-//        viewModelState.update { it.copy(selectedCoffees = selectedCoffees) }
-    }
-
-    fun updateAmountSelectionOpenDialog(key: CoffeeUiState, openDialog: Boolean) {
-        val updatedSelectedCoffees = viewModelState.value.selectedCoffees.toMutableMap()
-
-        val amountSelectionUiState = updatedSelectedCoffees[key] ?: return
-
-        val updatedAmountSelectionUiState = amountSelectionUiState.copy(openDialog = openDialog)
-
-        updatedSelectedCoffees.replace(key, updatedAmountSelectionUiState)
 
         viewModelState.update { it.copy(selectedCoffees = updatedSelectedCoffees) }
     }

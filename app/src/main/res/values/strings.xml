@@ -12,8 +12,8 @@
     <string name="section_title_low">Low amount</string>
 
     <!--  Floating action buttons  -->
-    <string name="fab_home_brew_assistant">Brew assistant</string>
-    <string name="fab_my_bags_add_coffee">Add coffee</string>
+    <string name="fab_brew_assistant">Brew assistant</string>
+    <string name="fab_add_coffee">Add coffee</string>
 
     <!--  Brew assistant screen  -->
     <string name="assistant_top_bar_title">Brew assistant</string>

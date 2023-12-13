@@ -1,3 +1,5 @@
+@file:Suppress("unused", "unused", "unused")
+
 package com.luczka.mycoffee.ui.theme
 
 import androidx.compose.ui.graphics.Color
