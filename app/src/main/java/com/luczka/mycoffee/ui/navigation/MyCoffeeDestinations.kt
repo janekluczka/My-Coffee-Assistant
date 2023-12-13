@@ -5,6 +5,7 @@ object MyCoffeeDestinations {
     const val ROUTE_ASSISTANT = "assistant"
     const val ROUTE_INPUT = "input"
     const val ROUTE_HOME = "home"
+    const val ROUTE_HISTORY = "history"
     const val ROUTE_MY_BAGS = "my_bags"
     const val ROUTE_RECIPES = "recipes"
     const val KEY_COFFEE_ID = "coffeeId"

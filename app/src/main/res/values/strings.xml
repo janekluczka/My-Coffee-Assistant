@@ -4,6 +4,7 @@
 
     <!--  Navigation Bar Tabs  -->
     <string name="tab_home">Home</string>
+    <string name="tab_history">History</string>
     <string name="tab_my_bags">My bags</string>
     <string name="tab_recipes">Recipes</string>
 

@@ -5,10 +5,13 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -54,6 +57,11 @@ fun MyCoffeeNavHost(
                 navigateToAssistant = navigateToAssistant,
                 navigate = navController::navigate,
             )
+        }
+        composable(MyCoffeeDestinations.ROUTE_HISTORY) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text(text = "Feature will be added soon")
+            }
         }
         composable(MyCoffeeDestinations.ROUTE_MY_BAGS) {
             val viewModel: MyBagsViewModel = viewModel(factory = MyCoffeeViewModelProvider.Factory)

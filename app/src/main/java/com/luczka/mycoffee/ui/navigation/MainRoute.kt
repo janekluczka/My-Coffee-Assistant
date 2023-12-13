@@ -44,6 +44,11 @@ enum class HomeTabs(
         painterResource = R.drawable.ic_baseline_home,
         route = MyCoffeeDestinations.ROUTE_HOME
     ),
+    HISTORY(
+        stringResource = R.string.tab_history,
+        painterResource = R.drawable.ic_baseline_auto_awesome_motion,
+        route = MyCoffeeDestinations.ROUTE_HISTORY
+    ),
     MY_BAGS(
         stringResource = R.string.tab_my_bags,
         painterResource = R.drawable.ic_baseline_auto_awesome_motion,
