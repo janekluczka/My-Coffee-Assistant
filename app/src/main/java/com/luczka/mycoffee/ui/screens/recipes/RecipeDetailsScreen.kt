@@ -35,6 +35,7 @@ import com.google.accompanist.web.WebView
 import com.google.accompanist.web.WebViewState
 import com.google.accompanist.web.rememberWebViewState
 import com.luczka.mycoffee.ui.components.BackIconButton
+import com.luczka.mycoffee.ui.components.BrewingStepListItem
 import com.luczka.mycoffee.ui.model.RecipeDetailsUiState
 
 @OptIn(ExperimentalMaterial3Api::class)

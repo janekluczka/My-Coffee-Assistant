@@ -42,7 +42,7 @@ fun ClickableOutlinedTextField(
 ) {
     OutlinedTextField(
         value = value,
-        onValueChange = { },
+        onValueChange = {},
         modifier = modifier,
         enabled = enabled,
         readOnly = readOnly,

@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.luczka.mycoffee.R
+import com.luczka.mycoffee.ui.components.MethodCard
 import com.luczka.mycoffee.ui.components.TopAppBarTitle
 
 @OptIn(ExperimentalMaterial3Api::class)

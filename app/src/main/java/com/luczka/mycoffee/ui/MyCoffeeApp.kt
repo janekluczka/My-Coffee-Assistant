@@ -14,6 +14,6 @@ fun MyCoffeeApp(widthSizeClass: WindowWidthSizeClass) {
     MyCoffeeMainNavHost(
         widthSizeClass = widthSizeClass,
         mainNavController = mainNavController,
-        navController = navController
+        nestedNavController = navController
     )
 }

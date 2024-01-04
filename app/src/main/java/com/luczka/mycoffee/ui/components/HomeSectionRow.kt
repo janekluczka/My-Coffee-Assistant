@@ -63,7 +63,7 @@ fun HomeSectionRow(
                         .width(150.dp)
                         .wrapContentHeight(),
                     coffeeUiState = coffeeCardUiState,
-                    imageAspectRatio = 4f / 3f,
+                    imageAspectRatio = 1f / 1f,
                 )
             }
         }
@@ -77,7 +77,7 @@ fun HomeSectionRowPreview() {
     (1..3).forEach { index ->
         previewList.add(
             CoffeeUiState(
-                id = index,
+                coffeeId = index,
                 name = "Coffee",
                 brand = "Brand"
             )
@@ -99,7 +99,7 @@ fun HomeSectionRowWithButtonPreview() {
     (1..5).forEach { index ->
         previewList.add(
             CoffeeUiState(
-                id = index,
+                coffeeId = index,
                 name = "Coffee",
                 brand = "Brand"
             )

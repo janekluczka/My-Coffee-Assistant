@@ -1,6 +1,6 @@
 package com.luczka.mycoffee.ui.model
 
-import com.luczka.mycoffee.data.Coffee
+import com.luczka.mycoffee.data.database.entities.Coffee
 import com.luczka.mycoffee.enums.Process
 import com.luczka.mycoffee.enums.Roast
 import java.time.LocalDate
@@ -9,34 +9,37 @@ import java.time.format.DateTimeFormatter
 val dateTimeFormatter: DateTimeFormatter = DateTimeFormatter.BASIC_ISO_DATE
 
 data class CoffeeUiState(
-    val id: Int = 0,
-    var name: String = "",
-    var brand: String = "",
-    var amount: String? = null,
-    var process: Process? = null,
-    var roast: Roast? = null,
-    var roastingDate: LocalDate? = null,
-    var isFavourite: Boolean = false,
-    var imageFile240x240: String? = null,
-    var imageFile360x360: String? = null,
-    var imageFile480x480: String? = null,
-    var imageFile720x720: String? = null,
-    var imageFile960x960: String? = null,
+    val coffeeId: Int = 0,
+    val name: String = "",
+    val brand: String = "",
+    val amount: String? = null,
+    val scaScore: String? = null,
+    val process: Process? = null,
+    val roast: Roast? = null,
+    val roastingDate: LocalDate? = null,
+    val isFavourite: Boolean = false,
+    val imageFile240x240: String? = null,
+    val imageFile360x360: String? = null,
+    val imageFile480x480: String? = null,
+    val imageFile720x720: String? = null,
+    val imageFile960x960: String? = null,
 ) : Comparable<CoffeeUiState> {
+
     override fun compareTo(other: CoffeeUiState): Int {
         return compareBy<CoffeeUiState>(
             { it.name },
             { it.brand },
             { it.amount },
-            { it.id }
+            { it.coffeeId }
         ).compare(this, other)
     }
 
     fun toCoffee(): Coffee = Coffee(
-        id = id,
+        coffeeId = coffeeId,
         name = name.trim(),
         brand = brand.trim(),
-        amount = amount?.toFloat(),
+        amount = amount?.toFloatOrNull(),
+        scaScore = scaScore?.toFloatOrNull(),
         process = process?.id,
         roast = roast?.id,
         roastingDate = roastingDate?.format(dateTimeFormatter),
@@ -49,7 +52,7 @@ data class CoffeeUiState(
     )
 
     fun isBlank(): Boolean {
-        if (id != 0) return false
+        if (coffeeId != 0) return false
         if (name != "") return false
         if (brand != "") return false
         if (amount != null) return false

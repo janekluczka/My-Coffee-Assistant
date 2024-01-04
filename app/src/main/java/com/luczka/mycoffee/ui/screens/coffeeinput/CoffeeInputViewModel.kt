@@ -7,7 +7,7 @@ import android.os.Build
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.luczka.mycoffee.data.CoffeeRepository
+import com.luczka.mycoffee.data.repositories.MyCoffeeDatabaseRepository
 import com.luczka.mycoffee.enums.Process
 import com.luczka.mycoffee.enums.Roast
 import com.luczka.mycoffee.ui.model.CoffeeUiState
@@ -44,7 +44,7 @@ data class CoffeeInputUiState(
 
 class CoffeeInputViewModel(
     private val coffeeId: Int? = null,
-    private val coffeeRepository: CoffeeRepository
+    private val myCoffeeDatabaseRepository: MyCoffeeDatabaseRepository
 ) : ViewModel() {
 
     companion object {
@@ -61,8 +61,9 @@ class CoffeeInputViewModel(
 
     init {
         if (coffeeId != null) {
+            // TODO: This does not have to be Flow
             viewModelScope.launch {
-                coffeeRepository.getCoffeeStream(id = coffeeId).filterNotNull().collect { coffee ->
+                myCoffeeDatabaseRepository.getCoffeeStream(coffeeId).filterNotNull().collect { coffee ->
                     _uiState.update {
                         it.copy(
                             isEdit = true,
@@ -102,6 +103,10 @@ class CoffeeInputViewModel(
         _uiState.update { it.copy(coffeeUiState = it.coffeeUiState.copy(amount = amount)) }
     }
 
+    fun updateScaScore(scaScore: String) {
+        _uiState.update { it.copy(coffeeUiState = it.coffeeUiState.copy(scaScore = scaScore)) }
+    }
+
     fun updateProcess(process: Process?) {
         _uiState.update { it.copy(coffeeUiState = it.coffeeUiState.copy(process = process)) }
     }
@@ -132,9 +137,9 @@ class CoffeeInputViewModel(
                 saveImageInMultipleSizes(context = context)
 
                 if (_uiState.value.isEdit) {
-                    coffeeRepository.updateCoffee(coffee = _uiState.value.coffeeUiState.toCoffee())
+                    myCoffeeDatabaseRepository.updateCoffee(coffee = _uiState.value.coffeeUiState.toCoffee())
                 } else {
-                    coffeeRepository.insertCoffee(coffee = _uiState.value.coffeeUiState.toCoffee())
+                    myCoffeeDatabaseRepository.insertCoffee(coffee = _uiState.value.coffeeUiState.toCoffee())
                 }
             }
 

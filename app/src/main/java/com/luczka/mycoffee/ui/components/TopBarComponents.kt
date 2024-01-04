@@ -48,15 +48,14 @@ fun FavouriteToggleButton(checked: Boolean, onCheckedChange: () -> Unit) {
         onClick = onCheckedChange,
         colors = IconButtonDefaults.iconButtonColors(
             contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-        ),
-        content = {
-            if (checked) {
-                Icon(imageVector = Icons.Filled.Favorite, contentDescription = null)
-            } else {
-                Icon(imageVector = Icons.Filled.FavoriteBorder, contentDescription = null)
-            }
+        )
+    ) {
+        if (checked) {
+            Icon(imageVector = Icons.Filled.Favorite, contentDescription = null)
+        } else {
+            Icon(imageVector = Icons.Filled.FavoriteBorder, contentDescription = null)
         }
-    )
+    }
 }
 
 @Composable
@@ -65,9 +64,10 @@ fun EditIconButton(onClick: () -> Unit) {
         onClick = onClick,
         colors = IconButtonDefaults.iconButtonColors(
             contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-        ),
-        content = { Icon(imageVector = Icons.Filled.Edit, contentDescription = null) }
-    )
+        )
+    ) {
+        Icon(imageVector = Icons.Filled.Edit, contentDescription = null)
+    }
 }
 
 @Composable
@@ -77,8 +77,9 @@ fun DeleteIconButton(onClick: () -> Unit) {
         colors = IconButtonDefaults.iconButtonColors(
             contentColor = MaterialTheme.colorScheme.onSurfaceVariant
         ),
-        content = { Icon(imageVector = Icons.Filled.Delete, contentDescription = null) }
-    )
+    ) {
+        Icon(imageVector = Icons.Filled.Delete, contentDescription = null)
+    }
 }
 
 @Preview

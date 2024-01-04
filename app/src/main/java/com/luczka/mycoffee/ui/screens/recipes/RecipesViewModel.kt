@@ -2,7 +2,7 @@ package com.luczka.mycoffee.ui.screens.recipes
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.luczka.mycoffee.data.FirebaseRepository
+import com.luczka.mycoffee.data.repositories.FirebaseRepository
 import com.luczka.mycoffee.ui.model.RecipeDetailsUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted

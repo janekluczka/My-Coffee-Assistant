@@ -7,31 +7,38 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.luczka.mycoffee.MyCoffeeApplication
 import com.luczka.mycoffee.ui.screens.brewassistant.AssistantViewModel
 import com.luczka.mycoffee.ui.screens.coffeeinput.CoffeeInputViewModel
+import com.luczka.mycoffee.ui.screens.coffees.CoffeesViewModel
+import com.luczka.mycoffee.ui.screens.history.BrewDetailsViewModel
+import com.luczka.mycoffee.ui.screens.history.HistoryViewModel
 import com.luczka.mycoffee.ui.screens.home.HomeViewModel
 import com.luczka.mycoffee.ui.screens.methods.MethodsViewModel
-import com.luczka.mycoffee.ui.screens.mybags.MyBagsViewModel
 import com.luczka.mycoffee.ui.screens.recipes.RecipesViewModel
 
 object MyCoffeeViewModelProvider {
     val Factory = viewModelFactory {
         initializer {
             HomeViewModel(
-                coffeeRepository = myCoffeeApplication().container.coffeeRepository
+                myCoffeeDatabaseRepository = myCoffeeApplication().container.myCoffeeDatabaseRepository
             )
         }
         initializer {
             AssistantViewModel(
-                coffeeRepository = myCoffeeApplication().container.coffeeRepository
+                myCoffeeDatabaseRepository = myCoffeeApplication().container.myCoffeeDatabaseRepository
             )
         }
         initializer {
-            MyBagsViewModel(
-                coffeeRepository = myCoffeeApplication().container.coffeeRepository
+            HistoryViewModel(
+                myCoffeeDatabaseRepository = myCoffeeApplication().container.myCoffeeDatabaseRepository
+            )
+        }
+        initializer {
+            CoffeesViewModel(
+                myCoffeeDatabaseRepository = myCoffeeApplication().container.myCoffeeDatabaseRepository
             )
         }
         initializer {
             CoffeeInputViewModel(
-                coffeeRepository = myCoffeeApplication().container.coffeeRepository
+                myCoffeeDatabaseRepository = myCoffeeApplication().container.myCoffeeDatabaseRepository
             )
         }
         initializer {
@@ -41,12 +48,23 @@ object MyCoffeeViewModelProvider {
         }
     }
 
+    fun brewDetailsViewModelFactory(brewId: Int): ViewModelProvider.Factory {
+        return viewModelFactory {
+            initializer {
+                BrewDetailsViewModel(
+                    brewId = brewId,
+                    myCoffeeDatabaseRepository = myCoffeeApplication().container.myCoffeeDatabaseRepository
+                )
+            }
+        }
+    }
+
     fun coffeeInputViewModelFactory(coffeeId: Int?): ViewModelProvider.Factory {
         return viewModelFactory {
             initializer {
                 CoffeeInputViewModel(
                     coffeeId = coffeeId,
-                    coffeeRepository = myCoffeeApplication().container.coffeeRepository
+                    myCoffeeDatabaseRepository = myCoffeeApplication().container.myCoffeeDatabaseRepository
                 )
             }
         }

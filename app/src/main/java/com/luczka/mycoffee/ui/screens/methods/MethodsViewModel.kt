@@ -2,7 +2,8 @@ package com.luczka.mycoffee.ui.screens.methods
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.luczka.mycoffee.data.FirebaseRepository
+import com.luczka.mycoffee.data.repositories.FirebaseRepository
+import com.luczka.mycoffee.ui.components.MethodUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
@@ -61,8 +62,8 @@ class MethodsViewModel(private val firebaseRepository: FirebaseRepository) : Vie
             firebaseRepository.getMethods(
                 onSuccess = { methodList ->
                     val methodUiStateListSorted = methodList
-                        .map { it.toMethodCardUiState() }
-                        .sortedBy { it.title }
+                        .map { it.toMethodUiState() }
+                        .sortedBy { it.name }
                     viewModelState.update {
                         it.copy(
                             isLoading = false,

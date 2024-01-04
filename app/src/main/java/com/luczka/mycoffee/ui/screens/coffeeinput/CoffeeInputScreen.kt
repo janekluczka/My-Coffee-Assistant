@@ -6,18 +6,52 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.keyframes
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.Done
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.surfaceColorAtElevation
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -28,6 +62,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
@@ -35,10 +70,8 @@ import coil.request.ImageRequest
 import com.luczka.mycoffee.R
 import com.luczka.mycoffee.enums.Process
 import com.luczka.mycoffee.enums.Roast
-import com.luczka.mycoffee.enums.toDropdownMenuUiState
 import com.luczka.mycoffee.ui.components.ClickableOutlinedTextField
 import com.luczka.mycoffee.ui.components.CloseIconButton
-import com.luczka.mycoffee.ui.components.CustomExposedDropdownMenu
 import com.luczka.mycoffee.ui.components.FilteredOutlinedTextField
 import com.luczka.mycoffee.ui.components.TopAppBarTitle
 import com.luczka.mycoffee.ui.model.CoffeeUiState
@@ -58,13 +91,14 @@ import java.time.format.FormatStyle
 fun CoffeeInputScreen(
     uiState: CoffeeInputUiState,
     navigateUp: () -> Unit,
-    onPhotoSelected: (Uri?) -> Unit,
-    onPhotoDeleted: () -> Unit,
+    onSelectPhoto: (Uri?) -> Unit,
+    onDeletePhoto: () -> Unit,
     onUpdateName: (String) -> Unit,
     onNameInputFinished: () -> Unit,
     onUpdateBrand: (String) -> Unit,
     onBrandInputFinished: () -> Unit,
     onUpdateAmount: (String) -> Unit,
+    onUpdateScaScore: (String) -> Unit,
     onUpdateProcess: (Process?) -> Unit,
     onUpdateRoast: (Roast?) -> Unit,
     onUpdateRoastingDate: (LocalDate) -> Unit,
@@ -73,9 +107,15 @@ fun CoffeeInputScreen(
     var openDiscardDialog by rememberSaveable { mutableStateOf(false) }
     var openCalendarDialog by rememberSaveable { mutableStateOf(false) }
 
+    val roastListState = rememberLazyListState()
+    val processListState = rememberLazyListState()
+
+    val coffeeRoasts = remember { mutableStateOf(Roast.values()) }
+    val coffeeProcess = remember { mutableStateOf(Process.values()) }
+
     val singlePhotoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
-        onResult = onPhotoSelected
+        onResult = onSelectPhoto
     )
 
     LaunchedEffect(uiState.isSaved) {
@@ -94,8 +134,11 @@ fun CoffeeInputScreen(
 
     if (openDiscardDialog) {
         DiscardDialog(
-            navigateUp = navigateUp,
-            onHideDialog = { openDiscardDialog = false }
+            onNegative = { openDiscardDialog = false },
+            onPositive = {
+                openDiscardDialog = false
+                navigateUp()
+            }
         )
     }
 
@@ -119,48 +162,28 @@ fun CoffeeInputScreen(
         AddCoffeeContent(
             innerPadding = innerPadding,
             coffeeInputUiState = uiState,
+            roastListState = roastListState,
+            processListState = processListState,
+            coffeeRoasts = coffeeRoasts,
+            coffeeProcess = coffeeProcess,
             onAddPhoto = {
                 val mediaType = ActivityResultContracts.PickVisualMedia.ImageOnly
                 singlePhotoPickerLauncher.launch(PickVisualMediaRequest(mediaType))
             },
-            onDeletePhoto = onPhotoDeleted,
-            updateName = onUpdateName,
+            onDeletePhoto = onDeletePhoto,
+            onUpdateName = onUpdateName,
             onNameInputFinished = onNameInputFinished,
-            updateBrand = onUpdateBrand,
+            onUpdateBrand = onUpdateBrand,
             onBrandInputFinished = onBrandInputFinished,
-            updateAmount = onUpdateAmount,
-            updateProcess = onUpdateProcess,
-            updateRoast = onUpdateRoast,
+            onUpdateAmount = onUpdateAmount,
+            onUpdateScaScore = onUpdateScaScore,
+            onUpdateProcess = onUpdateProcess,
+            onUpdateRoast = onUpdateRoast,
             onShowCalendarDialog = { openCalendarDialog = true }
         )
     }
 }
 
-@Composable
-private fun DiscardDialog(
-    navigateUp: () -> Unit,
-    onHideDialog: () -> Unit
-) {
-    AlertDialog(
-        title = { Text(text = stringResource(id = R.string.dialog_title_discard)) },
-        text = { Text(text = stringResource(id = R.string.dialog_text_discard)) },
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    onHideDialog()
-                    navigateUp()
-                },
-                content = { Text(text = stringResource(id = R.string.dialog_action_discard)) })
-        },
-        dismissButton = {
-            TextButton(
-                onClick = onHideDialog,
-                content = { Text(text = stringResource(id = R.string.dialog_action_cancel)) }
-            )
-        },
-        onDismissRequest = onHideDialog
-    )
-}
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
@@ -216,10 +239,9 @@ private fun AddCoffeeTopBar(
         },
         title = { TopAppBarTitle(text = title) },
         actions = {
-            TextButton(
-                onClick = { saveCoffee(context) },
-                content = { Text(text = stringResource(id = R.string.dialog_action_save)) }
-            )
+            TextButton(onClick = { saveCoffee(context) }) {
+                Text(text = stringResource(id = R.string.dialog_action_save))
+            }
         }
     )
 }
@@ -240,23 +262,32 @@ private fun onBackPressed(
 private fun AddCoffeeContent(
     innerPadding: PaddingValues,
     coffeeInputUiState: CoffeeInputUiState,
+    roastListState: LazyListState,
+    processListState: LazyListState,
+    coffeeRoasts: MutableState<Array<Roast>>,
+    coffeeProcess: MutableState<Array<Process>>,
     onAddPhoto: () -> Unit,
     onDeletePhoto: () -> Unit,
-    updateName: (String) -> Unit,
+    onUpdateName: (String) -> Unit,
     onNameInputFinished: () -> Unit,
-    updateBrand: (String) -> Unit,
+    onUpdateBrand: (String) -> Unit,
     onBrandInputFinished: () -> Unit,
-    updateAmount: (String) -> Unit,
-    updateProcess: (Process?) -> Unit,
-    updateRoast: (Roast?) -> Unit,
+    onUpdateAmount: (String) -> Unit,
+    onUpdateScaScore: (String) -> Unit,
+    onUpdateProcess: (Process?) -> Unit,
+    onUpdateRoast: (Roast?) -> Unit,
     onShowCalendarDialog: () -> Unit,
 ) {
-    Box(
+    Column(
         modifier = Modifier
             .padding(innerPadding)
             .fillMaxSize()
     ) {
-        LazyColumn(modifier = Modifier.fillMaxSize()) {
+        LazyColumn(
+            modifier = Modifier.fillMaxWidth(),
+            contentPadding = PaddingValues(vertical = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
             item {
                 ImageSelectionBox(
                     coffeeInputUiState = coffeeInputUiState,
@@ -266,54 +297,80 @@ private fun AddCoffeeContent(
                 )
             }
             item {
-                Column(
-                    modifier = Modifier.padding(24.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                RequiredOutlinedTextFieldWithErrorMessage(
+                    value = coffeeInputUiState.coffeeUiState.name,
+                    onValueChange = onUpdateName,
+                    label = { Text(text = stringResource(id = R.string.input_required_text_field_label_name)) },
+                    isError = coffeeInputUiState.isNameWrong,
+                    onInputFinished = onNameInputFinished
+                )
+            }
+            item {
+                RequiredOutlinedTextFieldWithErrorMessage(
+                    value = coffeeInputUiState.coffeeUiState.brand,
+                    onValueChange = onUpdateBrand,
+                    label = { Text(text = stringResource(id = R.string.input_required_text_field_label_brand)) },
+                    isError = coffeeInputUiState.isBrandWrong,
+                    onInputFinished = onBrandInputFinished
+                )
+            }
+            item {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    RequiredOutlinedTextFieldWithErrorMessage(
-                        value = coffeeInputUiState.coffeeUiState.name,
-                        onValueChange = updateName,
-                        label = { Text(text = stringResource(id = R.string.input_required_text_field_label_name)) },
-                        isError = coffeeInputUiState.isNameWrong,
-                        onInputFinished = onNameInputFinished
-                    )
-                    RequiredOutlinedTextFieldWithErrorMessage(
-                        value = coffeeInputUiState.coffeeUiState.brand,
-                        onValueChange = updateBrand,
-                        label = { Text(text = stringResource(id = R.string.input_required_text_field_label_brand)) },
-                        isError = coffeeInputUiState.isBrandWrong,
-                        onInputFinished = onBrandInputFinished
-                    )
                     FilteredOutlinedTextField(
+                        modifier = Modifier.weight(3f),
                         value = coffeeInputUiState.coffeeUiState.amount ?: "",
-                        onValueChange = updateAmount,
+                        onValueChange = onUpdateAmount,
                         regex = Regex("([0-9]+([.][0-9]?)?|[.][0-9])"),
                         label = { Text(text = stringResource(id = R.string.coffee_parameters_amount)) },
                         placeholder = { Text(text = stringResource(id = R.string.input_text_field_placeholder_amount)) },
                         singleLine = true,
-                        modifier = Modifier.fillMaxWidth(),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                     )
-                    CoffeeRoastDropdownMenu(
-                        coffeeUiState = coffeeInputUiState.coffeeUiState,
-                        updateCoffeeRoast = updateRoast
-                    )
-                    CoffeeRoastingDateTextField(
-                        coffeeUiState = coffeeInputUiState.coffeeUiState,
-                        onShowCalendarDialog = onShowCalendarDialog
-                    )
-                    CoffeeProcessDropdownMenu(
-                        coffeeUiState = coffeeInputUiState.coffeeUiState,
-                        updateCoffeeProcess = updateProcess
+                    // TODO: Fix regex
+                    FilteredOutlinedTextField(
+                        modifier = Modifier.weight(2f),
+                        value = coffeeInputUiState.coffeeUiState.scaScore ?: "",
+                        onValueChange = onUpdateScaScore,
+                        regex = Regex("([0-9]+([.][0-9]?)?|[.][0-9])"),
+                        label = { Text(text = stringResource(id = R.string.coffee_parameters_sca_score)) },
+                        placeholder = { Text(text = stringResource(id = R.string.input_text_field_placeholder_amount)) },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                     )
                 }
             }
+            item {
+                CoffeeRoastDropdownMenu(
+                    coffeeUiState = coffeeInputUiState.coffeeUiState,
+                    roastListState = roastListState,
+                    coffeeRoasts = coffeeRoasts,
+                    updateCoffeeRoast = onUpdateRoast
+                )
+            }
+            item {
+                CoffeeProcessDropdownMenu(
+                    coffeeUiState = coffeeInputUiState.coffeeUiState,
+                    processListState = processListState,
+                    coffeeProcess = coffeeProcess,
+                    updateCoffeeProcess = onUpdateProcess
+                )
+            }
+//            item {
+//                CoffeeRoastingDateTextField(
+//                    coffeeUiState = coffeeInputUiState.coffeeUiState,
+//                    onShowCalendarDialog = onShowCalendarDialog
+//                )
+//            }
         }
     }
 }
 
 @Composable
-@OptIn(ExperimentalMaterial3Api::class)
 private fun ImageSelectionBox(
     coffeeInputUiState: CoffeeInputUiState,
     coffeeUiState: CoffeeUiState,
@@ -328,6 +385,7 @@ private fun ImageSelectionBox(
 
     Box(
         modifier = Modifier
+            .padding(horizontal = 24.dp)
             .fillMaxWidth()
             .aspectRatio(1f / 1f)
             .background(MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp)),
@@ -344,10 +402,10 @@ private fun ImageSelectionBox(
 
         if (model != null) {
             AsyncImage(
+                modifier = Modifier.fillMaxSize(),
                 model = model,
                 contentDescription = "",
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize()
+                contentScale = ContentScale.Crop
             )
         } else {
             Box(
@@ -355,44 +413,50 @@ private fun ImageSelectionBox(
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
+                    modifier = Modifier.size(48.dp),
                     painter = painterResource(id = R.drawable.ic_baseline_photo_camera),
                     contentDescription = "",
-                    modifier = Modifier.size(48.dp),
                     tint = MaterialTheme.colorScheme.surfaceVariant
                 )
             }
         }
         Row(
-            modifier = Modifier.padding(12.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            AssistChip(
+            OutlinedButton(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
                 onClick = onAddCoffeePhoto,
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Filled.Add,
-                        contentDescription = null
-                    )
-                },
-                label = { Text(text = stringResource(id = R.string.input_assist_chip_select)) },
-                colors = AssistChipDefaults.assistChipColors(
-                    containerColor = MaterialTheme.colorScheme.surface
+                colors = ButtonDefaults.outlinedButtonColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    disabledContainerColor = MaterialTheme.colorScheme.surface
+                ),
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Add,
+                    contentDescription = null
                 )
-            )
-            AssistChip(
+                Text(text = stringResource(id = R.string.input_assist_chip_select))
+            }
+            OutlinedButton(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
                 onClick = onCoffeePhotoDeleted,
                 enabled = hasUri || hasImage,
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Filled.Delete,
-                        contentDescription = null
-                    )
-                },
-                label = { Text(text = stringResource(id = R.string.input_assist_chip_delete)) },
-                colors = AssistChipDefaults.assistChipColors(
-                    containerColor = MaterialTheme.colorScheme.surface
+                colors = ButtonDefaults.outlinedButtonColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    disabledContainerColor = MaterialTheme.colorScheme.surface
                 )
-            )
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Delete,
+                    contentDescription = null
+                )
+                Text(text = stringResource(id = R.string.input_assist_chip_delete))
+            }
         }
     }
 }
@@ -426,38 +490,108 @@ private fun RequiredOutlinedTextFieldWithErrorMessage(
             },
         ),
         keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp)
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun CoffeeProcessDropdownMenu(
     coffeeUiState: CoffeeUiState,
+    processListState: LazyListState,
+    coffeeProcess: MutableState<Array<Process>>,
     updateCoffeeProcess: (Process?) -> Unit
 ) {
-    val menuItems = remember { Process.values().map { it.toDropdownMenuUiState() } }
-    val processStringResource = coffeeUiState.process?.stringResource
-    CustomExposedDropdownMenu(
-        value = processStringResource?.let { stringResource(id = it) } ?: "",
-        label = { Text(text = stringResource(id = R.string.coffee_parameters_process)) },
-        menuItems = menuItems,
-        onItemSelected = updateCoffeeProcess
+    Text(
+        modifier = Modifier.padding(horizontal = 24.dp),
+        text = stringResource(id = R.string.coffee_parameters_process),
+        style = MaterialTheme.typography.labelSmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        textAlign = TextAlign.Center,
     )
+    LazyRow(
+        state = processListState,
+        contentPadding = PaddingValues(horizontal = 24.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        items(coffeeProcess.value, { it.id }) { coffeeProcess ->
+            val isSelected = coffeeUiState.process == coffeeProcess
+            FilterChip(
+                selected = isSelected,
+                onClick = {
+                    val selectedProcess = if (isSelected) null else coffeeProcess
+                    updateCoffeeProcess(selectedProcess)
+                },
+                label = { Text(text = stringResource(id = coffeeProcess.stringResource)) },
+                leadingIcon = {
+                    Box(
+                        modifier = Modifier.animateContentSize(
+                            animationSpec = keyframes { durationMillis = 200 }
+                        )
+                    ) {
+                        if (isSelected) {
+                            Icon(
+                                imageVector = Icons.Filled.Done,
+                                contentDescription = null,
+                                modifier = Modifier.size(FilterChipDefaults.IconSize)
+                            )
+                        }
+                    }
+                }
+            )
+        }
+    }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun CoffeeRoastDropdownMenu(
     coffeeUiState: CoffeeUiState,
+    roastListState: LazyListState,
+    coffeeRoasts: MutableState<Array<Roast>>,
     updateCoffeeRoast: (Roast?) -> Unit
 ) {
-    val menuItems = remember { Roast.values().map { it.toDropdownMenuUiState() } }
-    val roastStringResource = coffeeUiState.roast?.stringResource
-    CustomExposedDropdownMenu(
-        value = roastStringResource?.let { stringResource(id = it) } ?: "",
-        label = { Text(text = stringResource(id = R.string.coffee_parameters_roast)) },
-        menuItems = menuItems,
-        onItemSelected = updateCoffeeRoast
+    Text(
+        modifier = Modifier.padding(horizontal = 24.dp),
+        text = stringResource(id = R.string.coffee_parameters_roast),
+        style = MaterialTheme.typography.labelSmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        textAlign = TextAlign.Center,
     )
+    LazyRow(
+        state = roastListState,
+        contentPadding = PaddingValues(horizontal = 24.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        items(coffeeRoasts.value, { it.id }) { coffeeRoast ->
+            val isSelected = coffeeUiState.roast == coffeeRoast
+            FilterChip(
+                selected = isSelected,
+                onClick = {
+                    val selectedRoast = if (isSelected) null else coffeeRoast
+                    updateCoffeeRoast(selectedRoast)
+                },
+                label = { Text(text = stringResource(id = coffeeRoast.stringResource)) },
+                leadingIcon = {
+                    Box(
+                        modifier = Modifier.animateContentSize(
+                            animationSpec = keyframes { durationMillis = 200 }
+                        )
+                    ) {
+                        if (isSelected) {
+                            Icon(
+                                imageVector = Icons.Filled.Done,
+                                contentDescription = null,
+                                modifier = Modifier.size(FilterChipDefaults.IconSize)
+                            )
+                        }
+                    }
+                }
+            )
+        }
+    }
 }
 
 @Composable
@@ -487,13 +621,14 @@ fun AddCoffeeScreenLightThemePreview() {
         CoffeeInputScreen(
             uiState = coffeeInputUiState,
             navigateUp = { },
-            onPhotoSelected = {},
-            onPhotoDeleted = {},
+            onSelectPhoto = {},
+            onDeletePhoto = {},
             onUpdateName = {},
             onNameInputFinished = {},
             onUpdateBrand = {},
             onBrandInputFinished = {},
             onUpdateAmount = {},
+            onUpdateScaScore = {},
             onUpdateProcess = {},
             onUpdateRoast = {},
             onUpdateRoastingDate = {},
@@ -510,13 +645,14 @@ fun AddCoffeeScreenDarkThemePreview() {
         CoffeeInputScreen(
             uiState = coffeeInputUiState,
             navigateUp = { },
-            onPhotoSelected = {},
-            onPhotoDeleted = {},
+            onSelectPhoto = {},
+            onDeletePhoto = {},
             onUpdateName = {},
             onNameInputFinished = {},
             onUpdateBrand = {},
             onBrandInputFinished = {},
             onUpdateAmount = {},
+            onUpdateScaScore = {},
             onUpdateProcess = {},
             onUpdateRoast = {},
             onUpdateRoastingDate = {},

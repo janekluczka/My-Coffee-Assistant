@@ -5,7 +5,7 @@
     <!--  Navigation Bar Tabs  -->
     <string name="tab_home">Home</string>
     <string name="tab_history">History</string>
-    <string name="tab_my_bags">My bags</string>
+    <string name="tab_coffees">Coffees</string>
     <string name="tab_recipes">Recipes</string>
 
     <!--  Home Screen Sections  -->
@@ -18,9 +18,9 @@
 
     <!--  Brew assistant screen  -->
     <string name="assistant_top_bar_title">Brew assistant</string>
-    <string name="assistant_screen_1_title">Select coffee beans</string>
-    <string name="assistant_screen_2_title">Select amount and ratio</string>
-    <string name="assistant_screen_3_title">Brew summary</string>
+    <string name="assistant_selection_screen_title">Select coffee beans</string>
+    <string name="assistant_parameters_screen_title">Select amount and ratio</string>
+    <string name="assistant_summary_screen_title">Brew summary</string>
     <string name="assistant_button_previous">Previous</string>
     <string name="assistant_button_next">Next</string>
     <string name="assistant_button_finish">Finish</string>
@@ -40,12 +40,17 @@
     <!--
         %1$d: Coffee amount [grams]
     -->
+    <string name="assistant_coffee">Coffee</string>
+    <string name="assistant_coffee_with_name">Coffee (%1$s)</string>
+    <string name="assistant_ratio">Ratio</string>
+    <string name="assistant_water">Water</string>
+
     <string name="assistant_select_ratio">Select ratio</string>
     <string name="assistant_ratio_format">%1$d:%2$d</string>
     <string name="assistant_selected_ratio">Selected ratio</string>
     <string name="assistant_select_ratio_error">"Must be greater than 0"</string>
     <string name="assistant_water_amount">Water amount</string>
-    <string name="assistant_taken_amount"> -%1$s g</string>
+    <string name="assistant_taken_amount"> - %1$s g</string>
     <!--
         %1$s: Amount taken [grams]
     -->
@@ -75,6 +80,7 @@
     <!--
         %1$s: Amount [grams]
     -->
+    <string name="coffee_parameters_sca_score">SCA score</string>
     <string name="coffee_parameters_process">Process</string>
     <string name="coffee_parameters_roast">Roast</string>
     <string name="coffee_parameters_roasting_date">Roasting date</string>
@@ -97,11 +103,22 @@
     <string name="dialog_text_abort">
         You have not finished yor brew. Are you sure you want to abort it?
     </string>
-    <string name="dialog_text_finish">%1$s grams will be taken from %2$s %3$s</string>
+    <string name="dialog_text_finish">%1$s grams will be taken from %2$s, %3$s</string>
     <!--
         %1$s: Amount taken [grams]
         %2$s: Coffee name
         %3$s: Coffee brand
+    -->
+    <string name="dialog_text_select_amount">Select amount between 0.0 g and %1$s g</string>
+    <!--
+        %1$s: Max coffee amount [grams]
+    -->
+    <string name="dialog_text_select_ratio">Select ratio between %1$d:%2$d and %3$d:%4$d</string>
+    <!--
+        %1$d: Min coffee ratio
+        %2$d: Max coffee ratio
+        %3$d: Min water ratio
+        %4$d: Max water ratio
     -->
 
     <!--  Dialog actions  -->

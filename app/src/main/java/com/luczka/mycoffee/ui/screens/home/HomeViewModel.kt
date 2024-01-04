@@ -2,7 +2,7 @@ package com.luczka.mycoffee.ui.screens.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.luczka.mycoffee.data.CoffeeRepository
+import com.luczka.mycoffee.data.repositories.MyCoffeeDatabaseRepository
 import com.luczka.mycoffee.ui.model.CoffeeUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -43,7 +43,9 @@ private data class HomeViewModelState(
     }
 }
 
-class HomeViewModel(private val coffeeRepository: CoffeeRepository) : ViewModel() {
+class HomeViewModel(
+    private val myCoffeeDatabaseRepository: MyCoffeeDatabaseRepository
+) : ViewModel() {
 
     private val viewModelState = MutableStateFlow(HomeViewModelState())
     val uiState = viewModelState
@@ -56,7 +58,7 @@ class HomeViewModel(private val coffeeRepository: CoffeeRepository) : ViewModel(
 
     init {
         viewModelScope.launch {
-            coffeeRepository.getInStockCoffeesStream().collect { coffeeList ->
+            myCoffeeDatabaseRepository.getCurrentCoffeesStream().collect { coffeeList ->
                 val currentCoffees = coffeeList.map { it.toCoffeeUiState() }
                 viewModelState.update {
                     it.copy(currentCoffees = currentCoffees)

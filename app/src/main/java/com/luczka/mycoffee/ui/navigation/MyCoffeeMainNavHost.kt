@@ -21,29 +21,19 @@ import com.luczka.mycoffee.ui.screens.coffeeinput.CoffeeInputViewModel
 fun MyCoffeeMainNavHost(
     widthSizeClass: WindowWidthSizeClass,
     mainNavController: NavHostController,
-    navController: NavHostController
+    nestedNavController: NavHostController
 ) {
     NavHost(
         navController = mainNavController,
         startDestination = MyCoffeeDestinations.ROUTE_MAIN,
     ) {
         composable(MyCoffeeDestinations.ROUTE_MAIN) {
-            MainRoute(
+            NestedRoute(
                 widthSizeClass = widthSizeClass,
-                navController = navController,
-                navigateToAssistant = {
-                    val route = MyCoffeeDestinations.ROUTE_ASSISTANT
-                    mainNavController.navigate(route = route)
-                },
-                navigateToAddCoffee = {
-                    val route = MyCoffeeDestinations.ROUTE_INPUT
-                    mainNavController.navigate(route = route)
-                },
-                navigateToEditCoffee = { coffeeId ->
-                    val route =
-                        "${MyCoffeeDestinations.ROUTE_INPUT}?${MyCoffeeDestinations.KEY_COFFEE_ID}=${coffeeId}"
-                    mainNavController.navigate(route = route)
-                }
+                nestedNavController = nestedNavController,
+                navigateToAssistant = mainNavController::navigateToAssistant,
+                navigateToAddCoffee = mainNavController::navigateToAddCoffee,
+                navigateToEditCoffee = mainNavController::navigateToEditCoffee
             )
         }
         composable(MyCoffeeDestinations.ROUTE_ASSISTANT) {
@@ -59,11 +49,13 @@ fun MyCoffeeMainNavHost(
                 onCoffeeSelected = viewModel::selectCoffee,
                 onUpdateAmountSelectionWholeNumber = viewModel::updateAmountSelectionWholeNumber,
                 onUpdateAmountSelectionFractionalPart = viewModel::updateAmountSelectionFractionalPart,
-                onUpdateAmountSelectionText = viewModel::updateAmountSelectionText,
-                onUpdateHasRatio = viewModel::updateHasRatio,
+                onUpdateAmountSelectionText = viewModel::updateAmountSelectionValue,
+                onUpdateCoffeeAmountSelectionWholeNumber = viewModel::updateAmountSelectionWholeNumber,
+                onUpdateCoffeeAmountSelectionFractionalPart = viewModel::updateAmountSelectionFractionalPart,
+                onUpdateCoffeeAmountSelectionText = viewModel::updateAmountSelectionValue,
                 onUpdateCoffeeRatio = viewModel::updateCoffeeRatioIndex,
                 onUpdateWaterRatio = viewModel::updateWaterRatioIndex,
-                onUpdateRatioText = viewModel::updateRatioText,
+                onUpdateRatioText = viewModel::updateRatioValues,
                 onFinishBrew = viewModel::finishBrew
             )
         }
@@ -91,8 +83,8 @@ fun MyCoffeeMainNavHost(
             CoffeeInputScreen(
                 uiState = uiState,
                 navigateUp = mainNavController::navigateUp,
-                onPhotoSelected = viewModel::updateImageUri,
-                onPhotoDeleted = {
+                onSelectPhoto = viewModel::updateImageUri,
+                onDeletePhoto = {
                     viewModel.updateImageUri(uri = null)
                     viewModel.updateDeleteImage(deleteImage = true)
                 },
@@ -101,6 +93,7 @@ fun MyCoffeeMainNavHost(
                 onUpdateBrand = viewModel::updateBrand,
                 onBrandInputFinished = viewModel::brandInputFinished,
                 onUpdateAmount = viewModel::updateAmount,
+                onUpdateScaScore = viewModel::updateScaScore,
                 onUpdateProcess = viewModel::updateProcess,
                 onUpdateRoast = viewModel::updateRoast,
                 onUpdateRoastingDate = viewModel::updateRoastingDate,
@@ -108,4 +101,16 @@ fun MyCoffeeMainNavHost(
             )
         }
     }
+}
+
+private fun NavHostController.navigateToEditCoffee(coffeeId: Int) {
+    this.navigate(route = "${MyCoffeeDestinations.ROUTE_INPUT}?${MyCoffeeDestinations.KEY_COFFEE_ID}=${coffeeId}")
+}
+
+private fun NavHostController.navigateToAssistant() {
+    this.navigate(route = MyCoffeeDestinations.ROUTE_ASSISTANT)
+}
+
+private fun NavHostController.navigateToAddCoffee() {
+    this.navigate(route = MyCoffeeDestinations.ROUTE_INPUT)
 }

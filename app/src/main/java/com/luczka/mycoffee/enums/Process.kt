@@ -1,7 +1,6 @@
 package com.luczka.mycoffee.enums
 
 import com.luczka.mycoffee.R
-import com.luczka.mycoffee.ui.model.DropdownMenuItemUiState
 
 /**
  * Enum class representing different coffee processing methods.
@@ -17,9 +16,3 @@ enum class Process(
     Washed(2, R.string.process_washed),
     Honey(3, R.string.process_honey)
 }
-
-fun Process.toDropdownMenuUiState(): DropdownMenuItemUiState<Process> =
-    DropdownMenuItemUiState(
-        item = this,
-        stringResource = stringResource
-    )

@@ -2,7 +2,9 @@ package com.luczka.mycoffee.ui.screens.brewassistant
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.luczka.mycoffee.data.CoffeeRepository
+import com.luczka.mycoffee.data.database.entities.Brew
+import com.luczka.mycoffee.data.database.entities.BrewedCoffee
+import com.luczka.mycoffee.data.repositories.MyCoffeeDatabaseRepository
 import com.luczka.mycoffee.ui.model.CoffeeUiState
 import com.luczka.mycoffee.util.toStringWithOneDecimalPoint
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -11,22 +13,38 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
-data class BrewAssistantUiState(
-    val currentCoffees: List<CoffeeUiState> = emptyList(),
-    val selectedCoffees: Map<CoffeeUiState, AmountSelectionUiState> = emptyMap(),
-    val moreThanOneCoffeeSelected: Boolean = false,
-    val hasAmountValue: Boolean = false,
-    val hasRatioValue: Boolean = false,
-    val selectedAmountsSum: String = "0.0",
-    val waterAmount: String = "0.0",
-    val ratioSelectionUiState: RatioSelectionUiState = RatioSelectionUiState(),
-    val isFinished: Boolean = false
-)
+sealed interface BrewAssistantUiState {
+    val currentCoffees: List<CoffeeUiState>
+    val selectedAmountsSum: String
+    val waterAmount: String
+    val ratioSelectionUiState: RatioSelectionUiState
+    val isFinished: Boolean
+
+    data class NoneSelected(
+        override val currentCoffees: List<CoffeeUiState> = emptyList(),
+        val amountSelectionUiState: AmountSelectionUiState = AmountSelectionUiState(),
+        override val selectedAmountsSum: String = "0.0",
+        override val ratioSelectionUiState: RatioSelectionUiState = RatioSelectionUiState(),
+        override val waterAmount: String = "0.0",
+        override val isFinished: Boolean = false
+    ) : BrewAssistantUiState
+
+    data class CoffeeSelected(
+        override val currentCoffees: List<CoffeeUiState> = emptyList(),
+        val selectedCoffees: Map<CoffeeUiState, AmountSelectionUiState> = emptyMap(),
+        override val selectedAmountsSum: String = "0.0",
+        override val ratioSelectionUiState: RatioSelectionUiState = RatioSelectionUiState(),
+        override val waterAmount: String = "0.0",
+        override val isFinished: Boolean = false
+    ) : BrewAssistantUiState
+}
+
+// TODO: Rename wholeNumbers & fractionalParts to integerParts & decimalParts
 
 data class AmountSelectionUiState(
-    val openPicker: Boolean = false,
-    val openDialog: Boolean = false,
     val wholeNumbers: List<Int> = (0..0).toList(),
     val fractionalParts: List<Int> = (0..9).toList(),
     val wholeNumberIndex: Int = 0,
@@ -46,14 +64,14 @@ data class RatioSelectionUiState(
 private data class AssistantViewModelState(
     val currentCoffees: List<CoffeeUiState> = emptyList(),
     val selectedCoffees: MutableMap<CoffeeUiState, AmountSelectionUiState> = mutableMapOf(),
-    val hasRatioValue: Boolean = false,
-    val isFinished: Boolean = false,
+    val amountSelectionUiState: AmountSelectionUiState = AmountSelectionUiState(
+        wholeNumbers = (0..99).toList()
+    ),
     val ratioSelectionUiState: RatioSelectionUiState = RatioSelectionUiState(),
+    val isFinished: Boolean = false,
 ) {
     fun toAssistantUiState(): BrewAssistantUiState {
-        val selectedAmountsSum = selectedCoffees.values
-            .map { it.selectedAmount.toFloatOrNull() ?: 0f }
-            .sum()
+        val selectedAmountsSum = sumSelectedAmounts()
 
         val selectedWaterRatio = ratioSelectionUiState.selectedWaterRatio
         val selectedCoffeeRatio = ratioSelectionUiState.selectedCoffeeRatio
@@ -63,21 +81,58 @@ private data class AssistantViewModelState(
         val selectedAmountsSumFormatted = selectedAmountsSum.toStringWithOneDecimalPoint()
         val waterAmountFormatted = waterAmount.toStringWithOneDecimalPoint()
 
-        return BrewAssistantUiState(
-            currentCoffees = currentCoffees,
-            selectedCoffees = selectedCoffees,
-            moreThanOneCoffeeSelected = selectedCoffees.size > 1,
-            hasAmountValue = true,
-            hasRatioValue = hasRatioValue,
-            isFinished = isFinished,
-            selectedAmountsSum = selectedAmountsSumFormatted,
-            waterAmount = waterAmountFormatted,
-            ratioSelectionUiState = ratioSelectionUiState
+        return if (selectedCoffees.isEmpty()) {
+            BrewAssistantUiState.NoneSelected(
+                currentCoffees = currentCoffees,
+                isFinished = isFinished,
+                selectedAmountsSum = selectedAmountsSumFormatted,
+                waterAmount = waterAmountFormatted,
+                amountSelectionUiState = amountSelectionUiState,
+                ratioSelectionUiState = ratioSelectionUiState
+            )
+        } else {
+            BrewAssistantUiState.CoffeeSelected(
+                currentCoffees = currentCoffees,
+                selectedCoffees = selectedCoffees,
+                isFinished = isFinished,
+                selectedAmountsSum = selectedAmountsSumFormatted,
+                waterAmount = waterAmountFormatted,
+                ratioSelectionUiState = ratioSelectionUiState
+            )
+        }
+    }
+
+    fun toBrew(): Brew {
+        val coffeeAmountsSum = sumSelectedAmounts()
+
+        val coffeeRatio = ratioSelectionUiState.selectedCoffeeRatio
+        val waterRatio = ratioSelectionUiState.selectedWaterRatio
+
+        val waterAmount = coffeeAmountsSum * waterRatio / coffeeRatio
+
+        return Brew(
+            brewId = 0,
+            date = LocalDateTime.now().format(DateTimeFormatter.BASIC_ISO_DATE),
+            coffeeAmount = coffeeAmountsSum,
+            coffeeRatio = coffeeRatio,
+            waterAmount = waterAmount,
+            waterRatio = waterRatio,
+            rating = null
         )
+    }
+
+    private fun sumSelectedAmounts(): Float {
+        return if (selectedCoffees.isEmpty()) {
+            amountSelectionUiState.selectedAmount.toFloatOrNull() ?: 0f
+        } else {
+            selectedCoffees.values.map { it.selectedAmount.toFloatOrNull() ?: 0f }.sum()
+        }
     }
 }
 
-class AssistantViewModel(private val coffeeRepository: CoffeeRepository) : ViewModel() {
+class AssistantViewModel(
+    private val myCoffeeDatabaseRepository: MyCoffeeDatabaseRepository
+) : ViewModel() {
 
     private val viewModelState = MutableStateFlow(AssistantViewModelState())
     val uiState = viewModelState
@@ -90,7 +145,7 @@ class AssistantViewModel(private val coffeeRepository: CoffeeRepository) : ViewM
 
     init {
         viewModelScope.launch {
-            coffeeRepository.getInStockCoffeesStream().collect { coffeeList ->
+            myCoffeeDatabaseRepository.getCurrentCoffeesStream().collect { coffeeList ->
                 val coffeeUiStateList = coffeeList
                     .map { it.toCoffeeUiState() }
                     .sortedWith(
@@ -113,64 +168,108 @@ class AssistantViewModel(private val coffeeRepository: CoffeeRepository) : ViewM
             else -> selectedCoffeeAmount
         }
 
-        val wholeNumbers = (0..lastWholeNumber).toList()
-
         val updatedSelectedCoffees = viewModelState.value.selectedCoffees.toMutableMap()
 
         if (updatedSelectedCoffees.containsKey(coffeeUiState)) {
             updatedSelectedCoffees.remove(coffeeUiState)
         } else {
             updatedSelectedCoffees[coffeeUiState] = AmountSelectionUiState(
-                wholeNumbers = wholeNumbers
+                wholeNumbers = (0..lastWholeNumber).toList()
             )
         }
 
         viewModelState.update { it.copy(selectedCoffees = updatedSelectedCoffees) }
     }
 
-    fun updateAmountSelectionWholeNumber(
-        key: CoffeeUiState,
-        wholeNumberIndex: Int
-    ) {
-        val selectedCoffees = viewModelState.value.selectedCoffees.toMutableMap()
+    fun updateAmountSelectionWholeNumber(wholeNumberIndex: Int) {
+        val amountSelectionUiState = viewModelState.value.amountSelectionUiState
 
-        val amountSelectionUiState = selectedCoffees[key] ?: return
+        val fractionalPartIndex = amountSelectionUiState.fractionalPartIndex
 
-        val wholeNumber =
-            amountSelectionUiState.wholeNumbers[wholeNumberIndex]
-        val fractionalPart =
-            amountSelectionUiState.fractionalParts[amountSelectionUiState.fractionalPartIndex]
-
-        val selectedAmount = "$wholeNumber.$fractionalPart"
+        val wholeNumber = amountSelectionUiState.wholeNumbers[wholeNumberIndex]
+        val fractionalPart = amountSelectionUiState.fractionalParts[fractionalPartIndex]
 
         val updatedAmountSelectionUiState = amountSelectionUiState.copy(
             wholeNumberIndex = wholeNumberIndex,
-            selectedAmount = selectedAmount
+            selectedAmount = "$wholeNumber.$fractionalPart"
         )
 
-        selectedCoffees.replace(key, updatedAmountSelectionUiState)
-
-        viewModelState.update { it.copy(selectedCoffees = selectedCoffees) }
+        viewModelState.update { it.copy(amountSelectionUiState = updatedAmountSelectionUiState) }
     }
 
-    fun updateAmountSelectionFractionalPart(
-        key: CoffeeUiState,
-        fractionalPartIndex: Int
-    ) {
+    fun updateAmountSelectionFractionalPart(fractionalPartIndex: Int) {
+        val amountSelectionUiState = viewModelState.value.amountSelectionUiState
+
+        val wholeNumberIndex = amountSelectionUiState.wholeNumberIndex
+
+        val wholeNumber = amountSelectionUiState.wholeNumbers[wholeNumberIndex]
+        val fractionalPart = amountSelectionUiState.fractionalParts[fractionalPartIndex]
+
+        val updatedAmountSelectionUiState = amountSelectionUiState.copy(
+            fractionalPartIndex = fractionalPartIndex,
+            selectedAmount = "$wholeNumber.$fractionalPart"
+        )
+
+        viewModelState.update { it.copy(amountSelectionUiState = updatedAmountSelectionUiState) }
+    }
+
+    fun updateAmountSelectionWholeNumber(key: CoffeeUiState, wholeNumberIndex: Int) {
         val selectedCoffees = viewModelState.value.selectedCoffees.toMutableMap()
 
         val amountSelectionUiState = selectedCoffees[key] ?: return
 
-        val wholeNumber =
-            amountSelectionUiState.wholeNumbers[amountSelectionUiState.wholeNumberIndex]
-        val fractionalPart =
-            amountSelectionUiState.fractionalParts[fractionalPartIndex]
+        val fractionalPartIndex = amountSelectionUiState.fractionalPartIndex
 
+        val wholeNumber = amountSelectionUiState.wholeNumbers[wholeNumberIndex]
+        val fractionalPart = amountSelectionUiState.fractionalParts[fractionalPartIndex]
+
+        val maxAmount = key.amount ?: return
         val selectedAmount = "$wholeNumber.$fractionalPart"
+
+        val maxAmountFloat = maxAmount.toFloatOrNull() ?: return
+        val selectedAmountFloat = selectedAmount.toFloatOrNull() ?: return
+
+        val updatedAmountSelectionUiState = if (selectedAmountFloat > maxAmountFloat) {
+            val selectedAmountFractionalPart = selectedAmount.split(".")[1].toIntOrNull() ?: return
+            val maxAmountFractionalPart = maxAmount.split(".")[1].toIntOrNull() ?: return
+
+            val fractionalPartIndexOffset = selectedAmountFractionalPart - maxAmountFractionalPart
+
+            val updatedFractionalPartIndex = fractionalPartIndex - fractionalPartIndexOffset
+
+            val updatedFractionalPart =
+                amountSelectionUiState.fractionalParts[updatedFractionalPartIndex]
+
+            amountSelectionUiState.copy(
+                wholeNumberIndex = wholeNumberIndex,
+                selectedAmount = "$wholeNumber.$updatedFractionalPart",
+                fractionalPartIndex = updatedFractionalPartIndex,
+            )
+        } else {
+            amountSelectionUiState.copy(
+                wholeNumberIndex = wholeNumberIndex,
+                selectedAmount = "$wholeNumber.$fractionalPart"
+            )
+        }
+
+        selectedCoffees.replace(key, updatedAmountSelectionUiState)
+
+        viewModelState.update { it.copy(selectedCoffees = selectedCoffees) }
+    }
+
+    fun updateAmountSelectionFractionalPart(key: CoffeeUiState, fractionalPartIndex: Int) {
+        val selectedCoffees = viewModelState.value.selectedCoffees.toMutableMap()
+
+        val amountSelectionUiState = selectedCoffees[key] ?: return
+
+        val wholeNumberIndex = amountSelectionUiState.wholeNumberIndex
+
+        val wholeNumber = amountSelectionUiState.wholeNumbers[wholeNumberIndex]
+        val fractionalPart = amountSelectionUiState.fractionalParts[fractionalPartIndex]
 
         val updatedAmountSelectionUiState = amountSelectionUiState.copy(
             fractionalPartIndex = fractionalPartIndex,
-            selectedAmount = selectedAmount
+            selectedAmount = "$wholeNumber.$fractionalPart"
         )
 
         selectedCoffees.replace(key, updatedAmountSelectionUiState)
@@ -178,100 +277,135 @@ class AssistantViewModel(private val coffeeRepository: CoffeeRepository) : ViewM
         viewModelState.update { it.copy(selectedCoffees = selectedCoffees) }
     }
 
-    fun updateAmountSelectionText(
-        key: CoffeeUiState,
-        coffeeAmountText: String
-    ) {
+    fun updateAmountSelectionValue(coffeeAmountValue: String) {
+        val amountSelectionUiState = viewModelState.value.amountSelectionUiState
+
+        val coffeeAmountFloat = coffeeAmountValue.toFloatOrNull() ?: return
+
+        val coffeeAmountValueWithDecimalPoint = coffeeAmountFloat.toStringWithOneDecimalPoint()
+
+        val coffeeAmountSplit = coffeeAmountValueWithDecimalPoint.split(".")
+
+        val wholeNumber = coffeeAmountSplit[0].toIntOrNull() ?: return
+        val fractionalPart = coffeeAmountSplit[1].toIntOrNull() ?: return
+
+        val updatedAmountSelectionUiState = amountSelectionUiState.copy(
+            selectedAmount = coffeeAmountValue,
+            wholeNumberIndex = amountSelectionUiState.wholeNumbers.indexOf(wholeNumber),
+            fractionalPartIndex = amountSelectionUiState.fractionalParts.indexOf(fractionalPart)
+        )
+
+        viewModelState.update { it.copy(amountSelectionUiState = updatedAmountSelectionUiState) }
+    }
+
+    fun updateAmountSelectionValue(key: CoffeeUiState, coffeeAmountValue: String) {
         val selectedCoffees = viewModelState.value.selectedCoffees
 
         val amountSelectionUiState = selectedCoffees[key] ?: return
 
-        val coffeeAmountFloat = coffeeAmountText.toFloatOrNull() ?: return
+        val coffeeAmountFloat = coffeeAmountValue.toFloatOrNull() ?: return
 
-        val selectedAmount = coffeeAmountFloat.toStringWithOneDecimalPoint()
+        val coffeeAmountValueWithDecimalPoint = coffeeAmountFloat.toStringWithOneDecimalPoint()
+
+        val coffeeAmountSplit = coffeeAmountValueWithDecimalPoint.split(".")
+
+        val wholeNumber = coffeeAmountSplit[0].toIntOrNull() ?: return
+        val fractionalPart = coffeeAmountSplit[1].toIntOrNull() ?: return
 
         val updatedAmountSelectionUiState = amountSelectionUiState.copy(
-            selectedAmount = selectedAmount
+            selectedAmount = coffeeAmountValue,
+            wholeNumberIndex = amountSelectionUiState.wholeNumbers.indexOf(wholeNumber),
+            fractionalPartIndex = amountSelectionUiState.fractionalParts.indexOf(fractionalPart)
         )
 
         selectedCoffees.replace(key, updatedAmountSelectionUiState)
 
-        // TODO: Add finding indexes
-
         viewModelState.update { it.copy(selectedCoffees = selectedCoffees) }
     }
 
-    fun updateHasRatio() {
-        viewModelState.update { it.copy(hasRatioValue = true) }
-    }
-
     fun updateCoffeeRatioIndex(coffeeRatioIndex: Int) {
-        updateRatios(coffeeRatioIndex = coffeeRatioIndex)
+        val ratioSelectionUiState = viewModelState.value.ratioSelectionUiState
+
+        val updatedRatioSelectionUiState = ratioSelectionUiState.copy(
+            coffeeRatioIndex = coffeeRatioIndex,
+            selectedCoffeeRatio = ratioSelectionUiState.coffeeRatios[coffeeRatioIndex],
+        )
+
+        viewModelState.update { it.copy(ratioSelectionUiState = updatedRatioSelectionUiState) }
     }
 
     fun updateWaterRatioIndex(waterRatioIndex: Int) {
-        updateRatios(waterRatioIndex = waterRatioIndex)
+        val ratioSelectionUiState = viewModelState.value.ratioSelectionUiState
+
+        val updatedRatioSelectionUiState = ratioSelectionUiState.copy(
+            waterRatioIndex = waterRatioIndex,
+            selectedWaterRatio = ratioSelectionUiState.waterRatios[waterRatioIndex],
+        )
+
+        viewModelState.update { it.copy(ratioSelectionUiState = updatedRatioSelectionUiState) }
     }
 
-    private fun updateRatios(
-        coffeeRatioIndex: Int = viewModelState.value.ratioSelectionUiState.coffeeRatioIndex,
-        waterRatioIndex: Int = viewModelState.value.ratioSelectionUiState.waterRatioIndex
-    ) {
-        val selectedCoffeeRatio =
-            viewModelState.value.ratioSelectionUiState.coffeeRatios[coffeeRatioIndex]
-        val selectedWaterRatio =
-            viewModelState.value.ratioSelectionUiState.waterRatios[waterRatioIndex]
+    fun updateRatioValues(coffeeRatioValue: String, waterRatioValue: String) {
+        val ratioSelectionUiState = viewModelState.value.ratioSelectionUiState
 
-        viewModelState.update {
-            it.copy(
-                ratioSelectionUiState = it.ratioSelectionUiState.copy(
-                    coffeeRatioIndex = coffeeRatioIndex,
-                    waterRatioIndex = waterRatioIndex,
-                    selectedCoffeeRatio = selectedCoffeeRatio,
-                    selectedWaterRatio = selectedWaterRatio,
-                )
-            )
+        val selectedCoffeeRatio = if (coffeeRatioValue.isNotBlank()) {
+            coffeeRatioValue.toIntOrNull() ?: return
+        } else {
+            ratioSelectionUiState.selectedCoffeeRatio
         }
-    }
 
-    fun updateRatioText(coffeeRatioText: String, waterAmountText: String) {
-        val selectedCoffeeRatio = coffeeRatioText.toIntOrNull() ?: return
-        val selectedWaterRatio = waterAmountText.toIntOrNull() ?: return
-
-        // TODO: Add finding indexes
-
-        viewModelState.update {
-            it.copy(
-                ratioSelectionUiState = it.ratioSelectionUiState.copy(
-                    selectedCoffeeRatio = selectedCoffeeRatio,
-                    selectedWaterRatio = selectedWaterRatio
-                )
-            )
+        val selectedWaterRatio = if (waterRatioValue.isNotBlank()) {
+            waterRatioValue.toIntOrNull() ?: return
+        } else {
+            ratioSelectionUiState.selectedWaterRatio
         }
+
+        val updatedRatioSelectionUiState = ratioSelectionUiState.copy(
+            selectedCoffeeRatio = selectedCoffeeRatio,
+            selectedWaterRatio = selectedWaterRatio,
+            coffeeRatioIndex = ratioSelectionUiState.coffeeRatios.indexOf(selectedCoffeeRatio),
+            waterRatioIndex = ratioSelectionUiState.waterRatios.indexOf(selectedWaterRatio)
+        )
+
+        viewModelState.update { it.copy(ratioSelectionUiState = updatedRatioSelectionUiState) }
     }
 
     fun finishBrew() {
-        val selectedCoffees = viewModelState.value.selectedCoffees
-
         viewModelScope.launch {
-            selectedCoffees.forEach { (selectedCoffee, amountSelectionUiState) ->
-                val selectedCoffeeAmount = selectedCoffee.amount?.toFloatOrNull() ?: 0f
-                val selectedAmount = amountSelectionUiState.selectedAmount.toFloatOrNull() ?: 0f
+            val brewId = insertBrew()
+            updateSelectedCoffees(brewId = brewId)
+            viewModelState.update { it.copy(isFinished = true) }
+        }
+    }
 
-                val updatedAmount = selectedCoffeeAmount - selectedAmount
+    private suspend fun insertBrew(): Long {
+        val brew = viewModelState.value.toBrew()
+        return myCoffeeDatabaseRepository.insertBrew(brew = brew)
+    }
 
-                val isFinishingBag = updatedAmount <= 0
+    private suspend fun updateSelectedCoffees(brewId: Long) {
+        viewModelState.value.selectedCoffees.forEach { (selectedCoffee, amountSelectionUiState) ->
+            val selectedCoffeeAmount = selectedCoffee.amount?.toFloatOrNull() ?: 0f
 
-                val updatedCoffee = if (isFinishingBag) {
-                    selectedCoffee.copy(amount = null)
-                } else {
-                    selectedCoffee.copy(amount = updatedAmount.toString())
-                }
+            val selectedAmount = amountSelectionUiState.selectedAmount.toFloatOrNull() ?: 0f
 
-                coffeeRepository.updateCoffee(updatedCoffee.toCoffee())
+            val updatedAmount = selectedCoffeeAmount - selectedAmount
+
+            val updatedCoffee = if (updatedAmount <= 0) {
+                selectedCoffee.copy(amount = null)
+            } else {
+                selectedCoffee.copy(amount = updatedAmount.toString())
             }
 
-            viewModelState.update { it.copy(isFinished = true) }
+            val brewedCoffee = BrewedCoffee(
+                brewId = brewId.toInt(),
+                coffeeId = selectedCoffee.coffeeId,
+                coffeeAmount = selectedAmount
+            )
+
+            myCoffeeDatabaseRepository.insertBrewedCoffee(brewedCoffee)
+
+            myCoffeeDatabaseRepository.updateCoffee(updatedCoffee.toCoffee())
         }
     }
 
