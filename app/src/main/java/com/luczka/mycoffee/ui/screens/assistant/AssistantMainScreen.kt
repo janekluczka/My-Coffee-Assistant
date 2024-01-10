@@ -1,4 +1,4 @@
-package com.luczka.mycoffee.ui.screens.brewassistant
+package com.luczka.mycoffee.ui.screens.assistant
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.tween

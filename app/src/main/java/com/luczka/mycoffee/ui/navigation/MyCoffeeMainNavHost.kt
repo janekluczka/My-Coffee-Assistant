@@ -12,8 +12,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.luczka.mycoffee.ui.MyCoffeeViewModelProvider
-import com.luczka.mycoffee.ui.screens.brewassistant.AssistantMainScreen
-import com.luczka.mycoffee.ui.screens.brewassistant.AssistantViewModel
+import com.luczka.mycoffee.ui.screens.assistant.AssistantMainScreen
+import com.luczka.mycoffee.ui.screens.assistant.AssistantViewModel
 import com.luczka.mycoffee.ui.screens.coffeeinput.CoffeeInputScreen
 import com.luczka.mycoffee.ui.screens.coffeeinput.CoffeeInputViewModel
 

@@ -24,7 +24,6 @@ import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -68,61 +67,59 @@ fun CoffeeDetailsScreen(
 
     val context = LocalContext.current
 
-    key(coffeeUiState.coffeeId) {
-        var openDeleteDialog by rememberSaveable { mutableStateOf(false) }
+    var openDeleteDialog by rememberSaveable { mutableStateOf(false) }
 
-        if (openDeleteDialog) {
-            DeleteCoffeeDialog(
-                coffeeUiState = coffeeUiState,
-                onNegative = {
-                    openDeleteDialog = false
-                },
-                onPositive = {
-                    openDeleteDialog = false
-                    onDelete(context.filesDir)
+    if (openDeleteDialog) {
+        DeleteCoffeeDialog(
+            coffeeUiState = coffeeUiState,
+            onNegative = {
+                openDeleteDialog = false
+            },
+            onPositive = {
+                openDeleteDialog = false
+                onDelete(context.filesDir)
+            }
+        )
+    }
+
+    when (widthSizeClass) {
+        WindowWidthSizeClass.Compact -> {
+            Scaffold(
+                topBar = {
+                    CoffeeDetailsTopBar(
+                        navigateUp = navigateUp,
+                        coffeeUiState = coffeeUiState,
+                        updateIsFavourite = onUpdateFavourite,
+                        navigateToEditCoffee = onEdit,
+                        onShowDeleteDialog = { openDeleteDialog = true }
+                    )
                 }
-            )
-        }
-
-        when (widthSizeClass) {
-            WindowWidthSizeClass.Compact -> {
-                Scaffold(
-                    topBar = {
-                        CoffeeDetailsTopBar(
-                            navigateUp = navigateUp,
-                            coffeeUiState = coffeeUiState,
-                            updateIsFavourite = onUpdateFavourite,
-                            navigateToEditCoffee = onEdit,
-                            onShowDeleteDialog = { openDeleteDialog = true }
-                        )
-                    }
-                ) { innerPadding ->
-                    Box(modifier = Modifier.padding(innerPadding)) {
-                        CoffeeDetailsList(coffeeUiState = coffeeUiState)
-                    }
+            ) { innerPadding ->
+                Box(modifier = Modifier.padding(innerPadding)) {
+                    CoffeeDetailsList(coffeeUiState = coffeeUiState)
                 }
             }
+        }
 
-            else -> {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopEnd) {
-                    CoffeeDetailsList(coffeeUiState = coffeeUiState)
-                    Box(
-                        modifier = Modifier.padding(8.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        OutlinedCard(border = CardDefaults.outlinedCardBorder(enabled = false)) {
-                            Surface {
-                                Row(
-                                    modifier = Modifier.padding(horizontal = 8.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    FavouriteToggleButton(
-                                        checked = coffeeUiState.isFavourite,
-                                        onCheckedChange = onUpdateFavourite
-                                    )
-                                    EditIconButton(onClick = { onEdit(coffeeUiState.coffeeId) })
-                                    DeleteIconButton(onClick = { openDeleteDialog = true })
-                                }
+        else -> {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopEnd) {
+                CoffeeDetailsList(coffeeUiState = coffeeUiState)
+                Box(
+                    modifier = Modifier.padding(8.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    OutlinedCard(border = CardDefaults.outlinedCardBorder(enabled = false)) {
+                        Surface {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                FavouriteToggleButton(
+                                    checked = coffeeUiState.isFavourite,
+                                    onCheckedChange = onUpdateFavourite
+                                )
+                                EditIconButton(onClick = { onEdit(coffeeUiState.coffeeId) })
+                                DeleteIconButton(onClick = { openDeleteDialog = true })
                             }
                         }
                     }

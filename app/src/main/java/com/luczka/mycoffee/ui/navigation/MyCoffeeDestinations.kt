@@ -8,7 +8,8 @@ object MyCoffeeDestinations {
     const val ROUTE_HISTORY = "history"
     const val ROUTE_COFFEES = "coffees"
     const val ROUTE_RECIPES = "recipes"
+    const val KEY_BREW_ID = "brewId"
     const val KEY_COFFEE_ID = "coffeeId"
     const val KEY_METHOD_ID = "methodId"
-    const val KEY_BREW_ID = "brewId"
+    const val KEY_RECIPE_ID = "recipeId"
 }

@@ -1,4 +1,4 @@
-package com.luczka.mycoffee.ui.screens.brewassistant
+package com.luczka.mycoffee.ui.screens.assistant
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column

@@ -1,4 +1,4 @@
-package com.luczka.mycoffee.ui.screens.history
+package com.luczka.mycoffee.ui.screens.historydetails
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -11,21 +11,21 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-data class BrewDetailsUiState(
+data class HistoryDetailsUiState(
     val brew: BrewUiState?
 )
 
 private data class BrewDetailsViewModelState(
     val brew: BrewUiState? = null
 ) {
-    fun toBrewDetailsUiState(): BrewDetailsUiState {
-        return BrewDetailsUiState(
+    fun toBrewDetailsUiState(): HistoryDetailsUiState {
+        return HistoryDetailsUiState(
             brew = brew
         )
     }
 }
 
-class BrewDetailsViewModel(
+class HistoryDetailsViewModel(
     private val brewId: Int,
     private val myCoffeeDatabaseRepository: MyCoffeeDatabaseRepository
 ) : ViewModel() {

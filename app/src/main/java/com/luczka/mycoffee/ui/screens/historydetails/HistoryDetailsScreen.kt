@@ -1,4 +1,4 @@
-package com.luczka.mycoffee.ui.screens.history
+package com.luczka.mycoffee.ui.screens.historydetails
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
@@ -36,18 +36,18 @@ import java.time.format.FormatStyle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BrewDetailsScreen(
-    brewDetailsUiState: BrewDetailsUiState,
+fun HistoryDetailsScreen(
+    historyDetailsUiState: HistoryDetailsUiState,
     navigateUp: () -> Unit,
     onDelete: () -> Unit
 ) {
-    brewDetailsUiState.brew ?: return
+    historyDetailsUiState.brew ?: return
 
     var openDeleteDialog by rememberSaveable { mutableStateOf(false) }
 
     if (openDeleteDialog) {
         DeleteBrewDialog(
-            brewUiState = brewDetailsUiState.brew,
+            brewUiState = historyDetailsUiState.brew,
             onNegative = {
                 openDeleteDialog = false
             },
@@ -64,7 +64,7 @@ fun BrewDetailsScreen(
                 navigationIcon = { BackIconButton(onClick = navigateUp) },
                 title = {
                     val formatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT)
-                    val date = brewDetailsUiState.brew.date.format(formatter)
+                    val date = historyDetailsUiState.brew.date.format(formatter)
                     TopAppBarTitle(text = date)
                 },
                 actions = {
@@ -85,7 +85,7 @@ fun BrewDetailsScreen(
                             end = 16.dp,
                             bottom = 8.dp
                         ),
-                        text = if (brewDetailsUiState.brew.brewedCoffees.size > 1) {
+                        text = if (historyDetailsUiState.brew.brewedCoffees.size > 1) {
                             stringResource(id = R.string.assistant_selected_coffees)
                         } else {
                             stringResource(id = R.string.assistant_selected_coffee)
@@ -100,7 +100,7 @@ fun BrewDetailsScreen(
                         modifier = Modifier.padding(horizontal = 16.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        brewDetailsUiState.brew.brewedCoffees.forEach {brewedCoffeeUiState ->
+                        historyDetailsUiState.brew.brewedCoffees.forEach { brewedCoffeeUiState ->
                             SelectedCoffeeCard(coffeeUiState = brewedCoffeeUiState.coffee)
                         }
                     }
@@ -133,7 +133,7 @@ fun BrewDetailsScreen(
                             parameterName = stringResource(id = R.string.assistant_coffee),
                             parameterValue = stringResource(
                                 id = R.string.coffee_parameters_amount_with_unit,
-                                brewDetailsUiState.brew.coffeeAmount.toStringWithOneDecimalPoint()
+                                historyDetailsUiState.brew.coffeeAmount.toStringWithOneDecimalPoint()
                             )
                         )
                         BrewParameterCard(
@@ -141,7 +141,7 @@ fun BrewDetailsScreen(
                                 .weight(1f)
                                 .fillMaxWidth(),
                             parameterName = stringResource(id = R.string.assistant_ratio),
-                            parameterValue = brewDetailsUiState.brew.ratio
+                            parameterValue = historyDetailsUiState.brew.ratio
                         )
                         BrewParameterCard(
                             modifier = Modifier
@@ -150,7 +150,7 @@ fun BrewDetailsScreen(
                             parameterName = stringResource(id = R.string.assistant_water),
                             parameterValue = stringResource(
                                 id = R.string.coffee_parameters_amount_with_unit,
-                                brewDetailsUiState.brew.waterAmount.toStringWithOneDecimalPoint()
+                                historyDetailsUiState.brew.waterAmount.toStringWithOneDecimalPoint()
                             )
                         )
                     }

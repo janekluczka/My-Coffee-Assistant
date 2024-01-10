@@ -5,11 +5,11 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.luczka.mycoffee.MyCoffeeApplication
-import com.luczka.mycoffee.ui.screens.brewassistant.AssistantViewModel
+import com.luczka.mycoffee.ui.screens.assistant.AssistantViewModel
 import com.luczka.mycoffee.ui.screens.coffeeinput.CoffeeInputViewModel
 import com.luczka.mycoffee.ui.screens.coffees.CoffeesViewModel
-import com.luczka.mycoffee.ui.screens.history.BrewDetailsViewModel
 import com.luczka.mycoffee.ui.screens.history.HistoryViewModel
+import com.luczka.mycoffee.ui.screens.historydetails.HistoryDetailsViewModel
 import com.luczka.mycoffee.ui.screens.home.HomeViewModel
 import com.luczka.mycoffee.ui.screens.methods.MethodsViewModel
 import com.luczka.mycoffee.ui.screens.recipes.RecipesViewModel
@@ -48,10 +48,10 @@ object MyCoffeeViewModelProvider {
         }
     }
 
-    fun brewDetailsViewModelFactory(brewId: Int): ViewModelProvider.Factory {
+    fun historyDetailsViewModelFactory(brewId: Int): ViewModelProvider.Factory {
         return viewModelFactory {
             initializer {
-                BrewDetailsViewModel(
+                HistoryDetailsViewModel(
                     brewId = brewId,
                     myCoffeeDatabaseRepository = myCoffeeApplication().container.myCoffeeDatabaseRepository
                 )

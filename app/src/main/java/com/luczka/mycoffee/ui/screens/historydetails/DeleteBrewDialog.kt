@@ -1,4 +1,4 @@
-package com.luczka.mycoffee.ui.screens.history
+package com.luczka.mycoffee.ui.screens.historydetails
 
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text

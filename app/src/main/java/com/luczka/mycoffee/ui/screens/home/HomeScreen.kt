@@ -16,6 +16,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -29,15 +30,20 @@ import java.time.ZoneId
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
+    widthSizeClass: WindowWidthSizeClass,
     uiState: HomeUiState,
     navigateToAssistant: () -> Unit,
     navigate: (String) -> Unit,
 ) {
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(
-                title = { TopAppBarTitle(text = stringResource(R.string.app_name_short)) }
-            )
+            when (widthSizeClass) {
+                WindowWidthSizeClass.Compact -> {
+                    CenterAlignedTopAppBar(
+                        title = { TopAppBarTitle(text = stringResource(R.string.app_name_short)) }
+                    )
+                }
+            }
         }
     ) { innerPadding ->
         LazyColumn(

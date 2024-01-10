@@ -1,4 +1,4 @@
-package com.luczka.mycoffee.ui.screens.recipes
+package com.luczka.mycoffee.ui.screens.recipedetails
 
 import android.annotation.SuppressLint
 import android.content.Context

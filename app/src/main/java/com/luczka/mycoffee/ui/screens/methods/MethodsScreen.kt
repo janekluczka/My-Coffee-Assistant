@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -22,14 +23,19 @@ import com.luczka.mycoffee.ui.components.TopAppBarTitle
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MethodsScreen(
+    widthSizeClass: WindowWidthSizeClass,
     uiState: MethodsUiState,
     navigateToRecipes: (String) -> Unit,
 ) {
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(
-                title = { TopAppBarTitle(text = stringResource(R.string.app_name_short)) }
-            )
+            when (widthSizeClass) {
+                WindowWidthSizeClass.Compact -> {
+                    CenterAlignedTopAppBar(
+                        title = { TopAppBarTitle(text = stringResource(R.string.app_name_short)) }
+                    )
+                }
+            }
         }
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {

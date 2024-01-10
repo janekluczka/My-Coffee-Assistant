@@ -1,10 +1,6 @@
 package com.luczka.mycoffee.ui.navigation
 
-import androidx.activity.compose.BackHandler
-import androidx.compose.animation.Crossfade
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
@@ -18,17 +14,17 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.luczka.mycoffee.ui.MyCoffeeViewModelProvider
+import com.luczka.mycoffee.ui.screens.coffeedetails.CoffeeDetailsScreen
 import com.luczka.mycoffee.ui.screens.coffees.CoffeesScreen
 import com.luczka.mycoffee.ui.screens.coffees.CoffeesViewModel
-import com.luczka.mycoffee.ui.screens.history.BrewDetailsScreen
-import com.luczka.mycoffee.ui.screens.history.BrewDetailsViewModel
+import com.luczka.mycoffee.ui.screens.historydetails.HistoryDetailsScreen
+import com.luczka.mycoffee.ui.screens.historydetails.HistoryDetailsViewModel
 import com.luczka.mycoffee.ui.screens.history.HistoryScreen
 import com.luczka.mycoffee.ui.screens.history.HistoryViewModel
 import com.luczka.mycoffee.ui.screens.home.HomeScreen
 import com.luczka.mycoffee.ui.screens.home.HomeViewModel
 import com.luczka.mycoffee.ui.screens.methods.MethodsScreen
 import com.luczka.mycoffee.ui.screens.methods.MethodsViewModel
-import com.luczka.mycoffee.ui.screens.recipes.RecipeDetailsScreen
 import com.luczka.mycoffee.ui.screens.recipes.RecipesScreen
 import com.luczka.mycoffee.ui.screens.recipes.RecipesViewModel
 
@@ -51,6 +47,7 @@ fun MyCoffeeNestedNavHost(
             val viewModel: HomeViewModel = viewModel(factory = MyCoffeeViewModelProvider.Factory)
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
             HomeScreen(
+                widthSizeClass = widthSizeClass,
                 uiState = uiState,
                 navigateToAssistant = navigateToAssistant,
                 navigate = navController::navigate,
@@ -76,12 +73,12 @@ fun MyCoffeeNestedNavHost(
         ) { backStackEntry ->
             backStackEntry.arguments?.getString(MyCoffeeDestinations.KEY_BREW_ID)?.toIntOrNull()
                 ?.let { brewId ->
-                    val viewModel: BrewDetailsViewModel = viewModel(
-                        factory = MyCoffeeViewModelProvider.brewDetailsViewModelFactory(brewId = brewId)
+                    val viewModel: HistoryDetailsViewModel = viewModel(
+                        factory = MyCoffeeViewModelProvider.historyDetailsViewModelFactory(brewId = brewId)
                     )
                     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-                    BrewDetailsScreen(
-                        brewDetailsUiState = uiState,
+                    HistoryDetailsScreen(
+                        historyDetailsUiState = uiState,
                         navigateUp = navController::navigateUp,
                         onDelete = viewModel::onDelete
                     )
@@ -110,13 +107,21 @@ fun MyCoffeeNestedNavHost(
         ) { backStackEntry ->
             backStackEntry.arguments?.getString(MyCoffeeDestinations.KEY_COFFEE_ID)?.toIntOrNull()
                 ?.let { coffeeId ->
-
+                    CoffeeDetailsScreen(
+                        widthSizeClass = widthSizeClass,
+                        coffeeUiState = null,
+                        navigateUp = navController::navigateUp,
+                        onUpdateFavourite = { /*TODO*/ },
+                        onEdit = navigateToEditCoffee,
+                        onDelete = {}
+                    )
                 }
         }
         composable(MyCoffeeDestinations.ROUTE_RECIPES) {
             val viewModel: MethodsViewModel = viewModel(factory = MyCoffeeViewModelProvider.Factory)
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
             MethodsScreen(
+                widthSizeClass = widthSizeClass,
                 uiState = uiState,
                 navigateToRecipes = navController::navigateToRecipes
             )
@@ -136,61 +141,32 @@ fun MyCoffeeNestedNavHost(
                 factory = MyCoffeeViewModelProvider.methodRecipesViewModelFactory(methodId)
             )
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-            when (widthSizeClass) {
-                WindowWidthSizeClass.Compact -> {
-                    Crossfade(
-                        targetState = uiState.showDetails,
-                        label = ""
-                    ) { showDetails ->
-                        if (!showDetails) {
-                            RecipesScreen(
-                                uiState = uiState,
-                                navigateUp = navController::navigateUp,
-                                onRecipeSelected = { youtubeId ->
-                                    viewModel.selectRecipe(
-                                        youtubeId = youtubeId,
-                                        showDetails = true
-                                    )
-                                }
-                            )
-                        } else {
-                            BackHandler {
-                                viewModel.onHideDetails()
-                            }
-
-                            RecipeDetailsScreen(
-                                widthSizeClass = widthSizeClass,
-                                recipeDetailsUiState = uiState.selectedRecipe,
-                                navigateUp = navController::navigateUp
-                            )
-                        }
-                    }
+            RecipesScreen(
+                uiState = uiState,
+                navigateUp = navController::navigateUp,
+                onRecipeSelected = { youtubeId ->
+                    navController.navigateToRecipeDetails(
+                        methodId = methodId,
+                        recipeId = youtubeId
+                    )
                 }
-
-                else -> {
-                    Row {
-                        Box(modifier = Modifier.weight(2f)) {
-                            RecipesScreen(
-                                uiState = uiState,
-                                navigateUp = navController::navigateUp,
-                                onRecipeSelected = { youtubeId ->
-                                    viewModel.selectRecipe(
-                                        youtubeId = youtubeId,
-                                        showDetails = false
-                                    )
-                                }
-                            )
-                        }
-                        Box(modifier = Modifier.weight(3f)) {
-                            RecipeDetailsScreen(
-                                widthSizeClass = widthSizeClass,
-                                recipeDetailsUiState = uiState.selectedRecipe,
-                                navigateUp = navController::navigateUp
-                            )
-                        }
-                    }
-                }
-            }
+            )
+        }
+        composable(
+            route = "${MyCoffeeDestinations.ROUTE_RECIPES}/{${MyCoffeeDestinations.KEY_METHOD_ID}}/{${MyCoffeeDestinations.KEY_RECIPE_ID}}",
+            arguments = listOf(
+                navArgument(
+                    name = MyCoffeeDestinations.KEY_METHOD_ID,
+                    builder = { type = NavType.StringType }
+                ),
+                navArgument(
+                    name = MyCoffeeDestinations.KEY_RECIPE_ID,
+                    builder = { type = NavType.StringType }
+                )
+            )
+        ) { backStackEntry ->
+            val recipeId = backStackEntry.arguments?.getString(MyCoffeeDestinations.KEY_RECIPE_ID)
+                ?: return@composable
         }
     }
 }
@@ -205,4 +181,8 @@ private fun NavHostController.navigateToCoffeeDetails(coffeeId: Int) {
 
 private fun NavHostController.navigateToRecipes(methodId: String) {
     this.navigate("${MyCoffeeDestinations.ROUTE_RECIPES}/${methodId}")
+}
+
+private fun NavHostController.navigateToRecipeDetails(methodId: String, recipeId: String) {
+    this.navigate("${MyCoffeeDestinations.ROUTE_RECIPES}/${methodId}/${recipeId}")
 }
