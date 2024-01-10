@@ -18,7 +18,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.luczka.mycoffee.ui.MyCoffeeViewModelProvider
-import com.luczka.mycoffee.ui.screens.coffees.CoffeeDetailsScreen
 import com.luczka.mycoffee.ui.screens.coffees.CoffeesScreen
 import com.luczka.mycoffee.ui.screens.coffees.CoffeesViewModel
 import com.luczka.mycoffee.ui.screens.history.BrewDetailsScreen
@@ -91,74 +90,28 @@ fun MyCoffeeNestedNavHost(
         composable(MyCoffeeDestinations.ROUTE_COFFEES) {
             val viewModel: CoffeesViewModel = viewModel(factory = MyCoffeeViewModelProvider.Factory)
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-            when (widthSizeClass) {
-                WindowWidthSizeClass.Compact -> {
-                    Crossfade(
-                        targetState = uiState.showDetails,
-                        label = ""
-                    ) { showDetails ->
-                        if (!showDetails) {
-                            CoffeesScreen(
-                                widthSizeClass = widthSizeClass,
-                                uiState = uiState,
-                                navigateUp = navController::navigateUp,
-                                navigateToAddCoffee = navigateToAddCoffee,
-                                onSelectFilter = viewModel::onFilterSelected,
-                                onCoffeeSelected = { coffeeId ->
-                                    viewModel.onCoffeeSelected(
-                                        coffeeId = coffeeId,
-                                        showDetails = true
-                                    )
-                                }
-                            )
-                        } else {
-                            BackHandler {
-                                viewModel.onHideDetails()
-                            }
+            CoffeesScreen(
+                widthSizeClass = widthSizeClass,
+                uiState = uiState,
+                navigateUp = navController::navigateUp,
+                navigateToAddCoffee = navigateToAddCoffee,
+                onSelectFilter = viewModel::onFilterSelected,
+                onCoffeeSelected = navController::navigateToCoffeeDetails
+            )
+        }
+        composable(
+            route = "${MyCoffeeDestinations.ROUTE_COFFEES}/{${MyCoffeeDestinations.KEY_COFFEE_ID}}",
+            arguments = listOf(
+                navArgument(
+                    name = MyCoffeeDestinations.KEY_COFFEE_ID,
+                    builder = { type = NavType.StringType }
+                )
+            )
+        ) { backStackEntry ->
+            backStackEntry.arguments?.getString(MyCoffeeDestinations.KEY_COFFEE_ID)?.toIntOrNull()
+                ?.let { coffeeId ->
 
-                            CoffeeDetailsScreen(
-                                widthSizeClass = widthSizeClass,
-                                coffeeUiState = uiState.selectedCoffee,
-                                navigateUp = navController::navigateUp,
-                                onUpdateFavourite = viewModel::onUpdateFavourite,
-                                onEdit = navigateToEditCoffee,
-                                onDelete = viewModel::onDelete
-                            )
-                        }
-                    }
                 }
-
-                else -> {
-                    Row {
-                        Box(modifier = Modifier.weight(2f)) {
-                            CoffeesScreen(
-                                widthSizeClass = widthSizeClass,
-                                uiState = uiState,
-                                navigateUp = navController::navigateUp,
-                                navigateToAddCoffee = navigateToAddCoffee,
-                                onSelectFilter = viewModel::onFilterSelected,
-                                onCoffeeSelected = { coffeeId ->
-                                    viewModel.onCoffeeSelected(
-                                        coffeeId = coffeeId,
-                                        showDetails = false
-                                    )
-                                }
-                            )
-                        }
-                        // TODO: Add crossfade when changing details
-                        Box(modifier = Modifier.weight(3f)) {
-                            CoffeeDetailsScreen(
-                                widthSizeClass = widthSizeClass,
-                                coffeeUiState = uiState.selectedCoffee,
-                                navigateUp = navController::navigateUp,
-                                onUpdateFavourite = viewModel::onUpdateFavourite,
-                                onEdit = navigateToEditCoffee,
-                                onDelete = viewModel::onDelete
-                            )
-                        }
-                    }
-                }
-            }
         }
         composable(MyCoffeeDestinations.ROUTE_RECIPES) {
             val viewModel: MethodsViewModel = viewModel(factory = MyCoffeeViewModelProvider.Factory)
@@ -244,6 +197,10 @@ fun MyCoffeeNestedNavHost(
 
 private fun NavHostController.navigateToBrewDetails(brewId: Int) {
     this.navigate("${MyCoffeeDestinations.ROUTE_HISTORY}/${brewId}")
+}
+
+private fun NavHostController.navigateToCoffeeDetails(coffeeId: Int) {
+    this.navigate("${MyCoffeeDestinations.ROUTE_COFFEES}/${coffeeId}")
 }
 
 private fun NavHostController.navigateToRecipes(methodId: String) {

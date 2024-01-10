@@ -60,7 +60,7 @@ fun CoffeesScreen(
     navigateUp: () -> Unit,
     navigateToAddCoffee: () -> Unit,
     onSelectFilter: (CoffeeFilter) -> Unit,
-    onCoffeeSelected: (Int?) -> Unit
+    onCoffeeSelected: (Int) -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
 
@@ -196,7 +196,7 @@ private fun HasCoffeesScreen(
     uiState: CoffeesUiState.HasCoffees,
     onSelectFilter: (CoffeeFilter) -> Unit,
     coffeeListState: LazyListState,
-    onCoffeeSelected: (Int?) -> Unit
+    onCoffeeSelected: (Int) -> Unit
 ) {
     Column(modifier = Modifier.padding(innerPadding)) {
         LazyRow(

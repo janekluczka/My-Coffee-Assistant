@@ -16,20 +16,14 @@ import java.time.LocalDate
 
 sealed interface CoffeesUiState {
     val filteredCoffees: List<CoffeeUiState>
-    val selectedCoffee: CoffeeUiState?
-    val showDetails: Boolean
 
     data class NoCoffees(
         override val filteredCoffees: List<CoffeeUiState> = emptyList(),
-        override val selectedCoffee: CoffeeUiState? = null,
-        override val showDetails: Boolean = false,
     ) : CoffeesUiState
 
     data class HasCoffees(
         override val filteredCoffees: List<CoffeeUiState>,
         val selectedFilter: CoffeeFilter,
-        override val selectedCoffee: CoffeeUiState?,
-        override val showDetails: Boolean,
     ) : CoffeesUiState
 }
 
@@ -49,8 +43,6 @@ private data class CoffeesViewModelState(
             CoffeesUiState.HasCoffees(
                 filteredCoffees = filteredCoffees,
                 selectedFilter = selectedFilter,
-                showDetails = showDetails,
-                selectedCoffee = allCoffees.find { it.coffeeId == selectedCoffeeId }
             )
         }
     }
@@ -106,20 +98,16 @@ class CoffeesViewModel(
     }
 
     fun onFilterSelected(selectedFilter: CoffeeFilter) {
-        val filteredCoffees = filterCoffees(
-            allCoffees = viewModelState.value.allCoffees,
-            selectedFilter = selectedFilter
-        )
         viewModelState.update {
             it.copy(
                 selectedFilter = selectedFilter,
-                filteredCoffees = filteredCoffees
+                filteredCoffees = filterCoffees(selectedFilter = selectedFilter)
             )
         }
     }
 
     private fun filterCoffees(
-        allCoffees: List<CoffeeUiState>,
+        allCoffees: List<CoffeeUiState> = viewModelState.value.allCoffees,
         selectedFilter: CoffeeFilter
     ): List<CoffeeUiState> {
         return when (selectedFilter) {
@@ -143,19 +131,6 @@ class CoffeesViewModel(
                 allCoffees.filter { it.isOlderThan(date = LocalDate.now().minusWeeks(4)) }
             }
         }
-    }
-
-    fun onCoffeeSelected(coffeeId: Int?, showDetails: Boolean) {
-        viewModelState.update {
-            it.copy(
-                selectedCoffeeId = coffeeId,
-                showDetails = showDetails
-            )
-        }
-    }
-
-    fun onHideDetails() {
-        viewModelState.update { it.copy(showDetails = false) }
     }
 
     fun onUpdateFavourite() {

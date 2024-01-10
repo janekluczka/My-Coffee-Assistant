@@ -1,4 +1,4 @@
-package com.luczka.mycoffee.ui.screens.coffees
+package com.luczka.mycoffee.ui.screens.coffeedetails
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
