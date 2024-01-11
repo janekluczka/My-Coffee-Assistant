@@ -42,13 +42,11 @@ sealed interface BrewAssistantUiState {
     ) : BrewAssistantUiState
 }
 
-// TODO: Rename wholeNumbers & fractionalParts to integerParts & decimalParts
-
 data class AmountSelectionUiState(
-    val wholeNumbers: List<Int> = (0..0).toList(),
-    val fractionalParts: List<Int> = (0..9).toList(),
-    val wholeNumberIndex: Int = 0,
-    val fractionalPartIndex: Int = 0,
+    val integerParts: List<Int> = (0..0).toList(),
+    val decimalParts: List<Int> = (0..9).toList(),
+    val integerPartIndex: Int = 0,
+    val decimalPartIndex: Int = 0,
     val selectedAmount: String = "0.0"
 )
 
@@ -65,7 +63,7 @@ private data class AssistantViewModelState(
     val currentCoffees: List<CoffeeUiState> = emptyList(),
     val selectedCoffees: MutableMap<CoffeeUiState, AmountSelectionUiState> = mutableMapOf(),
     val amountSelectionUiState: AmountSelectionUiState = AmountSelectionUiState(
-        wholeNumbers = (0..99).toList()
+        integerParts = (0..99).toList()
     ),
     val ratioSelectionUiState: RatioSelectionUiState = RatioSelectionUiState(),
     val isFinished: Boolean = false,
@@ -162,7 +160,7 @@ class AssistantViewModel(
     fun selectCoffee(coffeeUiState: CoffeeUiState) {
         val selectedCoffeeAmount = coffeeUiState.amount?.toFloatOrNull()?.toInt()
 
-        val lastWholeNumber = when {
+        val lastIntegerPart = when {
             selectedCoffeeAmount == null -> 0
             selectedCoffeeAmount > 99 -> 99
             else -> selectedCoffeeAmount
@@ -174,81 +172,80 @@ class AssistantViewModel(
             updatedSelectedCoffees.remove(coffeeUiState)
         } else {
             updatedSelectedCoffees[coffeeUiState] = AmountSelectionUiState(
-                wholeNumbers = (0..lastWholeNumber).toList()
+                integerParts = (0..lastIntegerPart).toList()
             )
         }
 
         viewModelState.update { it.copy(selectedCoffees = updatedSelectedCoffees) }
     }
 
-    fun updateAmountSelectionWholeNumber(wholeNumberIndex: Int) {
+    fun updateAmountSelectionIntegerPart(integerPartIndex: Int) {
         val amountSelectionUiState = viewModelState.value.amountSelectionUiState
 
-        val fractionalPartIndex = amountSelectionUiState.fractionalPartIndex
+        val decimalPartIndex = amountSelectionUiState.decimalPartIndex
 
-        val wholeNumber = amountSelectionUiState.wholeNumbers[wholeNumberIndex]
-        val fractionalPart = amountSelectionUiState.fractionalParts[fractionalPartIndex]
+        val integerPart = amountSelectionUiState.integerParts[integerPartIndex]
+        val decimalPart = amountSelectionUiState.decimalParts[decimalPartIndex]
 
         val updatedAmountSelectionUiState = amountSelectionUiState.copy(
-            wholeNumberIndex = wholeNumberIndex,
-            selectedAmount = "$wholeNumber.$fractionalPart"
+            integerPartIndex = integerPartIndex,
+            selectedAmount = "$integerPart.$decimalPart"
         )
 
         viewModelState.update { it.copy(amountSelectionUiState = updatedAmountSelectionUiState) }
     }
 
-    fun updateAmountSelectionFractionalPart(fractionalPartIndex: Int) {
+    fun updateAmountSelectionDecimalPart(decimalPartIndex: Int) {
         val amountSelectionUiState = viewModelState.value.amountSelectionUiState
 
-        val wholeNumberIndex = amountSelectionUiState.wholeNumberIndex
+        val integerPartIndex = amountSelectionUiState.integerPartIndex
 
-        val wholeNumber = amountSelectionUiState.wholeNumbers[wholeNumberIndex]
-        val fractionalPart = amountSelectionUiState.fractionalParts[fractionalPartIndex]
+        val integerPart = amountSelectionUiState.integerParts[integerPartIndex]
+        val decimalPart = amountSelectionUiState.decimalParts[decimalPartIndex]
 
         val updatedAmountSelectionUiState = amountSelectionUiState.copy(
-            fractionalPartIndex = fractionalPartIndex,
-            selectedAmount = "$wholeNumber.$fractionalPart"
+            decimalPartIndex = decimalPartIndex,
+            selectedAmount = "$integerPart.$decimalPart"
         )
 
         viewModelState.update { it.copy(amountSelectionUiState = updatedAmountSelectionUiState) }
     }
 
-    fun updateAmountSelectionWholeNumber(key: CoffeeUiState, wholeNumberIndex: Int) {
+    fun updateAmountSelectionIntegerPart(key: CoffeeUiState, integerPartIndex: Int) {
         val selectedCoffees = viewModelState.value.selectedCoffees.toMutableMap()
 
         val amountSelectionUiState = selectedCoffees[key] ?: return
 
-        val fractionalPartIndex = amountSelectionUiState.fractionalPartIndex
+        val decimalPartIndex = amountSelectionUiState.decimalPartIndex
 
-        val wholeNumber = amountSelectionUiState.wholeNumbers[wholeNumberIndex]
-        val fractionalPart = amountSelectionUiState.fractionalParts[fractionalPartIndex]
+        val integerPart = amountSelectionUiState.integerParts[integerPartIndex]
+        val decimalPart = amountSelectionUiState.decimalParts[decimalPartIndex]
 
         val maxAmount = key.amount ?: return
-        val selectedAmount = "$wholeNumber.$fractionalPart"
+        val selectedAmount = "$integerPart.$decimalPart"
 
         val maxAmountFloat = maxAmount.toFloatOrNull() ?: return
         val selectedAmountFloat = selectedAmount.toFloatOrNull() ?: return
 
         val updatedAmountSelectionUiState = if (selectedAmountFloat > maxAmountFloat) {
-            val selectedAmountFractionalPart = selectedAmount.split(".")[1].toIntOrNull() ?: return
-            val maxAmountFractionalPart = maxAmount.split(".")[1].toIntOrNull() ?: return
+            val selectedAmountDecimalPart = selectedAmount.split(".")[1].toIntOrNull() ?: return
+            val maxAmountDecimalPart = maxAmount.split(".")[1].toIntOrNull() ?: return
 
-            val fractionalPartIndexOffset = selectedAmountFractionalPart - maxAmountFractionalPart
+            val decimalPartIndexOffset = selectedAmountDecimalPart - maxAmountDecimalPart
 
-            val updatedFractionalPartIndex = fractionalPartIndex - fractionalPartIndexOffset
+            val updatedDecimalPartIndex = decimalPartIndex - decimalPartIndexOffset
 
-            val updatedFractionalPart =
-                amountSelectionUiState.fractionalParts[updatedFractionalPartIndex]
+            val updatedDecimalPart = amountSelectionUiState.decimalParts[updatedDecimalPartIndex]
 
             amountSelectionUiState.copy(
-                wholeNumberIndex = wholeNumberIndex,
-                selectedAmount = "$wholeNumber.$updatedFractionalPart",
-                fractionalPartIndex = updatedFractionalPartIndex,
+                integerPartIndex = integerPartIndex,
+                decimalPartIndex = updatedDecimalPartIndex,
+                selectedAmount = "$integerPart.$updatedDecimalPart",
             )
         } else {
             amountSelectionUiState.copy(
-                wholeNumberIndex = wholeNumberIndex,
-                selectedAmount = "$wholeNumber.$fractionalPart"
+                integerPartIndex = integerPartIndex,
+                selectedAmount = "$integerPart.$decimalPart"
             )
         }
 
@@ -257,19 +254,19 @@ class AssistantViewModel(
         viewModelState.update { it.copy(selectedCoffees = selectedCoffees) }
     }
 
-    fun updateAmountSelectionFractionalPart(key: CoffeeUiState, fractionalPartIndex: Int) {
+    fun updateAmountSelectionDecimalPart(key: CoffeeUiState, decimalPartIndex: Int) {
         val selectedCoffees = viewModelState.value.selectedCoffees.toMutableMap()
 
         val amountSelectionUiState = selectedCoffees[key] ?: return
 
-        val wholeNumberIndex = amountSelectionUiState.wholeNumberIndex
+        val integerPartIndex = amountSelectionUiState.integerPartIndex
 
-        val wholeNumber = amountSelectionUiState.wholeNumbers[wholeNumberIndex]
-        val fractionalPart = amountSelectionUiState.fractionalParts[fractionalPartIndex]
+        val integerPart = amountSelectionUiState.integerParts[integerPartIndex]
+        val decimalPart = amountSelectionUiState.decimalParts[decimalPartIndex]
 
         val updatedAmountSelectionUiState = amountSelectionUiState.copy(
-            fractionalPartIndex = fractionalPartIndex,
-            selectedAmount = "$wholeNumber.$fractionalPart"
+            decimalPartIndex = decimalPartIndex,
+            selectedAmount = "$integerPart.$decimalPart"
         )
 
         selectedCoffees.replace(key, updatedAmountSelectionUiState)
@@ -286,13 +283,13 @@ class AssistantViewModel(
 
         val coffeeAmountSplit = coffeeAmountValueWithDecimalPoint.split(".")
 
-        val wholeNumber = coffeeAmountSplit[0].toIntOrNull() ?: return
-        val fractionalPart = coffeeAmountSplit[1].toIntOrNull() ?: return
+        val integerPart = coffeeAmountSplit[0].toIntOrNull() ?: return
+        val decimalPart = coffeeAmountSplit[1].toIntOrNull() ?: return
 
         val updatedAmountSelectionUiState = amountSelectionUiState.copy(
             selectedAmount = coffeeAmountValue,
-            wholeNumberIndex = amountSelectionUiState.wholeNumbers.indexOf(wholeNumber),
-            fractionalPartIndex = amountSelectionUiState.fractionalParts.indexOf(fractionalPart)
+            integerPartIndex = amountSelectionUiState.integerParts.indexOf(integerPart),
+            decimalPartIndex = amountSelectionUiState.decimalParts.indexOf(decimalPart)
         )
 
         viewModelState.update { it.copy(amountSelectionUiState = updatedAmountSelectionUiState) }
@@ -309,13 +306,13 @@ class AssistantViewModel(
 
         val coffeeAmountSplit = coffeeAmountValueWithDecimalPoint.split(".")
 
-        val wholeNumber = coffeeAmountSplit[0].toIntOrNull() ?: return
-        val fractionalPart = coffeeAmountSplit[1].toIntOrNull() ?: return
+        val integerPart = coffeeAmountSplit[0].toIntOrNull() ?: return
+        val decimalPart = coffeeAmountSplit[1].toIntOrNull() ?: return
 
         val updatedAmountSelectionUiState = amountSelectionUiState.copy(
             selectedAmount = coffeeAmountValue,
-            wholeNumberIndex = amountSelectionUiState.wholeNumbers.indexOf(wholeNumber),
-            fractionalPartIndex = amountSelectionUiState.fractionalParts.indexOf(fractionalPart)
+            integerPartIndex = amountSelectionUiState.integerParts.indexOf(integerPart),
+            decimalPartIndex = amountSelectionUiState.decimalParts.indexOf(decimalPart)
         )
 
         selectedCoffees.replace(key, updatedAmountSelectionUiState)

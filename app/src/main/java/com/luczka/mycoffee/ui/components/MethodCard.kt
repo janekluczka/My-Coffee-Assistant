@@ -14,11 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-
-data class MethodUiState(
-    val id: String = "",
-    val name: String = ""
-)
+import com.luczka.mycoffee.ui.model.MethodUiState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

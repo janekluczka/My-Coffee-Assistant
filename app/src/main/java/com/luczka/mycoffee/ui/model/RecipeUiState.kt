@@ -1,6 +1,6 @@
 package com.luczka.mycoffee.ui.model
 
-data class RecipeDetailsUiState(
+data class RecipeUiState(
     val imageUrl: String = "",
     val youtubeId: String = "",
     val author: String = "",

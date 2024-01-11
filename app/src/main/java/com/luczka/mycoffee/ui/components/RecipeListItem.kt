@@ -23,12 +23,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.luczka.mycoffee.models.Recipe
-import com.luczka.mycoffee.ui.model.RecipeDetailsUiState
+import com.luczka.mycoffee.ui.model.RecipeUiState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RecipeListItem(
-    recipeCardUiState: RecipeDetailsUiState,
+    recipeCardUiState: RecipeUiState,
     onClick: () -> Unit,
 ) {
     Row(

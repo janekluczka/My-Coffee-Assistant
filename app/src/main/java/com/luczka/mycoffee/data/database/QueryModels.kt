@@ -7,8 +7,7 @@ import com.luczka.mycoffee.data.database.entities.BrewedCoffee
 import com.luczka.mycoffee.data.database.entities.Coffee
 import com.luczka.mycoffee.ui.model.BrewUiState
 import com.luczka.mycoffee.ui.model.BrewedCoffeeUiState
-import com.luczka.mycoffee.ui.model.dateTimeFormatter
-import java.time.LocalDate
+import com.luczka.mycoffee.util.LocalDateParser
 
 data class BrewWithBrewedCoffees(
     @Embedded val brew: Brew,
@@ -21,7 +20,7 @@ data class BrewWithBrewedCoffees(
 ) {
     fun toBrewUiState(): BrewUiState = BrewUiState(
         brewId = brew.brewId,
-        date = LocalDate.parse(brew.date, dateTimeFormatter),
+        date = LocalDateParser.parseBasicIsoDate(brew.date),
         coffeeAmount = brew.coffeeAmount,
         ratio = "${brew.coffeeRatio}:${brew.waterRatio}",
         waterAmount = brew.waterAmount,

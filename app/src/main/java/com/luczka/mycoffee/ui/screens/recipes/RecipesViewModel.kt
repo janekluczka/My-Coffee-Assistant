@@ -3,7 +3,7 @@ package com.luczka.mycoffee.ui.screens.recipes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.luczka.mycoffee.data.repositories.FirebaseRepository
-import com.luczka.mycoffee.ui.model.RecipeDetailsUiState
+import com.luczka.mycoffee.ui.model.RecipeUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
@@ -24,7 +24,7 @@ sealed interface RecipesUiState {
     data class HasRecipes(
         override val title: String,
         override val isLoading: Boolean,
-        val recipes: List<RecipeDetailsUiState>,
+        val recipes: List<RecipeUiState>,
     ) : RecipesUiState
 }
 
@@ -32,7 +32,7 @@ private data class RecipesViewModelState(
     val title: String = "",
     val isLoading: Boolean = false,
     val errorMessage: String = "",
-    val recipes: List<RecipeDetailsUiState>? = null,
+    val recipes: List<RecipeUiState>? = null,
 ) {
     fun toRecipesUiState(): RecipesUiState {
         return if (recipes == null) {

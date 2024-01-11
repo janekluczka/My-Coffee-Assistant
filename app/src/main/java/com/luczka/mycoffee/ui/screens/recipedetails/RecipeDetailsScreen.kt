@@ -8,160 +8,91 @@ import android.view.ViewGroup
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.key
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.web.AccompanistWebViewClient
 import com.google.accompanist.web.WebView
-import com.google.accompanist.web.WebViewState
 import com.google.accompanist.web.rememberWebViewState
 import com.luczka.mycoffee.ui.components.BackIconButton
 import com.luczka.mycoffee.ui.components.BrewingStepListItem
-import com.luczka.mycoffee.ui.model.RecipeDetailsUiState
+import com.luczka.mycoffee.ui.model.RecipeUiState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RecipeDetailsScreen(
     widthSizeClass: WindowWidthSizeClass,
-    recipeDetailsUiState: RecipeDetailsUiState?,
+    uiState: RecipeDetailsUiState,
     navigateUp: () -> Unit,
 ) {
-    if(recipeDetailsUiState == null) return
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                navigationIcon = { BackIconButton(onClick = navigateUp) },
+                title = {}
+            )
+        }
+    ) { innerPadding ->
+        Box(modifier = Modifier.padding(innerPadding)) {
+            Crossfade(targetState = uiState.isLoading, label = "") {
+                if (it) {
+                    LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                } else {
+                    when (uiState) {
+                        is RecipeDetailsUiState.IsLoading -> {
 
-    key(recipeDetailsUiState.youtubeId) {
-        // TODO: https://github.com/google/accompanist/pull/1557
-        // TODO: Change background color for iframe in dark mode if possible
-        /**
-         * iframe parameters
-         *
-         * version: player version
-         * enablejsapi:
-         *  0 - JavaScript disabled
-         *  1 - JavaScript enabled
-         * controls:
-         *  0 - controls hidden,
-         *  1 - controls visible & Flash loaded immidiately
-         *  2 - controls visible & Flash loaded when video starts playing
-         * fs:
-         *  0 - fullscreen button hidden
-         *  1 - fullscreen button visible
-         *
-         * more at: https://developers.google.com/youtube/player_parameters?hl=pl
-         */
-        val iframeWidth = 640
-        val iframeHeight = 360
-        val iframeHtml = "<html>" +
-                "<meta name=\"viewport\" content=\"width=${iframeWidth}\">" +
-                "<style>iframe { overflow:hidden; }</style>" +
-                "<body style=\"margin: 0px; padding: 0px\">" +
-                "<iframe " +
-                "id=\"player\" " +
-                "frameborder=\"0\" " +
-                "allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\" " +
-                "width=\"${iframeWidth}\" " +
-                "height=\"${iframeHeight}\" " +
-                "src=\"https://www.youtube.com/embed/${recipeDetailsUiState.youtubeId}?version=3&amp;enablejsapi=1&amp;controls=1&amp;fs=0\">" +
-                "</iframe>" +
-                "</body>" +
-                "</html>"
-
-        // TODO: Refresh video on new url
-        val webViewState = rememberWebViewState(url = iframeHtml)
-
-        when (widthSizeClass) {
-            WindowWidthSizeClass.Compact -> {
-                Scaffold(
-                    topBar = {
-                        TopAppBar(
-                            navigationIcon = { BackIconButton(onClick = navigateUp) },
-                            title = {}
-                        )
-                    }
-                ) { innerPadding ->
-                    Column(
-                        modifier = Modifier.padding(innerPadding),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        YouTubePlayer(webViewState, iframeHtml)
-                        LazyColumn(
-                            modifier = Modifier.fillMaxSize(),
-                            contentPadding = PaddingValues(bottom = 8.dp)
-                        ) {
-                            item {
-                                Column(
-                                    modifier = Modifier.padding(16.dp),
-                                    verticalArrangement = Arrangement.spacedBy(4.dp)
-                                ) {
-                                    Text(
-                                        text = recipeDetailsUiState.title,
-                                        maxLines = 2,
-                                        overflow = TextOverflow.Ellipsis,
-                                        style = MaterialTheme.typography.titleMedium
-                                    )
-                                    Text(
-                                        text = recipeDetailsUiState.author,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis,
-                                        style = MaterialTheme.typography.bodyMedium
-                                    )
-                                }
-                            }
-                            items(recipeDetailsUiState.steps) { stepUiState ->
-                                BrewingStepListItem(stepUiState = stepUiState)
-                            }
                         }
-                    }
-                }
-            }
 
-            else -> {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(bottom = 8.dp)
-                ) {
-                    item {
-                        Column {
-                            YouTubePlayer(webViewState, iframeHtml)
-                            Surface {
-                                Column(
-                                    modifier = Modifier.padding(16.dp),
-                                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                        is RecipeDetailsUiState.HasData -> {
+                            Column {
+                                YouTubePlayer(recipeUiState = uiState.recipe)
+                                LazyColumn(
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentPadding = PaddingValues(bottom = 8.dp)
                                 ) {
-                                    Text(
-                                        text = recipeDetailsUiState.title,
-                                        maxLines = 2,
-                                        overflow = TextOverflow.Ellipsis,
-                                        style = MaterialTheme.typography.titleMedium
-                                    )
-                                    Text(
-                                        text = recipeDetailsUiState.author,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis,
-                                        style = MaterialTheme.typography.bodyMedium
-                                    )
+                                    item {
+                                        Column(
+                                            modifier = Modifier.padding(16.dp),
+                                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                                        ) {
+                                            Text(
+                                                text = uiState.recipe.title,
+                                                maxLines = 2,
+                                                overflow = TextOverflow.Ellipsis,
+                                                style = MaterialTheme.typography.titleMedium
+                                            )
+                                            Text(
+                                                text = uiState.recipe.author,
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis,
+                                                style = MaterialTheme.typography.bodyMedium
+                                            )
+                                        }
+                                    }
+                                    items(uiState.recipe.steps) { stepUiState ->
+                                        BrewingStepListItem(stepUiState = stepUiState)
+                                    }
                                 }
-                            }
-                            recipeDetailsUiState.steps.forEach { stepUiState ->
-                                BrewingStepListItem(stepUiState = stepUiState)
                             }
                         }
                     }
@@ -173,13 +104,54 @@ fun RecipeDetailsScreen(
 
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
-private fun YouTubePlayer(
-    webViewState: WebViewState,
-    iframeHtml: String
+fun YouTubePlayer(
+    recipeUiState: RecipeUiState
 ) {
+    // TODO: https://github.com/google/accompanist/pull/1557
+    // TODO: Change background color for iframe in dark mode if possible
+    /**
+     * iframe parameters
+     *
+     * version: player version
+     * enablejsapi:
+     *  0 - JavaScript disabled
+     *  1 - JavaScript enabled
+     * controls:
+     *  0 - controls hidden,
+     *  1 - controls visible & Flash loaded immidiately
+     *  2 - controls visible & Flash loaded when video starts playing
+     * fs:
+     *  0 - fullscreen button hidden
+     *  1 - fullscreen button visible
+     *
+     * more at: https://developers.google.com/youtube/player_parameters?hl=pl
+     */
+
     val context = LocalContext.current
+
+    val iframeWidth = 640
+    val iframeHeight = 360
+    val iframeHtml = "<html>" +
+            "<meta name=\"viewport\" content=\"width=${iframeWidth}\">" +
+            "<style>iframe { overflow:hidden; }</style>" +
+            "<body style=\"margin: 0px; padding: 0px\">" +
+            "<iframe " +
+            "id=\"player\" " +
+            "frameborder=\"0\" " +
+            "allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\" " +
+            "width=\"${iframeWidth}\" " +
+            "height=\"${iframeHeight}\" " +
+            "src=\"https://www.youtube.com/embed/${recipeUiState.youtubeId}?version=3&amp;enablejsapi=1&amp;controls=1&amp;fs=0\">" +
+            "</iframe>" +
+            "</body>" +
+            "</html>"
+
+    val webViewState = rememberWebViewState(url = iframeHtml)
+
     WebView(
-        modifier = Modifier.aspectRatio(16f / 9f),
+        modifier = Modifier
+            .aspectRatio(16f / 9f)
+            .fillMaxWidth(),
         state = webViewState,
         client = IFrameAccompanistWebViewClient(context = context),
         onCreated = { webView ->

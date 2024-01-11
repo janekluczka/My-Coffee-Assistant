@@ -135,15 +135,14 @@ private fun HasBrewsScreen(
                         }
                     },
                     overlineText = {
-                        val formatter =
-                            DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT)
+                        val formatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT)
                         val date = brewedUiState.date.format(formatter)
-                        Text(
-                            text = date,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            style = MaterialTheme.typography.labelMedium
-                        )
+                            Text(
+                                text = date,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                style = MaterialTheme.typography.labelMedium
+                            )
                     },
                     headlineText = {
                         val headlineText = when (brewedUiState.brewedCoffees.size) {

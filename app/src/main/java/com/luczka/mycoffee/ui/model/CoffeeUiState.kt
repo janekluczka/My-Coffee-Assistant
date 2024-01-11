@@ -3,10 +3,8 @@ package com.luczka.mycoffee.ui.model
 import com.luczka.mycoffee.data.database.entities.Coffee
 import com.luczka.mycoffee.enums.Process
 import com.luczka.mycoffee.enums.Roast
+import com.luczka.mycoffee.util.formatToBasicIsoDate
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-
-val dateTimeFormatter: DateTimeFormatter = DateTimeFormatter.BASIC_ISO_DATE
 
 data class CoffeeUiState(
     val coffeeId: Int = 0,
@@ -42,7 +40,7 @@ data class CoffeeUiState(
         scaScore = scaScore?.toFloatOrNull(),
         process = process?.id,
         roast = roast?.id,
-        roastingDate = roastingDate?.format(dateTimeFormatter),
+        roastingDate = roastingDate?.formatToBasicIsoDate(),
         isFavourite = isFavourite,
         imageFile240x240 = imageFile240x240,
         imageFile360x360 = imageFile360x360,

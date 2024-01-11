@@ -14,14 +14,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.luczka.mycoffee.R
 import com.luczka.mycoffee.ui.components.FilteredOutlinedTextField
 import com.luczka.mycoffee.util.toStringWithOneDecimalPoint
-
-// TODO: Fix error changing box size
 
 @Composable
 fun AmountSelectionDialog(
@@ -57,14 +56,11 @@ fun AmountSelectionDialog(
                     placeholder = { Text(text = amountSelectionUiState.selectedAmount) },
                     supportingText = {
                         Text(
-                            text = if (isAmountError) {
-                                stringResource(
-                                    id = R.string.assistant_select_amount_error,
-                                    "100"
-                                )
-                            } else {
-                                "\n"
-                            }
+                            modifier = Modifier.alpha(if (isAmountError) 1f else 0f),
+                            text = stringResource(
+                                id = R.string.assistant_select_amount_error,
+                                "100"
+                            )
                         )
                     },
                     isError = isAmountError,

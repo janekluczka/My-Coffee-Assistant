@@ -1,7 +1,7 @@
 package com.luczka.mycoffee.models
 
 import androidx.annotation.Keep
-import com.luczka.mycoffee.ui.model.RecipeDetailsUiState
+import com.luczka.mycoffee.ui.model.RecipeUiState
 
 /**
  * YouTube Video Thumbnail URLs
@@ -20,7 +20,7 @@ data class Recipe(
     val steps: List<Step> = emptyList()
 ) {
 
-    fun toRecipeDetailsUiState(): RecipeDetailsUiState = RecipeDetailsUiState(
+    fun toRecipeDetailsUiState(): RecipeUiState = RecipeUiState(
         imageUrl = "https://i.ytimg.com/vi/${youtubeId}/mqdefault.jpg",
         author = author,
         title = title,

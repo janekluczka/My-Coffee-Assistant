@@ -1,7 +1,7 @@
 package com.luczka.mycoffee.models
 
 import androidx.annotation.Keep
-import com.luczka.mycoffee.ui.components.MethodUiState
+import com.luczka.mycoffee.ui.model.MethodUiState
 
 @Keep
 data class Method(

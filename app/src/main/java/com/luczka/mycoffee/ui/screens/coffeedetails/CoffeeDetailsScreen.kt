@@ -3,26 +3,22 @@ package com.luczka.mycoffee.ui.screens.coffeedetails
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -33,23 +29,18 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.luczka.mycoffee.R
-import com.luczka.mycoffee.enums.Process
-import com.luczka.mycoffee.enums.Roast
 import com.luczka.mycoffee.ui.components.BackIconButton
 import com.luczka.mycoffee.ui.components.DeleteIconButton
 import com.luczka.mycoffee.ui.components.EditIconButton
 import com.luczka.mycoffee.ui.components.FavouriteToggleButton
 import com.luczka.mycoffee.ui.components.TopAppBarTitle
 import com.luczka.mycoffee.ui.model.CoffeeUiState
-import com.luczka.mycoffee.ui.theme.MyCoffeeTheme
 import com.luczka.mycoffee.util.isPositiveFloat
 import java.io.File
-import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
@@ -57,38 +48,44 @@ import java.time.format.FormatStyle
 @Composable
 fun CoffeeDetailsScreen(
     widthSizeClass: WindowWidthSizeClass,
-    coffeeUiState: CoffeeUiState?,
+    uiState: CoffeeDetailsUiState,
     navigateUp: () -> Unit,
     onUpdateFavourite: () -> Unit,
     onEdit: (Int) -> Unit,
     onDelete: (File) -> Unit,
 ) {
-    if (coffeeUiState == null) return
-
-    val context = LocalContext.current
-
-    var openDeleteDialog by rememberSaveable { mutableStateOf(false) }
-
-    if (openDeleteDialog) {
-        DeleteCoffeeDialog(
-            coffeeUiState = coffeeUiState,
-            onNegative = {
-                openDeleteDialog = false
-            },
-            onPositive = {
-                openDeleteDialog = false
-                onDelete(context.filesDir)
+    when (uiState) {
+        is CoffeeDetailsUiState.NoCoffee -> {
+            LaunchedEffect(uiState.isDeleted) {
+                if (uiState.isDeleted) {
+                    navigateUp()
+                }
             }
-        )
-    }
+        }
 
-    when (widthSizeClass) {
-        WindowWidthSizeClass.Compact -> {
+        is CoffeeDetailsUiState.HasCoffee -> {
+            val filesDir = LocalContext.current.filesDir
+
+            var openDeleteDialog by rememberSaveable { mutableStateOf(false) }
+
+            if (openDeleteDialog) {
+                DeleteCoffeeDialog(
+                    coffeeUiState = uiState.coffee,
+                    onNegative = {
+                        openDeleteDialog = false
+                    },
+                    onPositive = {
+                        openDeleteDialog = false
+                        onDelete(filesDir)
+                    }
+                )
+            }
+
             Scaffold(
                 topBar = {
                     CoffeeDetailsTopBar(
                         navigateUp = navigateUp,
-                        coffeeUiState = coffeeUiState,
+                        coffeeUiState = uiState.coffee,
                         updateIsFavourite = onUpdateFavourite,
                         navigateToEditCoffee = onEdit,
                         onShowDeleteDialog = { openDeleteDialog = true }
@@ -96,33 +93,7 @@ fun CoffeeDetailsScreen(
                 }
             ) { innerPadding ->
                 Box(modifier = Modifier.padding(innerPadding)) {
-                    CoffeeDetailsList(coffeeUiState = coffeeUiState)
-                }
-            }
-        }
-
-        else -> {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopEnd) {
-                CoffeeDetailsList(coffeeUiState = coffeeUiState)
-                Box(
-                    modifier = Modifier.padding(8.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    OutlinedCard(border = CardDefaults.outlinedCardBorder(enabled = false)) {
-                        Surface {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 8.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                FavouriteToggleButton(
-                                    checked = coffeeUiState.isFavourite,
-                                    onCheckedChange = onUpdateFavourite
-                                )
-                                EditIconButton(onClick = { onEdit(coffeeUiState.coffeeId) })
-                                DeleteIconButton(onClick = { openDeleteDialog = true })
-                            }
-                        }
-                    }
+                    CoffeeDetailsList(coffeeUiState = uiState.coffee)
                 }
             }
         }
@@ -131,7 +102,8 @@ fun CoffeeDetailsScreen(
 
 @Composable
 private fun CoffeeDetailsList(coffeeUiState: CoffeeUiState) {
-    val context = LocalContext.current
+    val filesDir = LocalContext.current.filesDir
+
     LazyColumn(contentPadding = PaddingValues(top = 16.dp, bottom = 16.dp)) {
         item {
             Box(
@@ -143,7 +115,7 @@ private fun CoffeeDetailsList(coffeeUiState: CoffeeUiState) {
                 contentAlignment = Alignment.Center
             ) {
                 if (coffeeUiState.imageFile960x960 != null) {
-                    val cacheFile = File(context.filesDir, coffeeUiState.imageFile960x960)
+                    val cacheFile = File(filesDir, coffeeUiState.imageFile960x960)
                     val model = ImageRequest.Builder(LocalContext.current)
                         .data(cacheFile)
                         .build()
@@ -249,25 +221,25 @@ private fun CoffeeDetailListItem(
     )
 }
 
-@Preview
-@Composable
-fun CoffeeDetailsPreview() {
-    val coffeeUiState = CoffeeUiState(
-        name = "ethiopia sami",
-        brand = "monko.",
-        amount = "240.0",
-        roast = Roast.MediumDark,
-        roastingDate = LocalDate.now(),
-        process = Process.Natural
-    )
-    MyCoffeeTheme {
-        CoffeeDetailsScreen(
-            widthSizeClass = WindowWidthSizeClass.Compact,
-            coffeeUiState = coffeeUiState,
-            navigateUp = {},
-            onUpdateFavourite = {},
-            onEdit = {},
-            onDelete = { _ -> }
-        )
-    }
-}
+//@Preview
+//@Composable
+//fun CoffeeDetailsPreview() {
+//    val coffeeUiState = CoffeeUiState(
+//        name = "ethiopia sami",
+//        brand = "monko.",
+//        amount = "240.0",
+//        roast = Roast.MediumDark,
+//        roastingDate = LocalDate.now(),
+//        process = Process.Natural
+//    )
+//    MyCoffeeTheme {
+//        CoffeeDetailsScreen(
+//            widthSizeClass = WindowWidthSizeClass.Compact,
+//            coffeeUiState = coffeeUiState,
+//            navigateUp = {},
+//            onUpdateFavourite = {},
+//            onEdit = {},
+//            onDelete = { _ -> }
+//        )
+//    }
+//}

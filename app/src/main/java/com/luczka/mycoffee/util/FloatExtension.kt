@@ -10,10 +10,10 @@ fun Float.toStringWithTwoDecimalPoints(): String {
     return String.format(Locale.US, "%.2f", this)
 }
 
-fun Float.getWholeNumber(): Int {
+fun Float.getIntegerPart(): Int {
     return this.toInt()
 }
 
-fun Float.getFractionalPart(): Int {
-    return ((this - this.getWholeNumber()) * 10).toInt()
+fun Float.getDecimalPart(): Int {
+    return ((this - this.getIntegerPart()) * 10).toInt()
 }

@@ -6,12 +6,14 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.luczka.mycoffee.MyCoffeeApplication
 import com.luczka.mycoffee.ui.screens.assistant.AssistantViewModel
+import com.luczka.mycoffee.ui.screens.coffeedetails.CoffeeDetailsViewModel
 import com.luczka.mycoffee.ui.screens.coffeeinput.CoffeeInputViewModel
 import com.luczka.mycoffee.ui.screens.coffees.CoffeesViewModel
 import com.luczka.mycoffee.ui.screens.history.HistoryViewModel
 import com.luczka.mycoffee.ui.screens.historydetails.HistoryDetailsViewModel
 import com.luczka.mycoffee.ui.screens.home.HomeViewModel
 import com.luczka.mycoffee.ui.screens.methods.MethodsViewModel
+import com.luczka.mycoffee.ui.screens.recipedetails.RecipeDetailsViewModel
 import com.luczka.mycoffee.ui.screens.recipes.RecipesViewModel
 
 object MyCoffeeViewModelProvider {
@@ -70,11 +72,33 @@ object MyCoffeeViewModelProvider {
         }
     }
 
+    fun coffeeDetailsViewModelFactory(coffeeId: Int): ViewModelProvider.Factory {
+        return viewModelFactory {
+            initializer {
+                CoffeeDetailsViewModel(
+                    coffeeId = coffeeId,
+                    myCoffeeDatabaseRepository = myCoffeeApplication().container.myCoffeeDatabaseRepository
+                )
+            }
+        }
+    }
+
     fun methodRecipesViewModelFactory(methodId: String): ViewModelProvider.Factory {
         return viewModelFactory {
             initializer {
                 RecipesViewModel(
                     methodId = methodId,
+                    firebaseRepository = myCoffeeApplication().container.firebaseRepository
+                )
+            }
+        }
+    }
+
+    fun recipeDetailsViewModelFactory(recipeId: String): ViewModelProvider.Factory {
+        return viewModelFactory {
+            initializer {
+                RecipeDetailsViewModel(
+                    recipeId = recipeId,
                     firebaseRepository = myCoffeeApplication().container.firebaseRepository
                 )
             }

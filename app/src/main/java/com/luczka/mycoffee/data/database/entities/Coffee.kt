@@ -5,10 +5,9 @@ import androidx.room.PrimaryKey
 import com.luczka.mycoffee.enums.Process
 import com.luczka.mycoffee.enums.Roast
 import com.luczka.mycoffee.ui.model.CoffeeUiState
-import com.luczka.mycoffee.ui.model.dateTimeFormatter
+import com.luczka.mycoffee.util.LocalDateParser
 import com.luczka.mycoffee.util.toStringWithOneDecimalPoint
 import com.luczka.mycoffee.util.toStringWithTwoDecimalPoints
-import java.time.LocalDate
 
 @Entity
 data class Coffee(
@@ -46,7 +45,7 @@ data class Coffee(
         scaScore = scaScore?.toStringWithTwoDecimalPoints(),
         process = Process.values().firstOrNull { it.id == process },
         roast = Roast.values().firstOrNull { it.id == roast },
-        roastingDate = roastingDate?.let { LocalDate.parse(it, dateTimeFormatter) },
+        roastingDate = roastingDate?.let { LocalDateParser.parseBasicIsoDate(it) },
         isFavourite = isFavourite,
         imageFile240x240 = imageFile240x240,
         imageFile360x360 = imageFile360x360,

@@ -15,16 +15,19 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.luczka.mycoffee.ui.MyCoffeeViewModelProvider
 import com.luczka.mycoffee.ui.screens.coffeedetails.CoffeeDetailsScreen
+import com.luczka.mycoffee.ui.screens.coffeedetails.CoffeeDetailsViewModel
 import com.luczka.mycoffee.ui.screens.coffees.CoffeesScreen
 import com.luczka.mycoffee.ui.screens.coffees.CoffeesViewModel
-import com.luczka.mycoffee.ui.screens.historydetails.HistoryDetailsScreen
-import com.luczka.mycoffee.ui.screens.historydetails.HistoryDetailsViewModel
 import com.luczka.mycoffee.ui.screens.history.HistoryScreen
 import com.luczka.mycoffee.ui.screens.history.HistoryViewModel
+import com.luczka.mycoffee.ui.screens.historydetails.HistoryDetailsScreen
+import com.luczka.mycoffee.ui.screens.historydetails.HistoryDetailsViewModel
 import com.luczka.mycoffee.ui.screens.home.HomeScreen
 import com.luczka.mycoffee.ui.screens.home.HomeViewModel
 import com.luczka.mycoffee.ui.screens.methods.MethodsScreen
 import com.luczka.mycoffee.ui.screens.methods.MethodsViewModel
+import com.luczka.mycoffee.ui.screens.recipedetails.RecipeDetailsScreen
+import com.luczka.mycoffee.ui.screens.recipedetails.RecipeDetailsViewModel
 import com.luczka.mycoffee.ui.screens.recipes.RecipesScreen
 import com.luczka.mycoffee.ui.screens.recipes.RecipesViewModel
 
@@ -107,13 +110,19 @@ fun MyCoffeeNestedNavHost(
         ) { backStackEntry ->
             backStackEntry.arguments?.getString(MyCoffeeDestinations.KEY_COFFEE_ID)?.toIntOrNull()
                 ?.let { coffeeId ->
+                    val viewModel: CoffeeDetailsViewModel = viewModel(
+                        factory = MyCoffeeViewModelProvider.coffeeDetailsViewModelFactory(
+                            coffeeId = coffeeId
+                        )
+                    )
+                    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
                     CoffeeDetailsScreen(
                         widthSizeClass = widthSizeClass,
-                        coffeeUiState = null,
+                        uiState = uiState,
                         navigateUp = navController::navigateUp,
-                        onUpdateFavourite = { /*TODO*/ },
+                        onUpdateFavourite = viewModel::onUpdateFavourite,
                         onEdit = navigateToEditCoffee,
-                        onDelete = {}
+                        onDelete = viewModel::onDelete
                     )
                 }
         }
@@ -165,8 +174,20 @@ fun MyCoffeeNestedNavHost(
                 )
             )
         ) { backStackEntry ->
-            val recipeId = backStackEntry.arguments?.getString(MyCoffeeDestinations.KEY_RECIPE_ID)
-                ?: return@composable
+            backStackEntry.arguments?.getString(MyCoffeeDestinations.KEY_RECIPE_ID)
+                ?.let { recipeId ->
+                    val viewModel: RecipeDetailsViewModel = viewModel(
+                        factory = MyCoffeeViewModelProvider.recipeDetailsViewModelFactory(
+                            recipeId = recipeId
+                        )
+                    )
+                    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+                    RecipeDetailsScreen(
+                        widthSizeClass = widthSizeClass,
+                        uiState = uiState,
+                        navigateUp = navController::navigateUp
+                    )
+                }
         }
     }
 }

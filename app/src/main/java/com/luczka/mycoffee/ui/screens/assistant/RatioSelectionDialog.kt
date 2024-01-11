@@ -20,6 +20,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -64,6 +65,8 @@ fun RatioSelectionDialog(
                     waterRatioValue = waterRatioValue,
                     isCoffeeRatioError = isCoffeeRatioError,
                     isWaterRatioError = isWaterRatioError,
+                    maxCoffeeRatio = maxCoffeeRatio,
+                    maxWaterRatio = maxWaterRatio,
                     onCoffeeRatioValueChange = { value ->
                         coffeeRatioValue = value
                         isCoffeeRatioError = validateValue(
@@ -112,6 +115,8 @@ private fun RatioInput(
     waterRatioValue: String,
     isCoffeeRatioError: Boolean,
     isWaterRatioError: Boolean,
+    maxCoffeeRatio: Int,
+    maxWaterRatio: Int,
     onCoffeeRatioValueChange: (String) -> Unit,
     onWaterRatioValueChange: (String) -> Unit,
 ) {
@@ -133,12 +138,12 @@ private fun RatioInput(
                 Text(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .wrapContentHeight(),
-                    text = if (isCoffeeRatioError) {
-                        stringResource(id = R.string.assistant_select_ratio_error)
-                    } else {
-                        "\n"
-                    },
+                        .wrapContentHeight()
+                        .alpha(if (isCoffeeRatioError) 1f else 0f),
+                    text = stringResource(
+                        id = R.string.assistant_select_ratio_range_error,
+                        maxCoffeeRatio
+                    )
                 )
             },
             isError = isCoffeeRatioError,
@@ -168,12 +173,12 @@ private fun RatioInput(
                 Text(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .wrapContentHeight(),
-                    text = if (isWaterRatioError) {
-                        stringResource(id = R.string.assistant_select_ratio_error)
-                    } else {
-                        "\n"
-                    },
+                        .wrapContentHeight()
+                        .alpha(if (isWaterRatioError) 1f else 0f),
+                    text = stringResource(
+                        id = R.string.assistant_select_ratio_range_error,
+                        maxWaterRatio
+                    )
                 )
             },
             isError = isWaterRatioError,

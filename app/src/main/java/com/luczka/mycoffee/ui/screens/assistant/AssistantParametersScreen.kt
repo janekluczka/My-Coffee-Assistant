@@ -26,11 +26,11 @@ import com.luczka.mycoffee.ui.model.CoffeeUiState
 @Composable
 fun AssistantParametersScreen(
     uiState: BrewAssistantUiState,
-    onUpdateAmountSelectionWholeNumber: (Int) -> Unit,
-    onUpdateAmountSelectionFractionalPart: (Int) -> Unit,
+    onUpdateAmountSelectionIntegerPart: (Int) -> Unit,
+    onUpdateAmountSelectionDecimalPart: (Int) -> Unit,
     onUpdateAmountSelectionText: (String) -> Unit,
-    onUpdateCoffeeAmountSelectionWholeNumber: (CoffeeUiState, Int) -> Unit,
-    onUpdateCoffeeAmountSelectionFractionalPart: (CoffeeUiState, Int) -> Unit,
+    onUpdateCoffeeAmountSelectionIntegerPart: (CoffeeUiState, Int) -> Unit,
+    onUpdateCoffeeAmountSelectionDecimalPart: (CoffeeUiState, Int) -> Unit,
     onUpdateCoffeeAmountSelectionText: (CoffeeUiState, String) -> Unit,
     onUpdateCoffeeRatio: (Int) -> Unit,
     onUpdateRatioText: (String, String) -> Unit,
@@ -111,8 +111,8 @@ fun AssistantParametersScreen(
                         amountSelectionUiState = uiState.amountSelectionUiState,
                         openPicker = openPicker,
                         onClick = { openPicker = !openPicker },
-                        onUpdateAmountSelectionWholeNumber = onUpdateAmountSelectionWholeNumber,
-                        onUpdateAmountSelectionFractionalPart = onUpdateAmountSelectionFractionalPart,
+                        onUpdateAmountSelectionIntegerPart = onUpdateAmountSelectionIntegerPart,
+                        onUpdateAmountSelectionDecimalPart = onUpdateAmountSelectionDecimalPart,
                         onOpenDialog = { openDialog = true }
                     )
                 }
@@ -150,8 +150,8 @@ fun AssistantParametersScreen(
                             amountSelectionUiState = amountSelectionUiState,
                             openAmountPicker = openAmountPicker,
                             onClick = { openAmountPicker = !openAmountPicker },
-                            onUpdateCoffeeAmountSelectionWholeNumber = onUpdateCoffeeAmountSelectionWholeNumber,
-                            onUpdateCoffeeAmountSelectionFractionalPart = onUpdateCoffeeAmountSelectionFractionalPart,
+                            onUpdateCoffeeAmountSelectionIntegerPart = onUpdateCoffeeAmountSelectionIntegerPart,
+                            onUpdateCoffeeAmountSelectionDecimalPart = onUpdateCoffeeAmountSelectionDecimalPart,
                             onOpenDialog = { openAmountDialog = true }
                         )
                     }
@@ -214,8 +214,8 @@ private fun AmountSelectionListItemWithPicker(
     amountSelectionUiState: AmountSelectionUiState,
     openPicker: Boolean,
     onClick: () -> Unit,
-    onUpdateAmountSelectionWholeNumber: (Int) -> Unit,
-    onUpdateAmountSelectionFractionalPart: (Int) -> Unit,
+    onUpdateAmountSelectionIntegerPart: (Int) -> Unit,
+    onUpdateAmountSelectionDecimalPart: (Int) -> Unit,
     onOpenDialog: () -> Unit
 ) {
     ExpandableBrewParametersListItem(
@@ -229,17 +229,17 @@ private fun AmountSelectionListItemWithPicker(
         expanded = openPicker
     ) {
         DoubleVerticalPager(
-            leftPagerPage = amountSelectionUiState.wholeNumberIndex,
-            rightPagerPage = amountSelectionUiState.fractionalPartIndex,
+            leftPagerPage = amountSelectionUiState.integerPartIndex,
+            rightPagerPage = amountSelectionUiState.decimalPartIndex,
             separator = ".",
-            onUpdateLeftPager = { wholeNumberIndex ->
-                onUpdateAmountSelectionWholeNumber(wholeNumberIndex)
+            onUpdateLeftPager = { integerPartIndex ->
+                onUpdateAmountSelectionIntegerPart(integerPartIndex)
             },
-            onUpdateRightPager = { fractionalPartIndex ->
-                onUpdateAmountSelectionFractionalPart(fractionalPartIndex)
+            onUpdateRightPager = { decimalPartIndex ->
+                onUpdateAmountSelectionDecimalPart(decimalPartIndex)
             },
-            leftPagerItems = amountSelectionUiState.wholeNumbers,
-            rightPagerItems = amountSelectionUiState.fractionalParts,
+            leftPagerItems = amountSelectionUiState.integerParts,
+            rightPagerItems = amountSelectionUiState.decimalParts,
             onShowInputDialog = onOpenDialog
         )
     }
@@ -252,8 +252,8 @@ private fun AmountSelectionListItemWithPicker(
     amountSelectionUiState: AmountSelectionUiState,
     openAmountPicker: Boolean,
     onClick: () -> Unit,
-    onUpdateCoffeeAmountSelectionWholeNumber: (CoffeeUiState, Int) -> Unit,
-    onUpdateCoffeeAmountSelectionFractionalPart: (CoffeeUiState, Int) -> Unit,
+    onUpdateCoffeeAmountSelectionIntegerPart: (CoffeeUiState, Int) -> Unit,
+    onUpdateCoffeeAmountSelectionDecimalPart: (CoffeeUiState, Int) -> Unit,
     onOpenDialog: () -> Unit
 ) {
     ExpandableBrewParametersListItem(
@@ -271,17 +271,17 @@ private fun AmountSelectionListItemWithPicker(
         expanded = openAmountPicker
     ) {
         DoubleVerticalPager(
-            leftPagerPage = amountSelectionUiState.wholeNumberIndex,
-            rightPagerPage = amountSelectionUiState.fractionalPartIndex,
+            leftPagerPage = amountSelectionUiState.integerPartIndex,
+            rightPagerPage = amountSelectionUiState.decimalPartIndex,
             separator = ".",
-            onUpdateLeftPager = { wholeNumberIndex ->
-                onUpdateCoffeeAmountSelectionWholeNumber(selectedCoffee, wholeNumberIndex)
+            onUpdateLeftPager = { integerPartIndex ->
+                onUpdateCoffeeAmountSelectionIntegerPart(selectedCoffee, integerPartIndex)
             },
-            onUpdateRightPager = { fractionalPartIndex ->
-                onUpdateCoffeeAmountSelectionFractionalPart(selectedCoffee, fractionalPartIndex)
+            onUpdateRightPager = { decimalPartIndex ->
+                onUpdateCoffeeAmountSelectionDecimalPart(selectedCoffee, decimalPartIndex)
             },
-            leftPagerItems = amountSelectionUiState.wholeNumbers,
-            rightPagerItems = amountSelectionUiState.fractionalParts,
+            leftPagerItems = amountSelectionUiState.integerParts,
+            rightPagerItems = amountSelectionUiState.decimalParts,
             onShowInputDialog = onOpenDialog
         )
     }
@@ -302,11 +302,11 @@ fun AssistantParametersScreenPreview() {
     )
     AssistantParametersScreen(
         uiState = uiState,
-        onUpdateAmountSelectionWholeNumber = { _ -> },
-        onUpdateAmountSelectionFractionalPart = { _ -> },
+        onUpdateAmountSelectionIntegerPart = { _ -> },
+        onUpdateAmountSelectionDecimalPart = { _ -> },
         onUpdateAmountSelectionText = { _ -> },
-        onUpdateCoffeeAmountSelectionWholeNumber = { _, _ -> },
-        onUpdateCoffeeAmountSelectionFractionalPart = { _, _ -> },
+        onUpdateCoffeeAmountSelectionIntegerPart = { _, _ -> },
+        onUpdateCoffeeAmountSelectionDecimalPart = { _, _ -> },
         onUpdateCoffeeAmountSelectionText = { _, _ -> },
         onUpdateCoffeeRatio = {},
         onUpdateRatioText = { _, _ -> }
@@ -334,11 +334,11 @@ fun AssistantParametersScreenPreview1() {
     )
     AssistantParametersScreen(
         uiState = uiState,
-        onUpdateAmountSelectionWholeNumber = { _ -> },
-        onUpdateAmountSelectionFractionalPart = { _ -> },
+        onUpdateAmountSelectionIntegerPart = { _ -> },
+        onUpdateAmountSelectionDecimalPart = { _ -> },
         onUpdateAmountSelectionText = { _ -> },
-        onUpdateCoffeeAmountSelectionWholeNumber = { _, _ -> },
-        onUpdateCoffeeAmountSelectionFractionalPart = { _, _ -> },
+        onUpdateCoffeeAmountSelectionIntegerPart = { _, _ -> },
+        onUpdateCoffeeAmountSelectionDecimalPart = { _, _ -> },
         onUpdateCoffeeAmountSelectionText = { _, _ -> },
         onUpdateCoffeeRatio = {},
         onUpdateRatioText = { _, _ -> }
