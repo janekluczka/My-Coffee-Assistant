@@ -53,6 +53,8 @@ fun AssistantMainScreen(
     onUpdateCoffeeRatio: (Int) -> Unit,
     onUpdateWaterRatio: (Int) -> Unit,
     onUpdateRatioText: (String, String) -> Unit,
+    onUpdateRating: (Int?) -> Unit,
+    onUpdateNotes: (String) -> Unit,
     onFinishBrew: () -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -165,8 +167,10 @@ fun AssistantMainScreen(
             onUpdateCoffeeAmountSelectionText = onUpdateCoffeeAmountSelectionText,
             onUpdateCoffeeRatio = onUpdateCoffeeRatio,
             onUpdateWaterRatio = onUpdateWaterRatio,
-            onUpdateRatioText = onUpdateRatioText
-            )
+            onUpdateRatioText = onUpdateRatioText,
+            onUpdateRating = onUpdateRating,
+            onUpdateNotes = onUpdateNotes
+        )
     }
 }
 
@@ -224,6 +228,8 @@ private fun AssistantContent(
     onUpdateCoffeeRatio: (Int) -> Unit,
     onUpdateRatioText: (String, String) -> Unit,
     onUpdateWaterRatio: (Int) -> Unit,
+    onUpdateRating: (Int?) -> Unit,
+    onUpdateNotes: (String) -> Unit,
 ) {
     Column(modifier = Modifier.padding(innerPadding)) {
         Divider(modifier = Modifier.fillMaxWidth())
@@ -257,6 +263,8 @@ private fun AssistantContent(
 
                 2 -> AssistantSummaryScreen(
                     uiState = uiState,
+                    onUpdateRating = onUpdateRating,
+                    onUpdateNotes = onUpdateNotes
                 )
 
                 else -> {}

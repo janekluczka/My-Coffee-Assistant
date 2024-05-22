@@ -21,6 +21,8 @@ sealed interface BrewAssistantUiState {
     val selectedAmountsSum: String
     val waterAmount: String
     val ratioSelectionUiState: RatioSelectionUiState
+    val rating: Int?
+    val notes: String
     val isFinished: Boolean
 
     data class NoneSelected(
@@ -29,7 +31,9 @@ sealed interface BrewAssistantUiState {
         override val selectedAmountsSum: String = "0.0",
         override val ratioSelectionUiState: RatioSelectionUiState = RatioSelectionUiState(),
         override val waterAmount: String = "0.0",
-        override val isFinished: Boolean = false
+        override val rating: Int? = null,
+        override val notes: String = "",
+        override val isFinished: Boolean = false,
     ) : BrewAssistantUiState
 
     data class CoffeeSelected(
@@ -38,6 +42,8 @@ sealed interface BrewAssistantUiState {
         override val selectedAmountsSum: String = "0.0",
         override val ratioSelectionUiState: RatioSelectionUiState = RatioSelectionUiState(),
         override val waterAmount: String = "0.0",
+        override val rating: Int? = null,
+        override val notes: String = "",
         override val isFinished: Boolean = false
     ) : BrewAssistantUiState
 }
@@ -62,10 +68,10 @@ data class RatioSelectionUiState(
 private data class AssistantViewModelState(
     val currentCoffees: List<CoffeeUiState> = emptyList(),
     val selectedCoffees: MutableMap<CoffeeUiState, AmountSelectionUiState> = mutableMapOf(),
-    val amountSelectionUiState: AmountSelectionUiState = AmountSelectionUiState(
-        integerParts = (0..99).toList()
-    ),
+    val amountSelectionUiState: AmountSelectionUiState = AmountSelectionUiState(integerParts = (0..99).toList()),
     val ratioSelectionUiState: RatioSelectionUiState = RatioSelectionUiState(),
+    val rating: Int? = null,
+    val notes: String = "",
     val isFinished: Boolean = false,
 ) {
     fun toAssistantUiState(): BrewAssistantUiState {
@@ -86,7 +92,9 @@ private data class AssistantViewModelState(
                 selectedAmountsSum = selectedAmountsSumFormatted,
                 waterAmount = waterAmountFormatted,
                 amountSelectionUiState = amountSelectionUiState,
-                ratioSelectionUiState = ratioSelectionUiState
+                ratioSelectionUiState = ratioSelectionUiState,
+                rating = rating,
+                notes = notes
             )
         } else {
             BrewAssistantUiState.CoffeeSelected(
@@ -95,7 +103,9 @@ private data class AssistantViewModelState(
                 isFinished = isFinished,
                 selectedAmountsSum = selectedAmountsSumFormatted,
                 waterAmount = waterAmountFormatted,
-                ratioSelectionUiState = ratioSelectionUiState
+                ratioSelectionUiState = ratioSelectionUiState,
+                rating = rating,
+                notes = notes
             )
         }
     }
@@ -115,7 +125,8 @@ private data class AssistantViewModelState(
             coffeeRatio = coffeeRatio,
             waterAmount = waterAmount,
             waterRatio = waterRatio,
-            rating = null
+            rating = rating,
+            notes = notes
         )
     }
 
@@ -365,6 +376,14 @@ class AssistantViewModel(
         )
 
         viewModelState.update { it.copy(ratioSelectionUiState = updatedRatioSelectionUiState) }
+    }
+
+    fun updateRating(rating: Int?) {
+        viewModelState.update { it.copy(rating = rating) }
+    }
+
+    fun updateNotes(notes: String) {
+        viewModelState.update { it.copy(notes = notes) }
     }
 
     fun finishBrew() {

@@ -103,9 +103,9 @@
         %1$s: Coffee name
         %2$s: Coffee brand
     -->
-    <string name="dialog_text_discard">Coffee has not been added yet</string>
+    <string name="dialog_text_discard">Coffee has not been added yet.</string>
     <string name="dialog_text_abort">
-        You have not finished yor brew. Are you sure you want to abort it?
+        You have not finished your brew. Are you sure you want to abort it?
     </string>
     <string name="dialog_text_finish">%1$s grams will be taken from %2$s, %3$s</string>
     <!--

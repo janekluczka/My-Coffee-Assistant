@@ -1,17 +1,14 @@
 package com.luczka.mycoffee.ui.screens.historydetails
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -20,7 +17,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -28,9 +24,9 @@ import androidx.compose.ui.unit.dp
 import com.luczka.mycoffee.R
 import com.luczka.mycoffee.ui.components.BackIconButton
 import com.luczka.mycoffee.ui.components.DeleteIconButton
-import com.luczka.mycoffee.ui.components.SelectedCoffeeCard
+import com.luczka.mycoffee.ui.components.HistoryDetailsCoffeeListItem
 import com.luczka.mycoffee.ui.components.TopAppBarTitle
-import com.luczka.mycoffee.util.toStringWithOneDecimalPoint
+import com.luczka.mycoffee.ui.screens.assistant.SummaryParametersListItem
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
@@ -73,118 +69,87 @@ fun HistoryDetailsScreen(
             )
         }
     ) { paddingValues ->
-        Box(modifier = Modifier.padding(paddingValues)) {
-            LazyColumn(
-                contentPadding = PaddingValues(vertical = 16.dp)
-            ) {
-                item {
-                    Text(
-                        modifier = Modifier.padding(
-                            top = 0.dp,
-                            start = 16.dp,
-                            end = 16.dp,
-                            bottom = 8.dp
-                        ),
-                        text = if (historyDetailsUiState.brew.brewedCoffees.size > 1) {
-                            stringResource(id = R.string.assistant_selected_coffees)
-                        } else {
-                            stringResource(id = R.string.assistant_selected_coffee)
-                        },
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        textAlign = TextAlign.Center,
-                    )
-                }
-                item {
-                    Column(
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        historyDetailsUiState.brew.brewedCoffees.forEach { brewedCoffeeUiState ->
-                            SelectedCoffeeCard(coffeeUiState = brewedCoffeeUiState.coffee)
+        Column(modifier = Modifier.padding(paddingValues)) {
+            Divider()
+            LazyColumn(contentPadding = PaddingValues(vertical = 16.dp)) {
+                historyDetailsUiState.brew.let { brewUiState ->
+
+                    item {
+                        Text(
+                            modifier = Modifier.padding(
+                                top = 0.dp,
+                                start = 16.dp,
+                                end = 16.dp,
+                                bottom = 8.dp
+                            ),
+                            text = if (brewUiState.brewedCoffees.size > 1) {
+                                stringResource(id = R.string.assistant_selected_coffees)
+                            } else {
+                                stringResource(id = R.string.assistant_selected_coffee)
+                            },
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center,
+                        )
+                    }
+                    item {
+                        Column {
+                            if (brewUiState.brewedCoffees.isEmpty()) {
+                                HistoryDetailsCoffeeListItem(coffeeUiState = null)
+                            } else {
+                                brewUiState.brewedCoffees.forEach { brewedCoffeeUiState ->
+                                    HistoryDetailsCoffeeListItem(coffeeUiState = brewedCoffeeUiState.coffee)
+                                }
+                            }
                         }
                     }
-                }
-                item {
-                    Text(
-                        modifier = Modifier.padding(
-                            top = 24.dp,
-                            start = 16.dp,
-                            end = 16.dp,
-                            bottom = 8.dp
-                        ),
-                        text = stringResource(id = R.string.assistant_selected_parameters),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        textAlign = TextAlign.Center,
-                    )
-                }
-                item {
-                    Row(
-                        modifier = Modifier
-                            .padding(horizontal = 16.dp)
-                            .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        BrewParameterCard(
-                            modifier = Modifier
-                                .weight(1f)
-                                .fillMaxWidth(),
-                            parameterName = stringResource(id = R.string.assistant_coffee),
-                            parameterValue = stringResource(
-                                id = R.string.coffee_parameters_amount_with_unit,
-                                historyDetailsUiState.brew.coffeeAmount.toStringWithOneDecimalPoint()
+
+                    item {
+                        Spacer(modifier = Modifier.height(24.dp))
+                    }
+                    item {
+                        Text(
+                            modifier = Modifier.padding(
+                                top = 0.dp,
+                                start = 16.dp,
+                                end = 16.dp,
+                                bottom = 8.dp
+                            ),
+                            text = stringResource(id = R.string.assistant_selected_parameters),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center,
+                        )
+                    }
+                    item {
+                        SummaryParametersListItem(
+                            index = 0,
+                            headlineText = stringResource(id = R.string.assistant_ratio),
+                            trailingText = stringResource(
+                                id = R.string.assistant_ratio_format,
+                                brewUiState.coffeeRatio,
+                                brewUiState.waterRatio
                             )
                         )
-                        BrewParameterCard(
-                            modifier = Modifier
-                                .weight(1f)
-                                .fillMaxWidth(),
-                            parameterName = stringResource(id = R.string.assistant_ratio),
-                            parameterValue = historyDetailsUiState.brew.ratio
-                        )
-                        BrewParameterCard(
-                            modifier = Modifier
-                                .weight(1f)
-                                .fillMaxWidth(),
-                            parameterName = stringResource(id = R.string.assistant_water),
-                            parameterValue = stringResource(
+                        SummaryParametersListItem(
+                            index = 1,
+                            headlineText = stringResource(id = R.string.assistant_coffee),
+                            trailingText = stringResource(
                                 id = R.string.coffee_parameters_amount_with_unit,
-                                historyDetailsUiState.brew.waterAmount.toStringWithOneDecimalPoint()
+                                brewUiState.coffeeAmount
+                            )
+                        )
+                        SummaryParametersListItem(
+                            index = 2,
+                            headlineText = stringResource(id = R.string.assistant_water),
+                            trailingText = stringResource(
+                                id = R.string.coffee_parameters_amount_with_unit,
+                                brewUiState.waterAmount
                             )
                         )
                     }
                 }
             }
-        }
-    }
-}
-
-@Composable
-private fun BrewParameterCard(
-    modifier: Modifier,
-    parameterName: String,
-    parameterValue: String
-) {
-    OutlinedCard(
-        modifier = modifier,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
-    ) {
-        Column(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = parameterValue,
-                style = MaterialTheme.typography.titleMedium,
-            )
-            Text(
-                text = parameterName,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
         }
     }
 }

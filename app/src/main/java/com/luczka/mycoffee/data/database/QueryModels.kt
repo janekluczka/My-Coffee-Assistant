@@ -22,9 +22,11 @@ data class BrewWithBrewedCoffees(
         brewId = brew.brewId,
         date = LocalDateParser.parseBasicIsoDate(brew.date),
         coffeeAmount = brew.coffeeAmount,
-        ratio = "${brew.coffeeRatio}:${brew.waterRatio}",
+        coffeeRatio = brew.coffeeRatio,
         waterAmount = brew.waterAmount,
+        waterRatio = brew.waterRatio,
         rating = brew.rating,
+        notes = brew.notes,
         brewedCoffees = brewedCoffees.map { it.toBrewedCoffeeUiState() }
     )
 }

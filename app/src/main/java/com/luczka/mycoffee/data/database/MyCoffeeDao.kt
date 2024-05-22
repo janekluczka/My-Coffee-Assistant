@@ -96,4 +96,7 @@ interface MyCoffeeDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertBrewedCoffee(brewedCoffee: BrewedCoffee)
 
+    @Delete
+    suspend fun delete(brew: Brew)
+
 }

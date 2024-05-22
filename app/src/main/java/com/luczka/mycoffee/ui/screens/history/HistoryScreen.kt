@@ -30,6 +30,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.luczka.mycoffee.R
 import com.luczka.mycoffee.ui.components.TopAppBarTitle
+import com.luczka.mycoffee.ui.model.BrewUiState
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
@@ -95,7 +96,6 @@ fun HistoryScreen(
 }
 
 @Composable
-@OptIn(ExperimentalMaterial3Api::class)
 private fun HasBrewsScreen(
     innerPadding: PaddingValues,
     brewListState: LazyListState,
@@ -112,76 +112,72 @@ private fun HasBrewsScreen(
                 items = uiState.brews,
                 key = { it.brewId }
             ) { brewedUiState ->
-                ListItem(
-                    modifier = Modifier.clickable {
-                        onListItemClicked(brewedUiState.brewId)
-                    },
-                    leadingContent = {
-                        if (brewedUiState.rating == null) {
-                            Box(
-                                modifier = Modifier
-                                    .size(40.dp)
-                                    .background(MaterialTheme.colorScheme.inverseOnSurface)
-                            )
-                        } else {
-                            Box(
-                                modifier = Modifier
-                                    .size(40.dp)
-                                    .background(MaterialTheme.colorScheme.inverseOnSurface),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(text = "${brewedUiState.rating}")
-                            }
-                        }
-                    },
-                    overlineText = {
-                        val formatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT)
-                        val date = brewedUiState.date.format(formatter)
-                            Text(
-                                text = date,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                style = MaterialTheme.typography.labelMedium
-                            )
-                    },
-                    headlineText = {
-                        val headlineText = when (brewedUiState.brewedCoffees.size) {
-                            0 -> {
-                                "Unknown"
-                            }
-
-                            1 -> {
-                                brewedUiState.brewedCoffees.first().let {
-                                    "${it.coffee.name}, ${it.coffee.brand}"
-                                }
-                            }
-
-                            else -> {
-                                brewedUiState.brewedCoffees.joinToString(separator = " + ") {
-                                    it.coffee.name
-                                }
-                            }
-                        }
-                        Text(
-                            text = headlineText,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                    },
-                    supportingText = {
-                        Text(
-                            text = stringResource(
-                                id = R.string.coffee_parameters_amount_with_unit,
-                                brewedUiState.coffeeAmount
-                            ),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    }
+                HistoryListItem(
+                    brewedUiState = brewedUiState,
+                    onClick = onListItemClicked
                 )
             }
         }
     }
+}
+
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+private fun HistoryListItem(
+    brewedUiState: BrewUiState,
+    onClick: (Int) -> Unit
+) {
+    val formatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT)
+    val date = brewedUiState.date.format(formatter)
+
+    val headlineText = when (brewedUiState.brewedCoffees.size) {
+        0 -> "Unknown"
+        1 -> brewedUiState.brewedCoffees.first().let { "${it.coffee.name}, ${it.coffee.brand}" }
+        else -> brewedUiState.brewedCoffees.joinToString(separator = " + ") { it.coffee.name }
+    }
+
+    ListItem(
+        modifier = Modifier.clickable {
+            onClick(brewedUiState.brewId)
+        },
+        leadingContent = {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .background(MaterialTheme.colorScheme.inverseOnSurface),
+                contentAlignment = Alignment.Center
+            ) {
+                if (brewedUiState.rating != null) {
+                    Text(text = "${brewedUiState.rating}")
+                }
+            }
+        },
+        overlineText = {
+            Text(
+                text = date,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                style = MaterialTheme.typography.labelMedium
+            )
+        },
+        headlineText = {
+            Text(
+                text = headlineText,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                style = MaterialTheme.typography.titleMedium
+            )
+        },
+        supportingText = {
+            Text(
+                text = stringResource(
+                    id = R.string.coffee_parameters_amount_with_unit,
+                    brewedUiState.coffeeAmount
+                ),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+    )
 }

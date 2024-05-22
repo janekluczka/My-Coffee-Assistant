@@ -30,7 +30,7 @@ interface MyCoffeeDatabaseRepository {
 
     suspend fun getBrewsWithCoffees(): Flow<List<BrewWithBrewedCoffees>>
 
-    suspend fun getBrewWithCoffees(brewId: Int): Flow<BrewWithBrewedCoffees>
+    suspend fun getBrewWithCoffees(brewId: Int): Flow<BrewWithBrewedCoffees?>
 
     suspend fun insertBrew(brew: Brew): Long
 

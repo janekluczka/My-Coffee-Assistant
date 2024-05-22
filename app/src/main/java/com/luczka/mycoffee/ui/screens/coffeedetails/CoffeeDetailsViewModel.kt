@@ -32,7 +32,7 @@ private data class CoffeeDetailsViewModelState(
         return if (coffee == null) {
             CoffeeDetailsUiState.NoCoffee(
                 coffeeId = coffeeId,
-                isDeleted = true
+                isDeleted = isDeleted
             )
         } else {
             CoffeeDetailsUiState.HasCoffee(

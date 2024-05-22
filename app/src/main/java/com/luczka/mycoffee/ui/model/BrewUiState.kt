@@ -1,14 +1,17 @@
 package com.luczka.mycoffee.ui.model
 
+import com.luczka.mycoffee.data.database.entities.Brew
 import java.time.LocalDate
 
 data class BrewUiState(
     val brewId: Int,
     val date: LocalDate,
     val coffeeAmount: Float,
-    val ratio: String,
+    val coffeeRatio: Int,
     val waterAmount: Float,
+    val waterRatio: Int,
     val rating: Int?,
+    val notes: String,
     val brewedCoffees: List<BrewedCoffeeUiState>
 ) : Comparable<BrewUiState> {
     override fun compareTo(other: BrewUiState): Int {
@@ -17,4 +20,19 @@ data class BrewUiState(
             { it.date }
         ).compare(this, other)
     }
+
+    fun getRatioString(): String {
+        return "${coffeeRatio}:${waterRatio}"
+    }
+
+    fun toBrew(): Brew = Brew(
+        brewId = brewId,
+        date = "",
+        coffeeAmount = coffeeAmount,
+        coffeeRatio = coffeeRatio,
+        waterAmount = waterAmount,
+        waterRatio = waterRatio,
+        rating = rating,
+        notes = notes,
+    )
 }

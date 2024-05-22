@@ -14,7 +14,7 @@ import com.luczka.mycoffee.data.database.entities.Coffee
         Brew::class,
         BrewedCoffee::class
     ],
-    version = 21,
+    version = 25,
     exportSchema = false
 )
 abstract class MyCoffeeDatabase : RoomDatabase() {

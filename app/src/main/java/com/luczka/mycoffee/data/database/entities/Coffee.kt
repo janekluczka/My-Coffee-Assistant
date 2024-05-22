@@ -11,7 +11,8 @@ import com.luczka.mycoffee.util.toStringWithTwoDecimalPoints
 
 @Entity
 data class Coffee(
-    @PrimaryKey(autoGenerate = true) val coffeeId: Int,
+    @PrimaryKey(autoGenerate = true)
+    val coffeeId: Int,
     val name: String,
     val brand: String,
     val amount: Float?,

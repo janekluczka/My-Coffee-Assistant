@@ -148,7 +148,7 @@ private fun goBackToCurrentFilter(
     filterListState: LazyListState,
     coroutineScope: CoroutineScope
 ) {
-    onSelectFilter(CoffeeFilter.Current)
+    onSelectFilter(CoffeeFilter.All)
     val currentFilterNotVisible = filterListState.firstVisibleItemIndex != 0
     val firstVisibleFilterNotAligned = filterListState.firstVisibleItemScrollOffset != 0
     if (currentFilterNotVisible || firstVisibleFilterNotAligned) {
@@ -243,7 +243,9 @@ private fun HasCoffeesScreen(
                 Box(modifier = Modifier.animateItemPlacement(animationSpec = tween())) {
                     CoffeeListItem(
                         coffeeUiState = coffeeUiState,
-                        onClick = { onCoffeeSelected(coffeeUiState.coffeeId) }
+                        onClick = {
+                            onCoffeeSelected(coffeeUiState.coffeeId)
+                        }
                     )
                 }
             }

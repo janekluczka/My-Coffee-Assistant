@@ -42,13 +42,17 @@ class HistoryDetailsViewModel(
     init {
         viewModelScope.launch {
             myCoffeeDatabaseRepository.getBrewWithCoffees(brewId = brewId).collect { brew ->
-                viewModelState.update { it.copy(brew = brew.toBrewUiState()) }
+                viewModelState.update { it.copy(brew = brew?.toBrewUiState()) }
             }
         }
     }
 
     fun onDelete() {
+        val brew = viewModelState.value.brew ?: return
 
+        viewModelScope.launch {
+            myCoffeeDatabaseRepository.deleteBrew(brew.toBrew())
+        }
     }
 
 }

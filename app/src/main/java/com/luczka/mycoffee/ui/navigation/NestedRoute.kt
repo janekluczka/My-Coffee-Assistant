@@ -1,10 +1,12 @@
 package com.luczka.mycoffee.ui.navigation
 
-import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -46,14 +48,17 @@ fun NestedRoute(
             Scaffold(
                 bottomBar = { MyCoffeeNavigationBar(navController = nestedNavController) }
             ) { innerPadding ->
-                MyCoffeeNestedNavHost(
-                    widthSizeClass = widthSizeClass,
-                    navController = nestedNavController,
-                    innerPadding = innerPadding,
-                    navigateToAssistant = navigateToAssistant,
-                    navigateToAddCoffee = navigateToAddCoffee,
-                    navigateToEditCoffee = navigateToEditCoffee
-                )
+                Column(modifier = Modifier.padding(innerPadding)) {
+                    MyCoffeeNestedNavHost(
+                        modifier = Modifier.weight(1f),
+                        widthSizeClass = widthSizeClass,
+                        navController = nestedNavController,
+                        navigateToAssistant = navigateToAssistant,
+                        navigateToAddCoffee = navigateToAddCoffee,
+                        navigateToEditCoffee = navigateToEditCoffee
+                    )
+                    Divider()
+                }
             }
         }
 
@@ -61,9 +66,9 @@ fun NestedRoute(
             Row(modifier = Modifier.fillMaxSize()) {
                 MyCoffeeNavigationRail(navController = nestedNavController)
                 MyCoffeeNestedNavHost(
+                    modifier = Modifier,
                     widthSizeClass = widthSizeClass,
                     navController = nestedNavController,
-                    innerPadding = PaddingValues(),
                     navigateToAssistant = navigateToAssistant,
                     navigateToAddCoffee = navigateToAddCoffee,
                     navigateToEditCoffee = navigateToEditCoffee

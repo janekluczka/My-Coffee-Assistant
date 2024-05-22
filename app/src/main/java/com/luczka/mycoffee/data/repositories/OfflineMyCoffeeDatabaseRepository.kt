@@ -53,9 +53,7 @@ class OfflineMyCoffeeDatabaseRepository(
     override suspend fun insertBrewedCoffee(brewedCoffee: BrewedCoffee) =
         myCoffeeDao.insertBrewedCoffee(brewedCoffee)
 
-    override suspend fun deleteBrew(brew: Brew) {
-        TODO("Not yet implemented")
-    }
-
+    override suspend fun deleteBrew(brew: Brew) =
+        myCoffeeDao.delete(brew)
 
 }

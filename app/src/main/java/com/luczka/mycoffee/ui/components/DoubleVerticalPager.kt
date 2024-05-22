@@ -36,11 +36,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import com.luczka.mycoffee.R
+import com.luczka.mycoffee.ui.theme.MyCoffeeTheme
 import kotlinx.coroutines.launch
 import kotlin.math.absoluteValue
 
-// TODO Add resizing with current density
+private const val beyondBoundsPageCount = 25
 
+// TODO Add resizing with current density
 @Composable
 @OptIn(ExperimentalFoundationApi::class)
 fun <T> DoubleVerticalPager(
@@ -100,8 +102,6 @@ fun <T> DoubleVerticalPager(
             onUpdateRightPager(page)
         }
     }
-
-    val beyondBoundsPageCount = 25
 
     Box(contentAlignment = Alignment.BottomStart) {
         Row(
@@ -194,10 +194,9 @@ private fun <T> PagerCard(
                 .graphicsLayer {
                     val currentPage = pagerState.currentPage
                     val currentPageOffsetFraction = pagerState.currentPageOffsetFraction
-                    val pageOffset =
-                        ((currentPage - page) + currentPageOffsetFraction).absoluteValue
+                    val pageOffset = ((currentPage - page) + currentPageOffsetFraction).absoluteValue
                     alpha = lerp(
-                        start = 0.4f,
+                        start = 0.5f,
                         stop = 1f,
                         fraction = 1f - pageOffset.coerceIn(0f, 1f)
                     )
@@ -208,8 +207,7 @@ private fun <T> PagerCard(
                     .heightIn(min = 80.dp)
                     .wrapContentWidth(),
                 contentAlignment = Alignment.Center
-            )
-            {
+            ) {
                 Text(
                     text = text.toString(),
                     modifier = Modifier.padding(horizontal = 16.dp),
@@ -223,14 +221,16 @@ private fun <T> PagerCard(
 @Preview
 @Composable
 fun DoubleVerticalPagerPreview() {
-    DoubleVerticalPager(
-        leftPagerPage = 0,
-        rightPagerPage = 0,
-        separator = ".",
-        onUpdateLeftPager = {},
-        onUpdateRightPager = {},
-        leftPagerItems = (1..99).toList().map { it.toString() },
-        rightPagerItems = (1..9).toList().map { it.toString() },
-        onShowInputDialog = {}
-    )
+    MyCoffeeTheme {
+        DoubleVerticalPager(
+            leftPagerPage = 0,
+            rightPagerPage = 0,
+            separator = ".",
+            onUpdateLeftPager = {},
+            onUpdateRightPager = {},
+            leftPagerItems = (1..99).toList().map { it.toString() },
+            rightPagerItems = (1..9).toList().map { it.toString() },
+            onShowInputDialog = {}
+        )
+    }
 }

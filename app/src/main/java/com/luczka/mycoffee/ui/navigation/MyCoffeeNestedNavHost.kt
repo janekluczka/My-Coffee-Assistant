@@ -1,7 +1,5 @@
 package com.luczka.mycoffee.ui.navigation
 
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -34,17 +32,17 @@ import com.luczka.mycoffee.ui.screens.recipes.RecipesViewModel
 @Composable
 fun MyCoffeeNestedNavHost(
     widthSizeClass: WindowWidthSizeClass,
+    modifier: Modifier,
     navController: NavHostController,
-    innerPadding: PaddingValues,
     navigateToAssistant: () -> Unit,
     navigateToAddCoffee: () -> Unit,
     navigateToEditCoffee: (Int) -> Unit
 ) {
     NavHost(
+        modifier = modifier,
         navController = navController,
         startDestination = MyCoffeeDestinations.ROUTE_HOME,
         route = "main_branch",
-        modifier = Modifier.padding(innerPadding)
     ) {
         composable(MyCoffeeDestinations.ROUTE_HOME) {
             val viewModel: HomeViewModel = viewModel(factory = MyCoffeeViewModelProvider.Factory)

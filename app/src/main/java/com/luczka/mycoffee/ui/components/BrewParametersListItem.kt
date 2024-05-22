@@ -31,7 +31,11 @@ fun BrewParametersListItem(
                 Text(text = "${index + 1}")
             }
         },
-        overlineText = { Text(text = overlineText) },
-        headlineText = { Text(text = headlineText) }
+        overlineText = {
+            Text(text = overlineText)
+        },
+        headlineText = {
+            Text(text = headlineText)
+        }
     )
 }

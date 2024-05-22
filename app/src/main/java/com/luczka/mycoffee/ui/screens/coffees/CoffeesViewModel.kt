@@ -28,7 +28,7 @@ sealed interface CoffeesUiState {
 
 private data class CoffeesViewModelState(
     val allCoffees: List<CoffeeUiState> = emptyList(),
-    val selectedFilter: CoffeeFilter = CoffeeFilter.Current,
+    val selectedFilter: CoffeeFilter = CoffeeFilter.All,
 ) {
     fun toCoffeesUiState(): CoffeesUiState {
         return if (allCoffees.isEmpty()) {

@@ -56,6 +56,8 @@ fun MyCoffeeMainNavHost(
                 onUpdateCoffeeRatio = viewModel::updateCoffeeRatioIndex,
                 onUpdateWaterRatio = viewModel::updateWaterRatioIndex,
                 onUpdateRatioText = viewModel::updateRatioValues,
+                onUpdateRating = viewModel::updateRating,
+                onUpdateNotes = viewModel::updateNotes,
                 onFinishBrew = viewModel::finishBrew
             )
         }
