@@ -10,7 +10,6 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
@@ -19,7 +18,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -27,13 +29,20 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat.startActivity
 import com.google.accompanist.web.AccompanistWebViewClient
 import com.google.accompanist.web.WebView
 import com.google.accompanist.web.rememberWebViewState
+import com.luczka.mycoffee.R
 import com.luczka.mycoffee.ui.components.BackIconButton
 import com.luczka.mycoffee.ui.components.BrewingStepListItem
 import com.luczka.mycoffee.ui.model.RecipeUiState
@@ -45,19 +54,64 @@ fun RecipeDetailsScreen(
     uiState: RecipeDetailsUiState,
     navigateUp: () -> Unit,
 ) {
+    val context = LocalContext.current
+
+    var openDeleteDialog by rememberSaveable { mutableStateOf(false) }
+
+    if (openDeleteDialog) {
+        LeaveApplicationDialog(
+            onNegative = {
+                openDeleteDialog = false
+            },
+            onPositive = {
+                openDeleteDialog = false
+                onOpenYouTube(context, uiState)
+            }
+        )
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
-                navigationIcon = { BackIconButton(onClick = navigateUp) },
-                title = {}
+                navigationIcon = {
+                    BackIconButton(onClick = navigateUp)
+                },
+                title = {
+                    val title = when (uiState) {
+                        is RecipeDetailsUiState.IsLoading -> ""
+                        is RecipeDetailsUiState.HasData -> uiState.recipe.title
+                    }
+                    Text(
+                        text = title,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                },
+                actions = {
+                    IconButton(
+                        onClick = {
+                            openDeleteDialog = true
+                        }
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_baseline_youtube),
+                            contentDescription = "YouTube icon"
+                        )
+                    }
+                }
             )
         }
     ) { innerPadding ->
-        Box(modifier = Modifier.padding(innerPadding)) {
-            Crossfade(targetState = uiState.isLoading, label = "") {
-                if (it) {
-                    LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-                } else {
+        Column(modifier = Modifier.padding(innerPadding)) {
+            Divider()
+            if (uiState.isLoading) {
+                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+            }
+            Crossfade(
+                targetState = uiState.isLoading,
+                label = ""
+            ) { isLoading ->
+                if (!isLoading) {
                     when (uiState) {
                         is RecipeDetailsUiState.IsLoading -> {
 
@@ -65,7 +119,6 @@ fun RecipeDetailsScreen(
 
                         is RecipeDetailsUiState.HasData -> {
                             Column {
-                                YouTubePlayer(recipeUiState = uiState.recipe)
                                 LazyColumn(
                                     modifier = Modifier.fillMaxSize(),
                                     contentPadding = PaddingValues(bottom = 8.dp)
@@ -168,6 +221,15 @@ fun YouTubePlayer(
         }
     )
 }
+
+fun onOpenYouTube(context: Context, uiState: RecipeDetailsUiState) {
+    if (uiState !is RecipeDetailsUiState.HasData) return
+    val youtubeId = uiState.recipe.youtubeId
+    val intent = Intent(Intent.ACTION_VIEW)
+    intent.data = Uri.parse("https://www.youtube.com/watch?v=${youtubeId}}")
+    startActivity(context, intent, null)
+}
+
 
 // TODO: Handle WebView errors
 class IFrameWebViewClient(private val context: Context) : WebViewClient() {
