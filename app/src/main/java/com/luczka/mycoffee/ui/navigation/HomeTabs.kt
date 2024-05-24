@@ -16,7 +16,7 @@ enum class HomeTabs(
     ),
     HISTORY(
         stringResource = R.string.tab_history,
-        painterResource = R.drawable.ic_baseline_auto_awesome_motion,
+        painterResource = R.drawable.ic_baseline_history,
         route = MyCoffeeDestinations.ROUTE_HISTORY
     ),
     COFFEES(
