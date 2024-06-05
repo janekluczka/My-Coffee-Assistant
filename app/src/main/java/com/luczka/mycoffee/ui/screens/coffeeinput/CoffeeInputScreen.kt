@@ -27,9 +27,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
@@ -51,6 +49,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -105,8 +104,11 @@ fun CoffeeInputScreen(
     onUpdateRoastingDate: (LocalDate) -> Unit,
     onSave: (Context) -> Unit
 ) {
+    val scope = rememberCoroutineScope()
+
     var openDiscardDialog by rememberSaveable { mutableStateOf(false) }
     var openCalendarDialog by rememberSaveable { mutableStateOf(false) }
+    var showBottomSheet by remember { mutableStateOf(false) }
 
     val roastListState = rememberLazyListState()
     val processListState = rememberLazyListState()
@@ -439,10 +441,6 @@ private fun ImageSelectionBox(
                     disabledContainerColor = MaterialTheme.colorScheme.surface
                 ),
             ) {
-                Icon(
-                    imageVector = Icons.Filled.Add,
-                    contentDescription = null
-                )
                 Text(text = stringResource(id = R.string.input_assist_chip_select))
             }
             OutlinedButton(
@@ -456,10 +454,6 @@ private fun ImageSelectionBox(
                     disabledContainerColor = MaterialTheme.colorScheme.surface
                 )
             ) {
-                Icon(
-                    imageVector = Icons.Filled.Delete,
-                    contentDescription = null
-                )
                 Text(text = stringResource(id = R.string.input_assist_chip_delete))
             }
         }

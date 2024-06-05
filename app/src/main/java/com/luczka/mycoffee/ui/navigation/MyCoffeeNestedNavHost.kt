@@ -72,18 +72,17 @@ fun MyCoffeeNestedNavHost(
                 )
             )
         ) { backStackEntry ->
-            backStackEntry.arguments?.getString(MyCoffeeDestinations.KEY_BREW_ID)?.toIntOrNull()
-                ?.let { brewId ->
-                    val viewModel: HistoryDetailsViewModel = viewModel(
-                        factory = MyCoffeeViewModelProvider.historyDetailsViewModelFactory(brewId = brewId)
-                    )
-                    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-                    HistoryDetailsScreen(
-                        historyDetailsUiState = uiState,
-                        navigateUp = navController::navigateUp,
-                        onDelete = viewModel::onDelete
-                    )
-                }
+            backStackEntry.arguments?.getString(MyCoffeeDestinations.KEY_BREW_ID)?.toIntOrNull()?.let { brewId ->
+                val viewModel: HistoryDetailsViewModel = viewModel(
+                    factory = MyCoffeeViewModelProvider.historyDetailsViewModelFactory(brewId = brewId)
+                )
+                val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+                HistoryDetailsScreen(
+                    historyDetailsUiState = uiState,
+                    navigateUp = navController::navigateUp,
+                    onDelete = viewModel::onDelete
+                )
+            }
         }
         composable(MyCoffeeDestinations.ROUTE_COFFEES) {
             val viewModel: CoffeesViewModel = viewModel(factory = MyCoffeeViewModelProvider.Factory)
@@ -106,23 +105,20 @@ fun MyCoffeeNestedNavHost(
                 )
             )
         ) { backStackEntry ->
-            backStackEntry.arguments?.getString(MyCoffeeDestinations.KEY_COFFEE_ID)?.toIntOrNull()
-                ?.let { coffeeId ->
-                    val viewModel: CoffeeDetailsViewModel = viewModel(
-                        factory = MyCoffeeViewModelProvider.coffeeDetailsViewModelFactory(
-                            coffeeId = coffeeId
-                        )
-                    )
-                    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-                    CoffeeDetailsScreen(
-                        widthSizeClass = widthSizeClass,
-                        uiState = uiState,
-                        navigateUp = navController::navigateUp,
-                        onUpdateFavourite = viewModel::onUpdateFavourite,
-                        onEdit = navigateToEditCoffee,
-                        onDelete = viewModel::onDelete
-                    )
-                }
+            backStackEntry.arguments?.getString(MyCoffeeDestinations.KEY_COFFEE_ID)?.toIntOrNull()?.let { coffeeId ->
+                val viewModel: CoffeeDetailsViewModel = viewModel(
+                    factory = MyCoffeeViewModelProvider.coffeeDetailsViewModelFactory(coffeeId = coffeeId)
+                )
+                val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+                CoffeeDetailsScreen(
+                    widthSizeClass = widthSizeClass,
+                    uiState = uiState,
+                    navigateUp = navController::navigateUp,
+                    onUpdateFavourite = viewModel::onUpdateFavourite,
+                    onEdit = navigateToEditCoffee,
+                    onDelete = viewModel::onDelete
+                )
+            }
         }
         composable(MyCoffeeDestinations.ROUTE_RECIPES) {
             val viewModel: MethodsViewModel = viewModel(factory = MyCoffeeViewModelProvider.Factory)
@@ -142,8 +138,7 @@ fun MyCoffeeNestedNavHost(
                 )
             )
         ) { backStackEntry ->
-            val methodId = backStackEntry.arguments?.getString(MyCoffeeDestinations.KEY_METHOD_ID)
-                ?: return@composable
+            val methodId = backStackEntry.arguments?.getString(MyCoffeeDestinations.KEY_METHOD_ID) ?: return@composable
             val viewModel: RecipesViewModel = viewModel(
                 factory = MyCoffeeViewModelProvider.methodRecipesViewModelFactory(methodId)
             )
@@ -172,20 +167,17 @@ fun MyCoffeeNestedNavHost(
                 )
             )
         ) { backStackEntry ->
-            backStackEntry.arguments?.getString(MyCoffeeDestinations.KEY_RECIPE_ID)
-                ?.let { recipeId ->
-                    val viewModel: RecipeDetailsViewModel = viewModel(
-                        factory = MyCoffeeViewModelProvider.recipeDetailsViewModelFactory(
-                            recipeId = recipeId
-                        )
-                    )
-                    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-                    RecipeDetailsScreen(
-                        widthSizeClass = widthSizeClass,
-                        uiState = uiState,
-                        navigateUp = navController::navigateUp
-                    )
-                }
+            backStackEntry.arguments?.getString(MyCoffeeDestinations.KEY_RECIPE_ID)?.let { recipeId ->
+                val viewModel: RecipeDetailsViewModel = viewModel(
+                    factory = MyCoffeeViewModelProvider.recipeDetailsViewModelFactory(recipeId = recipeId)
+                )
+                val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+                RecipeDetailsScreen(
+                    widthSizeClass = widthSizeClass,
+                    uiState = uiState,
+                    navigateUp = navController::navigateUp
+                )
+            }
         }
     }
 }

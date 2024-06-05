@@ -13,32 +13,48 @@ import kotlinx.coroutines.launch
 
 sealed interface MethodsUiState {
     val isLoading: Boolean
+    val isError: Boolean
+
+    data class IsError(
+        override val isLoading: Boolean,
+        override val isError: Boolean,
+    ) : MethodsUiState
 
     data class NoMethods(
         override val isLoading: Boolean,
+        override val isError: Boolean,
         val errorMessage: String,
     ) : MethodsUiState
 
     data class HasMethods(
         override val isLoading: Boolean,
+        override val isError: Boolean,
         val methods: List<MethodUiState>
     ) : MethodsUiState
 }
 
 private data class MethodsViewModelState(
     val isLoading: Boolean = false,
+    val isError: Boolean = false,
     val errorMessage: String = "",
     val methods: List<MethodUiState>? = null
 ) {
     fun toMethodUiState(): MethodsUiState {
-        return if (methods == null) {
-            MethodsUiState.NoMethods(
-                isLoading = isLoading,
-                errorMessage = errorMessage,
+        return when {
+            isError -> MethodsUiState.IsError(
+                isError = true,
+                isLoading = isLoading
             )
-        } else {
-            MethodsUiState.HasMethods(
+
+            methods == null -> MethodsUiState.NoMethods(
                 isLoading = isLoading,
+                isError = false,
+                errorMessage = errorMessage
+            )
+
+            else -> MethodsUiState.HasMethods(
+                isLoading = isLoading,
+                isError = false,
                 methods = methods
             )
         }
@@ -70,12 +86,19 @@ class MethodsViewModel(private val firebaseRepository: FirebaseRepository) : Vie
                             methods = methodUiStateListSorted
                         )
                     }
+
+//                    viewModelState.update {
+//                        it.copy(
+//                            isLoading = false,
+//                            isError = true
+//                        )
+//                    }
                 },
                 onError = { errorMessage ->
                     viewModelState.update {
                         it.copy(
                             isLoading = false,
-                            errorMessage = errorMessage
+                            isError = true
                         )
                     }
                 }

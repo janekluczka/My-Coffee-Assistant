@@ -5,7 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
-import com.luczka.mycoffee.ui.MyCoffeeApp
+import com.luczka.mycoffee.ui.MyCoffeeContent
 import com.luczka.mycoffee.ui.theme.MyCoffeeTheme
 
 class MainActivity : ComponentActivity() {
@@ -19,7 +19,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             MyCoffeeTheme {
                 val windowSize = calculateWindowSizeClass(this)
-                MyCoffeeApp(widthSizeClass = windowSize.widthSizeClass)
+                MyCoffeeContent(widthSizeClass = windowSize.widthSizeClass)
             }
         }
     }

@@ -7,7 +7,7 @@ import androidx.navigation.compose.rememberNavController
 import com.luczka.mycoffee.ui.navigation.MyCoffeeMainNavHost
 
 @Composable
-fun MyCoffeeApp(widthSizeClass: WindowWidthSizeClass) {
+fun MyCoffeeContent(widthSizeClass: WindowWidthSizeClass) {
     val mainNavController: NavHostController = rememberNavController()
     val navController: NavHostController = rememberNavController()
 
