@@ -12,10 +12,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.luczka.mycoffee.ui.MyCoffeeViewModelProvider
-import com.luczka.mycoffee.ui.screens.assistant.AssistantMainScreen
-import com.luczka.mycoffee.ui.screens.assistant.AssistantViewModel
-import com.luczka.mycoffee.ui.screens.coffeeinput.CoffeeInputScreen
-import com.luczka.mycoffee.ui.screens.coffeeinput.CoffeeInputViewModel
+import com.luczka.mycoffee.ui.screen.assistant.AssistantMainScreen
+import com.luczka.mycoffee.ui.screen.assistant.AssistantViewModel
+import com.luczka.mycoffee.ui.screen.coffeeinput.CoffeeInputScreen
+import com.luczka.mycoffee.ui.screen.coffeeinput.CoffeeInputViewModel
 
 @Composable
 fun MyCoffeeMainNavHost(

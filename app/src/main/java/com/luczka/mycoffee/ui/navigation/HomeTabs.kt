@@ -11,22 +11,22 @@ enum class HomeTabs(
 ) {
     HOME(
         stringResource = R.string.tab_home,
-        painterResource = R.drawable.ic_baseline_home,
+        painterResource = R.drawable.home_24px,
         route = MyCoffeeDestinations.ROUTE_HOME
     ),
     HISTORY(
         stringResource = R.string.tab_history,
-        painterResource = R.drawable.ic_baseline_history,
+        painterResource = R.drawable.history_24px,
         route = MyCoffeeDestinations.ROUTE_HISTORY
     ),
     COFFEES(
         stringResource = R.string.tab_coffees,
-        painterResource = R.drawable.ic_baseline_auto_awesome_motion,
+        painterResource = R.drawable.browse_24px,
         route = MyCoffeeDestinations.ROUTE_COFFEES
     ),
     RECIPES(
         stringResource = R.string.tab_recipes,
-        painterResource = R.drawable.ic_baseline_format_list_bulleted,
+        painterResource = R.drawable.format_list_bulleted_24px,
         route = MyCoffeeDestinations.ROUTE_RECIPES
     ),
 }

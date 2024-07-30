@@ -16,6 +16,30 @@ val switzerFontFamily = FontFamily(
     Font(R.font.switzer_bold, FontWeight.Bold)
 )
 
+//val nunitoFontFamily = FontFamily(
+//    Font(R.font.nunito_light, FontWeight.Light),
+//    Font(R.font.nunito_regular, FontWeight.Normal),
+//    Font(R.font.nunito_medium, FontWeight.Medium),
+//    Font(R.font.nunito_semibold, FontWeight.SemiBold),
+//    Font(R.font.nunito_bold, FontWeight.Bold)
+//)
+
+//val switzerFontFamily = FontFamily(
+//    Font(R.font.satoshi_light, FontWeight.Light),
+//    Font(R.font.satoshi_regular, FontWeight.Normal),
+//    Font(R.font.satoshi_medium, FontWeight.Medium),
+//    Font(R.font.satoshi_bold, FontWeight.SemiBold),
+//    Font(R.font.satoshi_black, FontWeight.Bold)
+//)
+
+//val switzerFontFamily = FontFamily(
+//    Font(R.font.supreme_light, FontWeight.Light),
+//    Font(R.font.supreme_regular, FontWeight.Normal),
+//    Font(R.font.supreme_medium, FontWeight.Medium),
+//    Font(R.font.supreme_bold, FontWeight.SemiBold),
+//    Font(R.font.supreme_extrabold, FontWeight.Bold)
+//)
+
 val typography = Typography(
     displayLarge = TextStyle(
         fontFamily = switzerFontFamily,

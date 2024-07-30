@@ -1,8 +1,8 @@
 package com.luczka.mycoffee.ui.model
 
 import com.luczka.mycoffee.data.database.entities.Coffee
-import com.luczka.mycoffee.enums.Process
-import com.luczka.mycoffee.enums.Roast
+import com.luczka.mycoffee.enum.Process
+import com.luczka.mycoffee.enum.Roast
 import com.luczka.mycoffee.util.formatToBasicIsoDate
 import java.time.LocalDate
 

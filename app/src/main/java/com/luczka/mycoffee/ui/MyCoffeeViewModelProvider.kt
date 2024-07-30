@@ -5,16 +5,16 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.luczka.mycoffee.MyCoffeeApplication
-import com.luczka.mycoffee.ui.screens.assistant.AssistantViewModel
-import com.luczka.mycoffee.ui.screens.coffeedetails.CoffeeDetailsViewModel
-import com.luczka.mycoffee.ui.screens.coffeeinput.CoffeeInputViewModel
-import com.luczka.mycoffee.ui.screens.coffees.CoffeesViewModel
-import com.luczka.mycoffee.ui.screens.history.HistoryViewModel
-import com.luczka.mycoffee.ui.screens.historydetails.HistoryDetailsViewModel
-import com.luczka.mycoffee.ui.screens.home.HomeViewModel
-import com.luczka.mycoffee.ui.screens.methods.MethodsViewModel
-import com.luczka.mycoffee.ui.screens.recipedetails.RecipeDetailsViewModel
-import com.luczka.mycoffee.ui.screens.recipes.RecipesViewModel
+import com.luczka.mycoffee.ui.screen.assistant.AssistantViewModel
+import com.luczka.mycoffee.ui.screen.coffeedetails.CoffeeDetailsViewModel
+import com.luczka.mycoffee.ui.screen.coffeeinput.CoffeeInputViewModel
+import com.luczka.mycoffee.ui.screen.coffees.CoffeesViewModel
+import com.luczka.mycoffee.ui.screen.history.HistoryViewModel
+import com.luczka.mycoffee.ui.screen.historydetails.HistoryDetailsViewModel
+import com.luczka.mycoffee.ui.screen.home.HomeViewModel
+import com.luczka.mycoffee.ui.screen.methods.MethodsViewModel
+import com.luczka.mycoffee.ui.screen.recipedetails.RecipeDetailsViewModel
+import com.luczka.mycoffee.ui.screen.recipes.RecipesViewModel
 
 object MyCoffeeViewModelProvider {
     val Factory = viewModelFactory {
