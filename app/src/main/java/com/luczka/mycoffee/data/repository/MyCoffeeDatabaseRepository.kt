@@ -20,8 +20,6 @@ interface MyCoffeeDatabaseRepository {
 
     fun getAmountLowerThanStream(amount: Float): Flow<List<Coffee>>
 
-    fun getOlderThanStream(date: String): Flow<List<Coffee>>
-
     suspend fun insertCoffee(coffee: Coffee)
 
     suspend fun updateCoffee(coffee: Coffee)

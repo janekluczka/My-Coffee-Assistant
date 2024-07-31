@@ -3,8 +3,6 @@ package com.luczka.mycoffee.ui.model
 import com.luczka.mycoffee.data.database.entities.Coffee
 import com.luczka.mycoffee.enum.Process
 import com.luczka.mycoffee.enum.Roast
-import com.luczka.mycoffee.util.formatToBasicIsoDate
-import java.time.LocalDate
 
 data class CoffeeUiState(
     val coffeeId: Int = 0,
@@ -14,7 +12,6 @@ data class CoffeeUiState(
     val scaScore: String? = null,
     val process: Process? = null,
     val roast: Roast? = null,
-    val roastingDate: LocalDate? = null,
     val isFavourite: Boolean = false,
     val imageFile240x240: String? = null,
     val imageFile360x360: String? = null,
@@ -40,7 +37,6 @@ data class CoffeeUiState(
         scaScore = scaScore?.toFloatOrNull(),
         process = process?.id,
         roast = roast?.id,
-        roastingDate = roastingDate?.formatToBasicIsoDate(),
         isFavourite = isFavourite,
         imageFile240x240 = imageFile240x240,
         imageFile360x360 = imageFile360x360,
@@ -56,7 +52,6 @@ data class CoffeeUiState(
         if (amount != null) return false
         if (process != null) return false
         if (roast != null) return false
-        if (roastingDate != null) return false
         if (imageFile240x240 != null) return false
         if (imageFile360x360 != null) return false
         if (imageFile480x480 != null) return false
@@ -74,11 +69,6 @@ data class CoffeeUiState(
     fun hasAmountLowerThan(amount: Float): Boolean {
         val amountFloat = this.amount?.toFloatOrNull() ?: return false
         return amountFloat < amount
-    }
-
-    fun isOlderThan(date: LocalDate): Boolean {
-        val roastingDate = this.roastingDate ?: return false
-        return roastingDate.isBefore(date)
     }
 
     override fun toString(): String = "$name, $brand ($amount\u00A0g)"

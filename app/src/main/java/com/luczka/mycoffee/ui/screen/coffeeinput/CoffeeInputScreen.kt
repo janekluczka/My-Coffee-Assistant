@@ -27,7 +27,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
@@ -49,7 +48,6 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -72,19 +70,10 @@ import com.luczka.mycoffee.R
 import com.luczka.mycoffee.enum.Process
 import com.luczka.mycoffee.enum.Roast
 import com.luczka.mycoffee.ui.component.button.CloseIconButton
-import com.luczka.mycoffee.ui.component.textfield.ClickableOutlinedTextField
 import com.luczka.mycoffee.ui.component.textfield.FilteredOutlinedTextField
 import com.luczka.mycoffee.ui.model.CoffeeUiState
 import com.luczka.mycoffee.ui.theme.MyCoffeeTheme
-import com.maxkeppeker.sheets.core.models.base.rememberUseCaseState
-import com.maxkeppeler.sheets.calendar.CalendarDialog
-import com.maxkeppeler.sheets.calendar.models.CalendarConfig
-import com.maxkeppeler.sheets.calendar.models.CalendarSelection
-import com.maxkeppeler.sheets.calendar.models.CalendarStyle
 import java.io.File
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -101,14 +90,9 @@ fun CoffeeInputScreen(
     onUpdateScaScore: (String) -> Unit,
     onUpdateProcess: (Process?) -> Unit,
     onUpdateRoast: (Roast?) -> Unit,
-    onUpdateRoastingDate: (LocalDate) -> Unit,
     onSave: (Context) -> Unit
 ) {
-    val scope = rememberCoroutineScope()
-
     var openDiscardDialog by rememberSaveable { mutableStateOf(false) }
-    var openCalendarDialog by rememberSaveable { mutableStateOf(false) }
-    var showBottomSheet by remember { mutableStateOf(false) }
 
     val roastListState = rememberLazyListState()
     val processListState = rememberLazyListState()
@@ -145,13 +129,6 @@ fun CoffeeInputScreen(
         )
     }
 
-    if (openCalendarDialog) {
-        RoastingCalendarDialog(
-            onHideDialog = { openCalendarDialog = false },
-            updateCoffeeRoastingDate = onUpdateRoastingDate
-        )
-    }
-
     Scaffold(
         topBar = {
             AddCoffeeTopBar(
@@ -181,37 +158,9 @@ fun CoffeeInputScreen(
             onUpdateAmount = onUpdateAmount,
             onUpdateScaScore = onUpdateScaScore,
             onUpdateProcess = onUpdateProcess,
-            onUpdateRoast = onUpdateRoast,
-            onShowCalendarDialog = { openCalendarDialog = true }
+            onUpdateRoast = onUpdateRoast
         )
     }
-}
-
-
-@Composable
-@OptIn(ExperimentalMaterial3Api::class)
-private fun RoastingCalendarDialog(
-    updateCoffeeRoastingDate: (LocalDate) -> Unit,
-    onHideDialog: () -> Unit,
-) {
-    CalendarDialog(
-        state = rememberUseCaseState(
-            visible = true,
-            onCloseRequest = { onHideDialog() },
-            onFinishedRequest = { onHideDialog() },
-            onDismissRequest = { onHideDialog() }
-        ),
-        config = CalendarConfig(
-            monthSelection = true,
-            yearSelection = true,
-            style = CalendarStyle.MONTH,
-            boundary = LocalDate.now().minusYears(100)..LocalDate.now()
-        ),
-        selection = CalendarSelection.Date {
-            updateCoffeeRoastingDate(it)
-            onHideDialog()
-        }
-    )
 }
 
 @Composable
@@ -285,7 +234,6 @@ private fun AddCoffeeContent(
     onUpdateScaScore: (String) -> Unit,
     onUpdateProcess: (Process?) -> Unit,
     onUpdateRoast: (Roast?) -> Unit,
-    onShowCalendarDialog: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -372,12 +320,6 @@ private fun AddCoffeeContent(
                     updateCoffeeProcess = onUpdateProcess
                 )
             }
-//            item {
-//                CoffeeRoastingDateTextField(
-//                    coffeeUiState = coffeeInputUiState.coffeeUiState,
-//                    onShowCalendarDialog = onShowCalendarDialog
-//                )
-//            }
         }
         Divider()
     }
@@ -599,24 +541,6 @@ private fun CoffeeRoastDropdownMenu(
     }
 }
 
-@Composable
-private fun CoffeeRoastingDateTextField(
-    coffeeUiState: CoffeeUiState,
-    onShowCalendarDialog: () -> Unit,
-) {
-    val formatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)
-    val date = coffeeUiState.roastingDate?.format(formatter) ?: ""
-    ClickableOutlinedTextField(
-        value = date,
-        label = { Text(text = stringResource(id = R.string.coffee_parameters_roasting_date)) },
-        maxLines = 1,
-        modifier = Modifier.fillMaxWidth(),
-        trailingIcon = { Icon(imageVector = Icons.Filled.DateRange, contentDescription = null) },
-        readOnly = true,
-        onClick = onShowCalendarDialog
-    )
-}
-
 
 @Preview(device = "id:pixel_6")
 @Composable
@@ -636,7 +560,6 @@ fun AddCoffeeScreenLightThemePreview() {
             onUpdateScaScore = {},
             onUpdateProcess = {},
             onUpdateRoast = {},
-            onUpdateRoastingDate = {},
             onSave = { _ -> }
         )
     }
@@ -660,7 +583,6 @@ fun AddCoffeeScreenDarkThemePreview() {
             onUpdateScaScore = {},
             onUpdateProcess = {},
             onUpdateRoast = {},
-            onUpdateRoastingDate = {},
             onSave = { _ -> }
         )
     }

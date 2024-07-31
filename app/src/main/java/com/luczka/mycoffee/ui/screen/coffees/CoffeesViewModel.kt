@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.time.LocalDate
 
 sealed interface CoffeesUiState {
     val filteredCoffees: List<CoffeeUiState>
@@ -60,7 +59,7 @@ private data class CoffeesViewModelState(
             }
 
             CoffeeFilter.Older -> {
-                allCoffees.filter { it.isOlderThan(date = LocalDate.now().minusWeeks(4)) }
+                allCoffees
             }
         }
     }

@@ -98,7 +98,6 @@ fun MyCoffeeMainNavHost(
                 onUpdateScaScore = viewModel::updateScaScore,
                 onUpdateProcess = viewModel::updateProcess,
                 onUpdateRoast = viewModel::updateRoast,
-                onUpdateRoastingDate = viewModel::updateRoastingDate,
                 onSave = viewModel::saveCoffee
             )
         }

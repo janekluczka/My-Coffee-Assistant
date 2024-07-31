@@ -68,15 +68,6 @@ interface MyCoffeeDao {
     fun getBelowAmountCoffees(amount: Float): Flow<List<Coffee>>
 
     /**
-     * Get current coffees (amount > 0) with a roasting date older than the specified date,
-     * ordered by amount in ascending order.
-     * @param date The date to compare against.
-     * @return A [Flow] emitting a list of coffees with roasting date older than the specified date.
-     */
-    @Query("SELECT * FROM coffee WHERE roastingDate < :date AND amount > 0 ORDER BY amount ASC")
-    fun getOlderThanCoffees(date: String): Flow<List<Coffee>>
-
-    /**
      * Delete a coffee from the database.
      */
     @Delete

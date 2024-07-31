@@ -25,7 +25,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.text.SimpleDateFormat
-import java.time.LocalDate
 import java.util.Calendar
 import java.util.Locale
 import java.util.TimeZone
@@ -113,10 +112,6 @@ class CoffeeInputViewModel(
 
     fun updateRoast(roast: Roast?) {
         _uiState.update { it.copy(coffeeUiState = it.coffeeUiState.copy(roast = roast)) }
-    }
-
-    fun updateRoastingDate(date: LocalDate) {
-        _uiState.update { it.copy(coffeeUiState = it.coffeeUiState.copy(roastingDate = date)) }
     }
 
     fun saveCoffee(context: Context) {

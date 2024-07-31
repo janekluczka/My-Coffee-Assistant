@@ -29,9 +29,6 @@ class OfflineMyCoffeeDatabaseRepository(
     override fun getAmountLowerThanStream(amount: Float): Flow<List<Coffee>> =
         myCoffeeDao.getBelowAmountCoffees(amount)
 
-    override fun getOlderThanStream(date: String): Flow<List<Coffee>> =
-        myCoffeeDao.getOlderThanCoffees(date)
-
     override suspend fun insertCoffee(coffee: Coffee) =
         myCoffeeDao.insert(coffee)
 

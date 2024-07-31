@@ -43,8 +43,6 @@ import com.luczka.mycoffee.ui.component.button.FavouriteToggleButton
 import com.luczka.mycoffee.ui.model.CoffeeUiState
 import com.luczka.mycoffee.util.isPositiveFloat
 import java.io.File
-import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -176,16 +174,6 @@ private fun CoffeeDetailsList(coffeeUiState: CoffeeUiState) {
                 )
             }
         }
-        if (coffeeUiState.roastingDate != null) {
-            val formatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)
-            val date = coffeeUiState.roastingDate.format(formatter)!!
-            item {
-                CoffeeDetailListItem(
-                    detailName = stringResource(id = R.string.coffee_parameters_roasting_date),
-                    detailValue = date
-                )
-            }
-        }
     }
 }
 
@@ -240,7 +228,6 @@ private fun CoffeeDetailListItem(
 //        brand = "monko.",
 //        amount = "240.0",
 //        roast = Roast.MediumDark,
-//        roastingDate = LocalDate.now(),
 //        process = Process.Natural
 //    )
 //    MyCoffeeTheme {

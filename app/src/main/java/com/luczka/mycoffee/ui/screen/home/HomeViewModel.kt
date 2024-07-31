@@ -10,19 +10,14 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.time.LocalDate
 
 sealed interface HomeUiState {
     val lowAmountCoffees: List<CoffeeUiState>
     val hasMoreLowAmountCoffees: Boolean
-    val oldCoffees: List<CoffeeUiState>
-    val hasMoreOldCoffees: Boolean
 
     data class HasCoffees(
         override val lowAmountCoffees: List<CoffeeUiState>,
         override val hasMoreLowAmountCoffees: Boolean,
-        override val oldCoffees: List<CoffeeUiState>,
-        override val hasMoreOldCoffees: Boolean
     ) : HomeUiState
 }
 
@@ -32,13 +27,10 @@ private data class HomeViewModelState(
     fun toHomeUiState(): HomeUiState {
         val rowItemsAmount = 4
         val lowAmountCoffees = currentCoffees.filter { it.hasAmountLowerThan(100f) }
-        val oldCoffees = currentCoffees.filter { it.isOlderThan(LocalDate.now().minusWeeks(4)) }
 
         return HomeUiState.HasCoffees(
             lowAmountCoffees = lowAmountCoffees.take(rowItemsAmount),
             hasMoreLowAmountCoffees = lowAmountCoffees.size > rowItemsAmount,
-            oldCoffees = oldCoffees.take(rowItemsAmount),
-            hasMoreOldCoffees = oldCoffees.size > rowItemsAmount
         )
     }
 }
