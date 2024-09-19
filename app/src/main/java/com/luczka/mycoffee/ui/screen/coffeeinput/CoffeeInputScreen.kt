@@ -67,8 +67,8 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.luczka.mycoffee.R
-import com.luczka.mycoffee.domain.enum.Process
-import com.luczka.mycoffee.domain.enum.Roast
+import com.luczka.mycoffee.domain.model.Process
+import com.luczka.mycoffee.domain.model.Roast
 import com.luczka.mycoffee.ui.component.button.CloseIconButton
 import com.luczka.mycoffee.ui.component.textfield.FilteredOutlinedTextField
 import com.luczka.mycoffee.ui.model.CoffeeUiState

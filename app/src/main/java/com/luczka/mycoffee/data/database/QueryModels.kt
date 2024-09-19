@@ -2,45 +2,45 @@ package com.luczka.mycoffee.data.database
 
 import androidx.room.Embedded
 import androidx.room.Relation
-import com.luczka.mycoffee.data.database.entities.Brew
-import com.luczka.mycoffee.data.database.entities.BrewedCoffee
-import com.luczka.mycoffee.data.database.entities.Coffee
-import com.luczka.mycoffee.ui.model.BrewUiState
-import com.luczka.mycoffee.ui.model.BrewedCoffeeUiState
+import com.luczka.mycoffee.data.database.entities.BrewEntity
+import com.luczka.mycoffee.data.database.entities.BrewedCoffeeEntity
+import com.luczka.mycoffee.data.database.entities.CoffeeEntity
+import com.luczka.mycoffee.ui.screen.history.BrewUiState
+import com.luczka.mycoffee.ui.screen.history.BrewedCoffeeUiState
 import com.luczka.mycoffee.util.LocalDateParser
 
 data class BrewWithBrewedCoffees(
-    @Embedded val brew: Brew,
+    @Embedded val brewEntity: BrewEntity,
     @Relation(
         parentColumn = "brewId",
         entityColumn = "brewId",
-        entity = BrewedCoffee::class
+        entity = BrewedCoffeeEntity::class
     )
-    val brewedCoffees: List<BrewedCoffeeWithCoffee>
+    val brewedCoffeesEntity: List<BrewedCoffeeWithCoffee>
 ) {
     fun toBrewUiState(): BrewUiState = BrewUiState(
-        brewId = brew.brewId,
-        date = LocalDateParser.parseBasicIsoDate(brew.date),
-        coffeeAmount = brew.coffeeAmount,
-        coffeeRatio = brew.coffeeRatio,
-        waterAmount = brew.waterAmount,
-        waterRatio = brew.waterRatio,
-        rating = brew.rating,
-        notes = brew.notes,
-        brewedCoffees = brewedCoffees.map { it.toBrewedCoffeeUiState() }
+        brewId = brewEntity.brewId,
+        date = LocalDateParser.parseBasicIsoDate(brewEntity.date),
+        coffeeAmount = brewEntity.coffeeAmount,
+        coffeeRatio = brewEntity.coffeeRatio,
+        waterAmount = brewEntity.waterAmount,
+        waterRatio = brewEntity.waterRatio,
+        rating = brewEntity.rating,
+        notes = brewEntity.notes,
+        brewedCoffees = brewedCoffeesEntity.map { it.toBrewedCoffeeUiState() }
     )
 }
 
 data class BrewedCoffeeWithCoffee(
-    @Embedded val brewedCoffee: BrewedCoffee,
+    @Embedded val brewedCoffeeEntity: BrewedCoffeeEntity,
     @Relation(
         parentColumn = "coffeeId",
         entityColumn = "coffeeId"
     )
-    val coffee: Coffee
+    val coffeeEntity: CoffeeEntity
 ) {
     fun toBrewedCoffeeUiState(): BrewedCoffeeUiState = BrewedCoffeeUiState(
-        coffeeAmount = brewedCoffee.coffeeAmount,
-        coffee = coffee.toCoffeeUiState()
+        coffeeAmount = brewedCoffeeEntity.coffeeAmount,
+        coffee = coffeeEntity.toCoffeeUiState()
     )
 }

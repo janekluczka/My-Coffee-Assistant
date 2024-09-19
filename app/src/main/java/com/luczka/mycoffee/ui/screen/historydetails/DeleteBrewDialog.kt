@@ -6,7 +6,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.luczka.mycoffee.R
-import com.luczka.mycoffee.ui.model.BrewUiState
+import com.luczka.mycoffee.ui.screen.history.BrewUiState
 
 @Composable
 fun DeleteBrewDialog(

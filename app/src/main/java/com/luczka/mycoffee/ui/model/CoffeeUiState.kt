@@ -1,8 +1,8 @@
 package com.luczka.mycoffee.ui.model
 
-import com.luczka.mycoffee.data.database.entities.Coffee
-import com.luczka.mycoffee.domain.enum.Process
-import com.luczka.mycoffee.domain.enum.Roast
+import com.luczka.mycoffee.data.database.entities.CoffeeEntity
+import com.luczka.mycoffee.domain.model.Process
+import com.luczka.mycoffee.domain.model.Roast
 
 data class CoffeeUiState(
     val coffeeId: Int = 0,
@@ -29,7 +29,7 @@ data class CoffeeUiState(
         ).compare(this, other)
     }
 
-    fun toCoffee(): Coffee = Coffee(
+    fun toCoffee(): CoffeeEntity = CoffeeEntity(
         coffeeId = coffeeId,
         name = name.trim(),
         brand = brand.trim(),

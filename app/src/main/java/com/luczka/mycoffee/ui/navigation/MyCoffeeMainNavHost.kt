@@ -4,18 +4,18 @@ import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.luczka.mycoffee.ui.MyCoffeeViewModelProvider
 import com.luczka.mycoffee.ui.screen.assistant.AssistantMainScreen
 import com.luczka.mycoffee.ui.screen.assistant.AssistantViewModel
 import com.luczka.mycoffee.ui.screen.coffeeinput.CoffeeInputScreen
 import com.luczka.mycoffee.ui.screen.coffeeinput.CoffeeInputViewModel
+import com.luczka.mycoffee.ui.screen.coffeeinput.CoffeeInputViewModelFactory
 
 @Composable
 fun MyCoffeeMainNavHost(
@@ -37,9 +37,7 @@ fun MyCoffeeMainNavHost(
             )
         }
         composable(MyCoffeeDestinations.ROUTE_ASSISTANT) {
-            val viewModel: AssistantViewModel = viewModel(
-                factory = MyCoffeeViewModelProvider.Factory
-            )
+            val viewModel = hiltViewModel<AssistantViewModel>()
 
             val uiState by viewModel.uiState.collectAsState()
 
@@ -76,9 +74,9 @@ fun MyCoffeeMainNavHost(
             val arguments = backStackEntry.arguments
             val coffeeId = arguments?.getString(MyCoffeeDestinations.KEY_COFFEE_ID)?.toIntOrNull()
 
-            val viewModel: CoffeeInputViewModel = viewModel(
-                factory = MyCoffeeViewModelProvider.coffeeInputViewModelFactory(coffeeId)
-            )
+            val viewModel = hiltViewModel<CoffeeInputViewModel, CoffeeInputViewModelFactory> { factory ->
+                factory.create(coffeeId)
+            }
 
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 

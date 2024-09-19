@@ -2,14 +2,14 @@ package com.luczka.mycoffee.data.database.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.luczka.mycoffee.domain.enum.Process
-import com.luczka.mycoffee.domain.enum.Roast
+import com.luczka.mycoffee.domain.model.Process
+import com.luczka.mycoffee.domain.model.Roast
 import com.luczka.mycoffee.ui.model.CoffeeUiState
 import com.luczka.mycoffee.util.toStringWithOneDecimalPoint
 import com.luczka.mycoffee.util.toStringWithTwoDecimalPoints
 
 @Entity
-data class Coffee(
+data class CoffeeEntity(
     @PrimaryKey(autoGenerate = true)
     val coffeeId: Int,
     val name: String,
@@ -24,10 +24,10 @@ data class Coffee(
     val imageFile480x480: String?,
     val imageFile720x720: String?,
     val imageFile960x960: String?,
-) : Comparable<Coffee> {
+) : Comparable<CoffeeEntity> {
 
-    override fun compareTo(other: Coffee): Int {
-        return compareBy<Coffee>(
+    override fun compareTo(other: CoffeeEntity): Int {
+        return compareBy<CoffeeEntity>(
             { it.isFavourite },
             { it.name },
             { it.brand },

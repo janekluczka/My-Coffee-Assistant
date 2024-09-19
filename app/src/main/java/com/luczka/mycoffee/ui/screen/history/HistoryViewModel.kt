@@ -2,14 +2,15 @@ package com.luczka.mycoffee.ui.screen.history
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.luczka.mycoffee.data.repository.MyCoffeeDatabaseRepository
-import com.luczka.mycoffee.ui.model.BrewUiState
+import com.luczka.mycoffee.domain.repository.MyCoffeeDatabaseRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 sealed interface HistoryUiState {
     val brews: List<BrewUiState>
@@ -35,7 +36,8 @@ private data class HistoryViewModelState(
     }
 }
 
-class HistoryViewModel(
+@HiltViewModel
+class HistoryViewModel @Inject constructor(
     private val myCoffeeDatabaseRepository: MyCoffeeDatabaseRepository
 ) : ViewModel() {
 

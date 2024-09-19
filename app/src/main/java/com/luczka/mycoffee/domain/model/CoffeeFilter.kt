@@ -1,4 +1,4 @@
-package com.luczka.mycoffee.domain.enum
+package com.luczka.mycoffee.domain.model
 
 import com.luczka.mycoffee.R
 

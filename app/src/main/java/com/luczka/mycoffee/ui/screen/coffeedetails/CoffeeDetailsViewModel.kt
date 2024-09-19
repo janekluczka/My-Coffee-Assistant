@@ -2,8 +2,12 @@ package com.luczka.mycoffee.ui.screen.coffeedetails
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.luczka.mycoffee.data.repository.MyCoffeeDatabaseRepository
+import com.luczka.mycoffee.domain.repository.MyCoffeeDatabaseRepository
 import com.luczka.mycoffee.ui.model.CoffeeUiState
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
@@ -42,8 +46,15 @@ private data class CoffeeDetailsViewModelState(
     }
 }
 
-class CoffeeDetailsViewModel(
-    val coffeeId: Int,
+
+@AssistedFactory
+interface CoffeeDetailsViewModelFactory {
+    fun create(coffeeId: Int): CoffeeDetailsViewModel
+}
+
+@HiltViewModel(assistedFactory = CoffeeDetailsViewModelFactory::class)
+class CoffeeDetailsViewModel @AssistedInject constructor(
+    @Assisted val coffeeId: Int,
     private val myCoffeeDatabaseRepository: MyCoffeeDatabaseRepository
 ) : ViewModel() {
 
@@ -71,7 +82,7 @@ class CoffeeDetailsViewModel(
 
         viewModelScope.launch {
             val updatedCoffee = selectedCoffee.copy(isFavourite = !selectedCoffee.isFavourite)
-            myCoffeeDatabaseRepository.updateCoffee(coffee = updatedCoffee.toCoffee())
+            myCoffeeDatabaseRepository.updateCoffee(coffeeEntity = updatedCoffee.toCoffee())
         }
     }
 
@@ -91,7 +102,7 @@ class CoffeeDetailsViewModel(
             val file720x720 = imageFile720x720?.let { File(filesDir, it) }
             val file960x960 = imageFile960x960?.let { File(filesDir, it) }
 
-            myCoffeeDatabaseRepository.deleteCoffee(coffee = selectedCoffee.toCoffee())
+            myCoffeeDatabaseRepository.deleteCoffee(coffeeEntity = selectedCoffee.toCoffee())
 
             file240x240?.delete()
             file360x360?.delete()

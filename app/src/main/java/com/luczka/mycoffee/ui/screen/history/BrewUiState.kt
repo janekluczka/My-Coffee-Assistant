@@ -1,6 +1,6 @@
-package com.luczka.mycoffee.ui.model
+package com.luczka.mycoffee.ui.screen.history
 
-import com.luczka.mycoffee.data.database.entities.Brew
+import com.luczka.mycoffee.data.database.entities.BrewEntity
 import java.time.LocalDate
 
 data class BrewUiState(
@@ -25,7 +25,7 @@ data class BrewUiState(
         return "${coffeeRatio}:${waterRatio}"
     }
 
-    fun toBrew(): Brew = Brew(
+    fun toBrew(): BrewEntity = BrewEntity(
         brewId = brewId,
         date = "",
         coffeeAmount = coffeeAmount,

@@ -2,15 +2,17 @@ package com.luczka.mycoffee.ui.screen.coffees
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.luczka.mycoffee.data.repository.MyCoffeeDatabaseRepository
-import com.luczka.mycoffee.domain.enum.CoffeeFilter
+import com.luczka.mycoffee.domain.repository.MyCoffeeDatabaseRepository
+import com.luczka.mycoffee.domain.model.CoffeeFilter
 import com.luczka.mycoffee.ui.model.CoffeeUiState
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 sealed interface CoffeesUiState {
     val filteredCoffees: List<CoffeeUiState>
@@ -66,7 +68,8 @@ private data class CoffeesViewModelState(
 
 }
 
-class CoffeesViewModel(
+@HiltViewModel
+class CoffeesViewModel @Inject constructor(
     private val myCoffeeDatabaseRepository: MyCoffeeDatabaseRepository
 ) : ViewModel() {
 

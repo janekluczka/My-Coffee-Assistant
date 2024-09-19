@@ -4,6 +4,8 @@ plugins {
     alias(libs.plugins.google.gms.google.services)
     alias(libs.plugins.google.firebase.crashlytics)
     alias(libs.plugins.google.devtools.ksp)
+    id("kotlin-kapt")
+    id("com.google.dagger.hilt.android")
 }
 
 android {
@@ -60,6 +62,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.ui.util)
+    implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.androidx.exifinterface)
     implementation(libs.androidx.legacy.support.v4)
     implementation(libs.androidx.lifecycle.runtime.compose)
@@ -74,6 +77,9 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     implementation(libs.coil.compose)
     implementation(libs.google.accompanist.webview)
+
+    implementation(libs.google.dagger.hilt.android)
+    kapt(libs.google.dagger.hilt.android.compiler)
 
     // Import the Firebase BoM
     implementation(platform(libs.google.firebase.bom))

@@ -4,30 +4,33 @@ import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.luczka.mycoffee.ui.MyCoffeeViewModelProvider
 import com.luczka.mycoffee.ui.screen.coffeedetails.CoffeeDetailsScreen
 import com.luczka.mycoffee.ui.screen.coffeedetails.CoffeeDetailsViewModel
+import com.luczka.mycoffee.ui.screen.coffeedetails.CoffeeDetailsViewModelFactory
 import com.luczka.mycoffee.ui.screen.coffees.CoffeesScreen
 import com.luczka.mycoffee.ui.screen.coffees.CoffeesViewModel
 import com.luczka.mycoffee.ui.screen.history.HistoryScreen
 import com.luczka.mycoffee.ui.screen.history.HistoryViewModel
 import com.luczka.mycoffee.ui.screen.historydetails.HistoryDetailsScreen
 import com.luczka.mycoffee.ui.screen.historydetails.HistoryDetailsViewModel
+import com.luczka.mycoffee.ui.screen.historydetails.HistoryDetailsViewModelFactory
 import com.luczka.mycoffee.ui.screen.home.HomeScreen
 import com.luczka.mycoffee.ui.screen.home.HomeViewModel
 import com.luczka.mycoffee.ui.screen.methods.MethodsScreen
 import com.luczka.mycoffee.ui.screen.methods.MethodsViewModel
 import com.luczka.mycoffee.ui.screen.recipedetails.RecipeDetailsScreen
 import com.luczka.mycoffee.ui.screen.recipedetails.RecipeDetailsViewModel
+import com.luczka.mycoffee.ui.screen.recipedetails.RecipeDetailsViewModelFactory
 import com.luczka.mycoffee.ui.screen.recipes.RecipesScreen
 import com.luczka.mycoffee.ui.screen.recipes.RecipesViewModel
+import com.luczka.mycoffee.ui.screen.recipes.RecipesViewModelFactory
 
 @Composable
 fun MyCoffeeNestedNavHost(
@@ -45,7 +48,7 @@ fun MyCoffeeNestedNavHost(
         route = "main_branch",
     ) {
         composable(MyCoffeeDestinations.ROUTE_HOME) {
-            val viewModel: HomeViewModel = viewModel(factory = MyCoffeeViewModelProvider.Factory)
+            val viewModel = hiltViewModel<HomeViewModel>()
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
             HomeScreen(
                 widthSizeClass = widthSizeClass,
@@ -55,7 +58,7 @@ fun MyCoffeeNestedNavHost(
             )
         }
         composable(MyCoffeeDestinations.ROUTE_HISTORY) {
-            val viewModel: HistoryViewModel = viewModel(factory = MyCoffeeViewModelProvider.Factory)
+            val viewModel = hiltViewModel<HistoryViewModel>()
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
             HistoryScreen(
                 widthSizeClass = widthSizeClass,
@@ -73,9 +76,9 @@ fun MyCoffeeNestedNavHost(
             )
         ) { backStackEntry ->
             backStackEntry.arguments?.getString(MyCoffeeDestinations.KEY_BREW_ID)?.toIntOrNull()?.let { brewId ->
-                val viewModel: HistoryDetailsViewModel = viewModel(
-                    factory = MyCoffeeViewModelProvider.historyDetailsViewModelFactory(brewId = brewId)
-                )
+                val viewModel = hiltViewModel<HistoryDetailsViewModel, HistoryDetailsViewModelFactory> { factory ->
+                    factory.create(brewId)
+                }
                 val uiState by viewModel.uiState.collectAsStateWithLifecycle()
                 HistoryDetailsScreen(
                     historyDetailsUiState = uiState,
@@ -85,7 +88,7 @@ fun MyCoffeeNestedNavHost(
             }
         }
         composable(MyCoffeeDestinations.ROUTE_COFFEES) {
-            val viewModel: CoffeesViewModel = viewModel(factory = MyCoffeeViewModelProvider.Factory)
+            val viewModel = hiltViewModel<CoffeesViewModel>()
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
             CoffeesScreen(
                 widthSizeClass = widthSizeClass,
@@ -106,9 +109,9 @@ fun MyCoffeeNestedNavHost(
             )
         ) { backStackEntry ->
             backStackEntry.arguments?.getString(MyCoffeeDestinations.KEY_COFFEE_ID)?.toIntOrNull()?.let { coffeeId ->
-                val viewModel: CoffeeDetailsViewModel = viewModel(
-                    factory = MyCoffeeViewModelProvider.coffeeDetailsViewModelFactory(coffeeId = coffeeId)
-                )
+                val viewModel = hiltViewModel<CoffeeDetailsViewModel, CoffeeDetailsViewModelFactory> { factory ->
+                    factory.create(coffeeId)
+                }
                 val uiState by viewModel.uiState.collectAsStateWithLifecycle()
                 CoffeeDetailsScreen(
                     widthSizeClass = widthSizeClass,
@@ -121,7 +124,7 @@ fun MyCoffeeNestedNavHost(
             }
         }
         composable(MyCoffeeDestinations.ROUTE_RECIPES) {
-            val viewModel: MethodsViewModel = viewModel(factory = MyCoffeeViewModelProvider.Factory)
+            val viewModel = hiltViewModel<MethodsViewModel>()
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
             MethodsScreen(
                 widthSizeClass = widthSizeClass,
@@ -139,9 +142,9 @@ fun MyCoffeeNestedNavHost(
             )
         ) { backStackEntry ->
             val methodId = backStackEntry.arguments?.getString(MyCoffeeDestinations.KEY_METHOD_ID) ?: return@composable
-            val viewModel: RecipesViewModel = viewModel(
-                factory = MyCoffeeViewModelProvider.methodRecipesViewModelFactory(methodId)
-            )
+            val viewModel = hiltViewModel<RecipesViewModel, RecipesViewModelFactory> {
+                it.create(methodId)
+            }
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
             RecipesScreen(
                 uiState = uiState,
@@ -168,9 +171,9 @@ fun MyCoffeeNestedNavHost(
             )
         ) { backStackEntry ->
             backStackEntry.arguments?.getString(MyCoffeeDestinations.KEY_RECIPE_ID)?.let { recipeId ->
-                val viewModel: RecipeDetailsViewModel = viewModel(
-                    factory = MyCoffeeViewModelProvider.recipeDetailsViewModelFactory(recipeId = recipeId)
-                )
+                val viewModel = hiltViewModel<RecipeDetailsViewModel, RecipeDetailsViewModelFactory> { factory ->
+                    factory.create(recipeId)
+                }
                 val uiState by viewModel.uiState.collectAsStateWithLifecycle()
                 RecipeDetailsScreen(
                     widthSizeClass = widthSizeClass,

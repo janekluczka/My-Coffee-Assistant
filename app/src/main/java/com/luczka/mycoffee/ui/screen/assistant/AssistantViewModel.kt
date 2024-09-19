@@ -2,11 +2,12 @@ package com.luczka.mycoffee.ui.screen.assistant
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.luczka.mycoffee.data.database.entities.Brew
-import com.luczka.mycoffee.data.database.entities.BrewedCoffee
-import com.luczka.mycoffee.data.repository.MyCoffeeDatabaseRepository
+import com.luczka.mycoffee.data.database.entities.BrewEntity
+import com.luczka.mycoffee.data.database.entities.BrewedCoffeeEntity
+import com.luczka.mycoffee.domain.repository.MyCoffeeDatabaseRepository
 import com.luczka.mycoffee.ui.model.CoffeeUiState
 import com.luczka.mycoffee.util.toStringWithOneDecimalPoint
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
@@ -15,6 +16,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import javax.inject.Inject
 
 sealed interface BrewAssistantUiState {
     val currentCoffees: List<CoffeeUiState>
@@ -110,7 +112,7 @@ private data class AssistantViewModelState(
         }
     }
 
-    fun toBrew(): Brew {
+    fun toBrew(): BrewEntity {
         val coffeeAmountsSum = sumSelectedAmounts()
 
         val coffeeRatio = ratioSelectionUiState.selectedCoffeeRatio
@@ -118,7 +120,7 @@ private data class AssistantViewModelState(
 
         val waterAmount = coffeeAmountsSum * waterRatio / coffeeRatio
 
-        return Brew(
+        return BrewEntity(
             brewId = 0,
             date = LocalDateTime.now().format(DateTimeFormatter.BASIC_ISO_DATE),
             coffeeAmount = coffeeAmountsSum,
@@ -139,7 +141,8 @@ private data class AssistantViewModelState(
     }
 }
 
-class AssistantViewModel(
+@HiltViewModel
+class AssistantViewModel @Inject constructor(
     private val myCoffeeDatabaseRepository: MyCoffeeDatabaseRepository
 ) : ViewModel() {
 
@@ -396,7 +399,7 @@ class AssistantViewModel(
 
     private suspend fun insertBrew(): Long {
         val brew = viewModelState.value.toBrew()
-        return myCoffeeDatabaseRepository.insertBrew(brew = brew)
+        return myCoffeeDatabaseRepository.insertBrew(brewEntity = brew)
     }
 
     private suspend fun updateSelectedCoffees(brewId: Long) {
@@ -413,13 +416,13 @@ class AssistantViewModel(
                 selectedCoffee.copy(amount = updatedAmount.toString())
             }
 
-            val brewedCoffee = BrewedCoffee(
+            val brewedCoffeeEntity = BrewedCoffeeEntity(
                 brewId = brewId.toInt(),
                 coffeeId = selectedCoffee.coffeeId,
                 coffeeAmount = selectedAmount
             )
 
-            myCoffeeDatabaseRepository.insertBrewedCoffee(brewedCoffee)
+            myCoffeeDatabaseRepository.insertBrewedCoffee(brewedCoffeeEntity)
 
             myCoffeeDatabaseRepository.updateCoffee(updatedCoffee.toCoffee())
         }

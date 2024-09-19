@@ -2,14 +2,16 @@ package com.luczka.mycoffee.ui.screen.methods
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.luczka.mycoffee.data.repository.FirebaseRepository
+import com.luczka.mycoffee.domain.repository.FirebaseRepository
 import com.luczka.mycoffee.ui.model.MethodUiState
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 sealed interface MethodsUiState {
     val isLoading: Boolean
@@ -61,7 +63,10 @@ private data class MethodsViewModelState(
     }
 }
 
-class MethodsViewModel(private val firebaseRepository: FirebaseRepository) : ViewModel() {
+@HiltViewModel
+class MethodsViewModel @Inject constructor(
+    private val firebaseRepository: FirebaseRepository
+) : ViewModel() {
 
     private val viewModelState = MutableStateFlow(MethodsViewModelState(isLoading = true))
     val uiState = viewModelState

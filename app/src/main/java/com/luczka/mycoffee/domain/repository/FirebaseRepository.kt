@@ -1,4 +1,4 @@
-package com.luczka.mycoffee.data.repository
+package com.luczka.mycoffee.domain.repository
 
 import com.luczka.mycoffee.domain.model.Method
 import com.luczka.mycoffee.domain.model.Recipe

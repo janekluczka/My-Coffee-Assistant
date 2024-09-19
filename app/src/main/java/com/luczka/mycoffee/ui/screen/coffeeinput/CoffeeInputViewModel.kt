@@ -7,14 +7,18 @@ import android.os.Build
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.luczka.mycoffee.data.repository.MyCoffeeDatabaseRepository
-import com.luczka.mycoffee.domain.enum.Process
-import com.luczka.mycoffee.domain.enum.Roast
+import com.luczka.mycoffee.domain.repository.MyCoffeeDatabaseRepository
+import com.luczka.mycoffee.domain.model.Process
+import com.luczka.mycoffee.domain.model.Roast
 import com.luczka.mycoffee.ui.model.CoffeeUiState
 import com.luczka.mycoffee.util.CustomBitmapFactory
 import com.luczka.mycoffee.util.compressBitmap
 import com.luczka.mycoffee.util.createScaledBitmap
 import com.luczka.mycoffee.util.createSquareBitmap
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -41,8 +45,14 @@ data class CoffeeInputUiState(
     val isSaved: Boolean = false
 )
 
-class CoffeeInputViewModel(
-    private val coffeeId: Int? = null,
+@AssistedFactory
+interface CoffeeInputViewModelFactory {
+    fun create(coffeeId: Int?): CoffeeInputViewModel
+}
+
+@HiltViewModel(assistedFactory = CoffeeInputViewModelFactory::class)
+class CoffeeInputViewModel @AssistedInject constructor(
+    @Assisted private val coffeeId: Int? = null,
     private val myCoffeeDatabaseRepository: MyCoffeeDatabaseRepository
 ) : ViewModel() {
 
@@ -132,9 +142,9 @@ class CoffeeInputViewModel(
                 saveImageInMultipleSizes(context = context)
 
                 if (_uiState.value.isEdit) {
-                    myCoffeeDatabaseRepository.updateCoffee(coffee = _uiState.value.coffeeUiState.toCoffee())
+                    myCoffeeDatabaseRepository.updateCoffee(coffeeEntity = _uiState.value.coffeeUiState.toCoffee())
                 } else {
-                    myCoffeeDatabaseRepository.insertCoffee(coffee = _uiState.value.coffeeUiState.toCoffee())
+                    myCoffeeDatabaseRepository.insertCoffee(coffeeEntity = _uiState.value.coffeeUiState.toCoffee())
                 }
             }
 

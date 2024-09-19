@@ -7,8 +7,9 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.ktx.app
 import com.luczka.mycoffee.domain.model.Method
 import com.luczka.mycoffee.domain.model.Recipe
+import com.luczka.mycoffee.domain.repository.FirebaseRepository
 
-class OnlineFirebaseRepository : FirebaseRepository {
+class FirebaseRepositoryImpl : FirebaseRepository {
 
     companion object {
         private const val TAG = "OnlineFirebaseRepository"

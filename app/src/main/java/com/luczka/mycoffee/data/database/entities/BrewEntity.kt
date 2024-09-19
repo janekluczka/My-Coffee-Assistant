@@ -4,7 +4,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity
-data class Brew(
+data class BrewEntity(
     @PrimaryKey(autoGenerate = true)
     val brewId: Int,
     val date: String,

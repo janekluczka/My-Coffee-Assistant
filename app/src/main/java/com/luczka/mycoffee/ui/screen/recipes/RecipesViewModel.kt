@@ -2,8 +2,12 @@ package com.luczka.mycoffee.ui.screen.recipes
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.luczka.mycoffee.data.repository.FirebaseRepository
+import com.luczka.mycoffee.domain.repository.FirebaseRepository
 import com.luczka.mycoffee.ui.model.RecipeUiState
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
@@ -51,8 +55,14 @@ private data class RecipesViewModelState(
     }
 }
 
-class RecipesViewModel(
-    private val methodId: String,
+@AssistedFactory
+interface RecipesViewModelFactory {
+    fun create(methodId: String): RecipesViewModel
+}
+
+@HiltViewModel(assistedFactory = RecipesViewModelFactory::class)
+class RecipesViewModel @AssistedInject constructor(
+    @Assisted private val methodId: String,
     private val firebaseRepository: FirebaseRepository
 ) : ViewModel() {
 
