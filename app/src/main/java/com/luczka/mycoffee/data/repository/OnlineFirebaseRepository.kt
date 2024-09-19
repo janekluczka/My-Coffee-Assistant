@@ -5,8 +5,8 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.ktx.app
-import com.luczka.mycoffee.model.Method
-import com.luczka.mycoffee.model.Recipe
+import com.luczka.mycoffee.domain.model.Method
+import com.luczka.mycoffee.domain.model.Recipe
 
 class OnlineFirebaseRepository : FirebaseRepository {
 

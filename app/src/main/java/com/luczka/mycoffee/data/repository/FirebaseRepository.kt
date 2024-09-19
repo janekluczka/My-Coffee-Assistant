@@ -1,7 +1,7 @@
 package com.luczka.mycoffee.data.repository
 
-import com.luczka.mycoffee.model.Method
-import com.luczka.mycoffee.model.Recipe
+import com.luczka.mycoffee.domain.model.Method
+import com.luczka.mycoffee.domain.model.Recipe
 
 interface FirebaseRepository {
 

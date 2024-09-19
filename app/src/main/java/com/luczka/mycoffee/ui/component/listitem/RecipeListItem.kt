@@ -22,7 +22,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.luczka.mycoffee.model.Recipe
+import com.luczka.mycoffee.domain.model.Recipe
 import com.luczka.mycoffee.ui.model.RecipeUiState
 
 @OptIn(ExperimentalMaterial3Api::class)

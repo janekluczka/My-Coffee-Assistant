@@ -1,4 +1,4 @@
-package com.luczka.mycoffee.model
+package com.luczka.mycoffee.domain.model
 
 import androidx.annotation.Keep
 import com.luczka.mycoffee.ui.model.RecipeUiState

@@ -1,8 +1,8 @@
 package com.luczka.mycoffee.ui.model
 
 import com.luczka.mycoffee.data.database.entities.Coffee
-import com.luczka.mycoffee.enum.Process
-import com.luczka.mycoffee.enum.Roast
+import com.luczka.mycoffee.domain.enum.Process
+import com.luczka.mycoffee.domain.enum.Roast
 
 data class CoffeeUiState(
     val coffeeId: Int = 0,

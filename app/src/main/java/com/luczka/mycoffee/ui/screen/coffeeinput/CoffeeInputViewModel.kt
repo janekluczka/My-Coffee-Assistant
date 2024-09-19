@@ -8,8 +8,8 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.luczka.mycoffee.data.repository.MyCoffeeDatabaseRepository
-import com.luczka.mycoffee.enum.Process
-import com.luczka.mycoffee.enum.Roast
+import com.luczka.mycoffee.domain.enum.Process
+import com.luczka.mycoffee.domain.enum.Roast
 import com.luczka.mycoffee.ui.model.CoffeeUiState
 import com.luczka.mycoffee.util.CustomBitmapFactory
 import com.luczka.mycoffee.util.compressBitmap

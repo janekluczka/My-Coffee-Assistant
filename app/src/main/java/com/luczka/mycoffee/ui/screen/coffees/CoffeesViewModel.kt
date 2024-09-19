@@ -3,7 +3,7 @@ package com.luczka.mycoffee.ui.screen.coffees
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.luczka.mycoffee.data.repository.MyCoffeeDatabaseRepository
-import com.luczka.mycoffee.enum.CoffeeFilter
+import com.luczka.mycoffee.domain.enum.CoffeeFilter
 import com.luczka.mycoffee.ui.model.CoffeeUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted

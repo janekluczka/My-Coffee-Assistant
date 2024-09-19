@@ -2,8 +2,8 @@ package com.luczka.mycoffee.data.database.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.luczka.mycoffee.enum.Process
-import com.luczka.mycoffee.enum.Roast
+import com.luczka.mycoffee.domain.enum.Process
+import com.luczka.mycoffee.domain.enum.Roast
 import com.luczka.mycoffee.ui.model.CoffeeUiState
 import com.luczka.mycoffee.util.toStringWithOneDecimalPoint
 import com.luczka.mycoffee.util.toStringWithTwoDecimalPoints

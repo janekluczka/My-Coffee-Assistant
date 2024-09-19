@@ -47,7 +47,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.luczka.mycoffee.R
-import com.luczka.mycoffee.enum.CoffeeFilter
+import com.luczka.mycoffee.domain.enum.CoffeeFilter
 import com.luczka.mycoffee.ui.component.listitem.CoffeeListItem
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
