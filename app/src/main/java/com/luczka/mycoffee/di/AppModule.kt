@@ -2,6 +2,9 @@ package com.luczka.mycoffee.di
 
 import android.content.Context
 import androidx.room.Room
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.ktx.app
 import com.luczka.mycoffee.data.database.MyCoffeeDao
 import com.luczka.mycoffee.data.database.MyCoffeeDatabase
 import com.luczka.mycoffee.data.repository.FirebaseRepositoryImpl
@@ -44,8 +47,14 @@ object AppModule {
     }
 
     @Provides
-    fun providesFirebaseRepository() : FirebaseRepository {
-        return FirebaseRepositoryImpl()
+    @Singleton
+    fun providesFirebaseFirestore(): FirebaseFirestore {
+        return FirebaseFirestore.getInstance(Firebase.app)
+    }
+
+    @Provides
+    fun providesFirebaseRepository(firebaseFirestore: FirebaseFirestore) : FirebaseRepository {
+        return FirebaseRepositoryImpl(firebaseFirestore)
     }
 
 }

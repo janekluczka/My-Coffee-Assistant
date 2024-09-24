@@ -5,8 +5,8 @@ import androidx.room.Relation
 import com.luczka.mycoffee.data.database.entities.BrewEntity
 import com.luczka.mycoffee.data.database.entities.BrewedCoffeeEntity
 import com.luczka.mycoffee.data.database.entities.CoffeeEntity
-import com.luczka.mycoffee.ui.screen.history.BrewUiState
-import com.luczka.mycoffee.ui.screen.history.BrewedCoffeeUiState
+import com.luczka.mycoffee.ui.models.BrewUiState
+import com.luczka.mycoffee.ui.models.BrewedCoffeeUiState
 import com.luczka.mycoffee.util.LocalDateParser
 
 data class BrewWithBrewedCoffees(

@@ -2,9 +2,9 @@ package com.luczka.mycoffee.data.database.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.luczka.mycoffee.domain.model.Process
-import com.luczka.mycoffee.domain.model.Roast
-import com.luczka.mycoffee.ui.model.CoffeeUiState
+import com.luczka.mycoffee.domain.models.Process
+import com.luczka.mycoffee.domain.models.Roast
+import com.luczka.mycoffee.ui.models.CoffeeUiState
 import com.luczka.mycoffee.util.toStringWithOneDecimalPoint
 import com.luczka.mycoffee.util.toStringWithTwoDecimalPoints
 

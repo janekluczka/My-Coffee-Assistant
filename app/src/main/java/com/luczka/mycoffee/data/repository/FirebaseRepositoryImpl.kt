@@ -3,13 +3,13 @@ package com.luczka.mycoffee.data.repository
 import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.toObject
-import com.google.firebase.ktx.Firebase
-import com.google.firebase.ktx.app
-import com.luczka.mycoffee.domain.model.Method
-import com.luczka.mycoffee.domain.model.Recipe
+import com.luczka.mycoffee.domain.models.Method
+import com.luczka.mycoffee.domain.models.Recipe
 import com.luczka.mycoffee.domain.repository.FirebaseRepository
 
-class FirebaseRepositoryImpl : FirebaseRepository {
+class FirebaseRepositoryImpl(
+    private val firebaseFirestore: FirebaseFirestore
+) : FirebaseRepository {
 
     companion object {
         private const val TAG = "OnlineFirebaseRepository"
@@ -18,8 +18,6 @@ class FirebaseRepositoryImpl : FirebaseRepository {
         private const val FIELD_METHOD = "methodId"
         private const val FIELD_YOUTUBE_ID = "youtubeId"
     }
-
-    private val firebaseFirestore: FirebaseFirestore = FirebaseFirestore.getInstance(Firebase.app)
 
     override fun getMethods(
         onSuccess: (List<Method>) -> Unit,

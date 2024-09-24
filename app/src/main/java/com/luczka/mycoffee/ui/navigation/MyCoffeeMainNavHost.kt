@@ -11,11 +11,13 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.luczka.mycoffee.ui.screen.assistant.AssistantMainScreen
-import com.luczka.mycoffee.ui.screen.assistant.AssistantViewModel
-import com.luczka.mycoffee.ui.screen.coffeeinput.CoffeeInputScreen
-import com.luczka.mycoffee.ui.screen.coffeeinput.CoffeeInputViewModel
-import com.luczka.mycoffee.ui.screen.coffeeinput.CoffeeInputViewModelFactory
+import com.luczka.mycoffee.ui.screens.assistant.AssistantAction
+import com.luczka.mycoffee.ui.screens.assistant.AssistantViewModel
+import com.luczka.mycoffee.ui.screens.assistant.screens.AssistantMainScreen
+import com.luczka.mycoffee.ui.screens.coffeeinput.CoffeeInputAction
+import com.luczka.mycoffee.ui.screens.coffeeinput.CoffeeInputScreen
+import com.luczka.mycoffee.ui.screens.coffeeinput.CoffeeInputViewModel
+import com.luczka.mycoffee.ui.screens.coffeeinput.CoffeeInputViewModelFactory
 
 @Composable
 fun MyCoffeeMainNavHost(
@@ -38,25 +40,16 @@ fun MyCoffeeMainNavHost(
         }
         composable(MyCoffeeDestinations.ROUTE_ASSISTANT) {
             val viewModel = hiltViewModel<AssistantViewModel>()
-
             val uiState by viewModel.uiState.collectAsState()
-
             AssistantMainScreen(
                 uiState = uiState,
-                navigateUp = mainNavController::navigateUp,
-                onCoffeeSelected = viewModel::selectCoffee,
-                onUpdateAmountSelectionIntegerPart = viewModel::updateAmountSelectionIntegerPart,
-                onUpdateAmountSelectionDecimalPart = viewModel::updateAmountSelectionDecimalPart,
-                onUpdateAmountSelectionText = viewModel::updateAmountSelectionValue,
-                onUpdateCoffeeAmountSelectionIntegerPart = viewModel::updateAmountSelectionIntegerPart,
-                onUpdateCoffeeAmountSelectionDecimalPart = viewModel::updateAmountSelectionDecimalPart,
-                onUpdateCoffeeAmountSelectionText = viewModel::updateAmountSelectionValue,
-                onUpdateCoffeeRatio = viewModel::updateCoffeeRatioIndex,
-                onUpdateWaterRatio = viewModel::updateWaterRatioIndex,
-                onUpdateRatioText = viewModel::updateRatioValues,
-                onUpdateRating = viewModel::updateRating,
-                onUpdateNotes = viewModel::updateNotes,
-                onFinishBrew = viewModel::finishBrew
+                onAction = { action ->
+                    when (action) {
+                        is AssistantAction.NavigateUp -> mainNavController.navigateUp()
+                        else -> {}
+                    }
+                    viewModel.onAction(action)
+                }
             )
         }
         composable(
@@ -82,21 +75,13 @@ fun MyCoffeeMainNavHost(
 
             CoffeeInputScreen(
                 uiState = uiState,
-                navigateUp = mainNavController::navigateUp,
-                onSelectPhoto = viewModel::updateImageUri,
-                onDeletePhoto = {
-                    viewModel.updateImageUri(uri = null)
-                    viewModel.updateDeleteImage(deleteImage = true)
-                },
-                onUpdateName = viewModel::updateName,
-                onNameInputFinished = viewModel::nameInputFinished,
-                onUpdateBrand = viewModel::updateBrand,
-                onBrandInputFinished = viewModel::brandInputFinished,
-                onUpdateAmount = viewModel::updateAmount,
-                onUpdateScaScore = viewModel::updateScaScore,
-                onUpdateProcess = viewModel::updateProcess,
-                onUpdateRoast = viewModel::updateRoast,
-                onSave = viewModel::saveCoffee
+                onAction = { action ->
+                    when (action) {
+                        is CoffeeInputAction.NavigateUp -> mainNavController.navigateUp()
+                        else -> {}
+                    }
+                    viewModel.onAction(action)
+                }
             )
         }
     }
