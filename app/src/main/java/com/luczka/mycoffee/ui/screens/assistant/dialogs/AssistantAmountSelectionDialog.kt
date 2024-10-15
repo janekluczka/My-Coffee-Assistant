@@ -19,7 +19,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.luczka.mycoffee.R
-import com.luczka.mycoffee.ui.components.textfield.FilteredOutlinedTextField
+import com.luczka.mycoffee.ui.components.textfields.FilteredMyCoffeeOutlinedTextField
 import com.luczka.mycoffee.ui.screens.assistant.AmountSelectionUiState
 import com.luczka.mycoffee.util.toStringWithOneDecimalPoint
 
@@ -43,7 +43,7 @@ fun AssistantAmountSelectionDialog(
                         maxAmount.toStringWithOneDecimalPoint()
                     )
                 )
-                FilteredOutlinedTextField(
+                FilteredMyCoffeeOutlinedTextField(
                     value = amountValue,
                     onValueChange = { value ->
                         amountValue = value

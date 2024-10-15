@@ -16,6 +16,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -32,7 +33,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.luczka.mycoffee.R
-import com.luczka.mycoffee.ui.components.buttons.CloseIconButton
+import com.luczka.mycoffee.ui.components.icons.CloseIcon
 import com.luczka.mycoffee.ui.screens.assistant.AssistantAction
 import com.luczka.mycoffee.ui.screens.assistant.AssistantUiState
 import com.luczka.mycoffee.ui.screens.assistant.dialogs.AssistantAbortDialog
@@ -166,7 +167,7 @@ private fun AssistantTopBar(
 ) {
     TopAppBar(
         navigationIcon = {
-            CloseIconButton(
+            IconButton(
                 onClick = {
                     when (uiState) {
                         is AssistantUiState.NoneSelected -> {
@@ -186,7 +187,9 @@ private fun AssistantTopBar(
                         }
                     }
                 }
-            )
+            ) {
+                CloseIcon()
+            }
         },
         title = {
             Text(

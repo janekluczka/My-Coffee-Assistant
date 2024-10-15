@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -29,12 +30,11 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-fun NestedRoute(
+fun MainRoute(
     widthSizeClass: WindowWidthSizeClass,
     nestedNavController: NavHostController,
     navigateToAssistant: () -> Unit,
-    navigateToAddCoffee: () -> Unit,
-    navigateToEditCoffee: (Int) -> Unit
+    navigateToCoffeeInput: (Int?) -> Unit
 ) {
     val navigationType = when (widthSizeClass) {
         WindowWidthSizeClass.Compact -> MyCoffeeNavigationType.BOTTOM_NAVIGATION
@@ -54,8 +54,7 @@ fun NestedRoute(
                         widthSizeClass = widthSizeClass,
                         navController = nestedNavController,
                         navigateToAssistant = navigateToAssistant,
-                        navigateToAddCoffee = navigateToAddCoffee,
-                        navigateToEditCoffee = navigateToEditCoffee
+                        navigateToCoffeeInput = navigateToCoffeeInput
                     )
                     Divider()
                 }
@@ -70,8 +69,7 @@ fun NestedRoute(
                     widthSizeClass = widthSizeClass,
                     navController = nestedNavController,
                     navigateToAssistant = navigateToAssistant,
-                    navigateToAddCoffee = navigateToAddCoffee,
-                    navigateToEditCoffee = navigateToEditCoffee
+                    navigateToCoffeeInput = navigateToCoffeeInput
                 )
             }
         }
@@ -81,22 +79,24 @@ fun NestedRoute(
 @Composable
 private fun MyCoffeeNavigationRail(navController: NavHostController) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentDestination = navBackStackEntry?.destination
 
     NavigationRail(modifier = Modifier.fillMaxHeight()) {
         Spacer(modifier = Modifier.weight(1f))
-        HomeTabs.values().forEach { tab ->
+        Routes.Main.topLevelRoutes.forEach { topLevelRoute ->
             NavigationRailItem(
                 icon = {
                     Icon(
-                        painter = painterResource(id = tab.painterResource),
+                        painter = painterResource(id = topLevelRoute.drawableRes),
                         contentDescription = null
                     )
                 },
-                label = { Text(text = stringResource(id = tab.stringResource)) },
-                selected = navBackStackEntry?.destination?.hierarchy
-                    ?.any { it.route?.contains(tab.route) == true } == true,
+                label = { Text(text = stringResource(id = topLevelRoute.stringRes)) },
+                selected = currentDestination?.hierarchy?.any {
+                    it.hasRoute(topLevelRoute.route::class)
+                } == true,
                 onClick = {
-                    navController.navigate(tab.route) {
+                    navController.navigate(topLevelRoute.route) {
                         popUpTo(navController.graph.findStartDestination().id) {
                             saveState = true
                         }
@@ -113,21 +113,23 @@ private fun MyCoffeeNavigationRail(navController: NavHostController) {
 @Composable
 private fun MyCoffeeNavigationBar(navController: NavHostController) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentDestination = navBackStackEntry?.destination
 
     NavigationBar(tonalElevation = 0.dp) {
-        HomeTabs.values().forEach { tab ->
+        Routes.Main.topLevelRoutes.forEach { topLevelRoute ->
             NavigationBarItem(
                 icon = {
                     Icon(
-                        painter = painterResource(tab.painterResource),
+                        painter = painterResource(topLevelRoute.drawableRes),
                         contentDescription = null
                     )
                 },
-                label = { Text(text = stringResource(id = tab.stringResource)) },
-                selected = navBackStackEntry?.destination?.hierarchy
-                    ?.any { it.route?.contains(tab.route) == true } == true,
+                label = { Text(text = stringResource(id = topLevelRoute.stringRes)) },
+                selected = currentDestination?.hierarchy?.any {
+                    it.hasRoute(topLevelRoute.route::class)
+                } == true,
                 onClick = {
-                    navController.navigate(tab.route) {
+                    navController.navigate(topLevelRoute.route) {
                         popUpTo(navController.graph.findStartDestination().id) {
                             saveState = true
                         }

@@ -1,13 +1,10 @@
-package com.luczka.mycoffee.ui.components.listitem
+package com.luczka.mycoffee.ui.screens.coffees
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -20,13 +17,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.luczka.mycoffee.ui.components.icons.FavouriteIcon
 import com.luczka.mycoffee.ui.models.CoffeeUiState
 import com.luczka.mycoffee.ui.theme.MyCoffeeTheme
 import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CoffeeListItem(
+fun CoffeesListItem(
     coffeeUiState: CoffeeUiState,
     onClick: () -> Unit
 ) {
@@ -67,10 +65,7 @@ fun CoffeeListItem(
         },
         trailingContent = {
             if (coffeeUiState.isFavourite) {
-                Icon(
-                    imageVector = Icons.Filled.Favorite,
-                    contentDescription = null
-                )
+                FavouriteIcon()
             }
         }
     )
@@ -96,7 +91,7 @@ private fun CoffeeListItemPreview(darkTheme: Boolean) {
         brand = "monko."
     )
     MyCoffeeTheme(darkTheme = darkTheme) {
-        CoffeeListItem(
+        CoffeesListItem(
             coffeeUiState = coffeeUiState,
             onClick = {}
         )

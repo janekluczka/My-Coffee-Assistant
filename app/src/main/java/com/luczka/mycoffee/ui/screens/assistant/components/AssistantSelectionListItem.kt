@@ -1,4 +1,4 @@
-package com.luczka.mycoffee.ui.components.listitem
+package com.luczka.mycoffee.ui.screens.assistant.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -27,7 +27,7 @@ import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CoffeeSelectionListItem(
+fun AssistantSelectionListItem(
     coffeeUiState: CoffeeUiState,
     isSelected: Boolean,
     onClick: (CoffeeUiState) -> Unit
@@ -116,7 +116,7 @@ private fun CoffeeSelectionListItemPreview(darkTheme: Boolean, isSelected: Boole
         amount = "250"
     )
     MyCoffeeTheme(darkTheme = darkTheme) {
-        CoffeeSelectionListItem(
+        AssistantSelectionListItem(
             coffeeUiState = coffeeUiState,
             isSelected = isSelected,
             onClick = {},

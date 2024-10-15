@@ -46,7 +46,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.luczka.mycoffee.R
 import com.luczka.mycoffee.domain.models.CoffeeFilter
-import com.luczka.mycoffee.ui.components.listitem.CoffeeListItem
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -233,7 +232,7 @@ private fun HasCoffeesScreen(
                 key = { it.coffeeId }
             ) { coffeeUiState ->
                 Box(modifier = Modifier.animateItemPlacement(animationSpec = tween())) {
-                    CoffeeListItem(
+                    CoffeesListItem(
                         coffeeUiState = coffeeUiState,
                         onClick = {
                             val action = CoffeesAction.NavigateToCoffeeDetails(coffeeUiState.coffeeId)

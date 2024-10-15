@@ -21,13 +21,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.luczka.mycoffee.R
 import com.luczka.mycoffee.ui.components.custom.DoubleVerticalPager
-import com.luczka.mycoffee.ui.components.listitem.BrewParametersListItem
-import com.luczka.mycoffee.ui.components.listitem.ExpandableBrewParametersListItem
 import com.luczka.mycoffee.ui.models.CoffeeUiState
 import com.luczka.mycoffee.ui.screens.assistant.AmountSelectionUiState
 import com.luczka.mycoffee.ui.screens.assistant.AssistantAction
 import com.luczka.mycoffee.ui.screens.assistant.AssistantUiState
 import com.luczka.mycoffee.ui.screens.assistant.RatioSelectionUiState
+import com.luczka.mycoffee.ui.screens.assistant.components.AssistantParametersExpandableListItem
+import com.luczka.mycoffee.ui.screens.assistant.components.AssistantParametersListItem
 import com.luczka.mycoffee.ui.screens.assistant.dialogs.AssistantAmountSelectionDialog
 import com.luczka.mycoffee.ui.screens.assistant.dialogs.AssistantRatioSelectionDialog
 
@@ -225,8 +225,7 @@ fun AssistantParametersScreen(
                 is AssistantUiState.NoneSelected -> 2
                 is AssistantUiState.CoffeeSelected -> uiState.selectedCoffees.size + 1
             }
-
-            BrewParametersListItem(
+            AssistantParametersListItem(
                 index = index,
                 overlineText = stringResource(id = R.string.assistant_water),
                 headlineText = stringResource(
@@ -247,7 +246,7 @@ private fun RatioSelectionListItemWithPicker(
     onUpdateRightPager: (Int) -> Unit,
     onOpenDialog: () -> Unit
 ) {
-    ExpandableBrewParametersListItem(
+    AssistantParametersExpandableListItem(
         onClick = onClick,
         index = 0,
         overlineText = stringResource(id = R.string.assistant_ratio),
@@ -262,8 +261,8 @@ private fun RatioSelectionListItemWithPicker(
             leftPagerPage = ratioSelectionUiState.coffeeRatioIndex,
             rightPagerPage = ratioSelectionUiState.waterRatioIndex,
             separator = ":",
-            onUpdateLeftPager = onUpdateLeftPager,
-            onUpdateRightPager = onUpdateRightPager,
+            onLeftPagerIndexChanged = onUpdateLeftPager,
+            onRightPagerIndexChanged = onUpdateRightPager,
             leftPagerItems = ratioSelectionUiState.coffeeRatios,
             rightPagerItems = ratioSelectionUiState.waterRatios,
             onShowInputDialog = onOpenDialog
@@ -280,7 +279,7 @@ private fun AmountSelectionListItemWithPicker(
     onUpdateRightPager: (Int) -> Unit,
     onOpenDialog: () -> Unit
 ) {
-    ExpandableBrewParametersListItem(
+    AssistantParametersExpandableListItem(
         onClick = onClick,
         index = 1,
         overlineText = stringResource(id = R.string.assistant_coffee),
@@ -294,8 +293,8 @@ private fun AmountSelectionListItemWithPicker(
             leftPagerPage = amountSelectionUiState.integerPartIndex,
             rightPagerPage = amountSelectionUiState.decimalPartIndex,
             separator = ".",
-            onUpdateLeftPager = onUpdateLeftPager,
-            onUpdateRightPager = onUpdateRightPager,
+            onLeftPagerIndexChanged = onUpdateLeftPager,
+            onRightPagerIndexChanged = onUpdateRightPager,
             leftPagerItems = amountSelectionUiState.integerParts,
             rightPagerItems = amountSelectionUiState.decimalParts,
             onShowInputDialog = onOpenDialog
@@ -314,7 +313,7 @@ private fun AmountSelectionListItemWithPicker(
     onUpdateCoffeeAmountSelectionDecimalPart: (CoffeeUiState, Int) -> Unit,
     onOpenDialog: () -> Unit
 ) {
-    ExpandableBrewParametersListItem(
+    AssistantParametersExpandableListItem(
         onClick = onClick,
         index = index,
         overlineText = stringResource(
@@ -332,10 +331,10 @@ private fun AmountSelectionListItemWithPicker(
             leftPagerPage = amountSelectionUiState.integerPartIndex,
             rightPagerPage = amountSelectionUiState.decimalPartIndex,
             separator = ".",
-            onUpdateLeftPager = { integerPartIndex ->
+            onLeftPagerIndexChanged = { integerPartIndex ->
                 onUpdateCoffeeAmountSelectionIntegerPart(selectedCoffee, integerPartIndex)
             },
-            onUpdateRightPager = { decimalPartIndex ->
+            onRightPagerIndexChanged = { decimalPartIndex ->
                 onUpdateCoffeeAmountSelectionDecimalPart(selectedCoffee, decimalPartIndex)
             },
             leftPagerItems = amountSelectionUiState.integerParts,

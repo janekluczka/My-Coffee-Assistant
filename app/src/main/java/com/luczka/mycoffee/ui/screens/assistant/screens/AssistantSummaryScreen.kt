@@ -34,7 +34,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.luczka.mycoffee.R
-import com.luczka.mycoffee.ui.components.listitem.SelectedCoffeeListItem
+import com.luczka.mycoffee.ui.screens.assistant.components.AssistantSummaryCoffeeListItem
 import com.luczka.mycoffee.ui.models.CoffeeUiState
 import com.luczka.mycoffee.ui.screens.assistant.AmountSelectionUiState
 import com.luczka.mycoffee.ui.screens.assistant.AssistantAction
@@ -88,7 +88,7 @@ fun AssistantSummaryScreen(
                 item {
                     Column {
                         uiState.selectedCoffees.entries.forEach { entry ->
-                            SelectedCoffeeListItem(
+                            AssistantSummaryCoffeeListItem(
                                 coffeeUiState = entry.key,
                                 selectedAmount = entry.value.selectedAmount
                             )

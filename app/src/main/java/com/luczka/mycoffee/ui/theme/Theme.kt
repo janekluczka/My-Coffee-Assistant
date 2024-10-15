@@ -96,7 +96,7 @@ fun MyCoffeeTheme(
 
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = typography,
+        typography = MyCoffeeTypography.typography,
         content = content
     )
 }

@@ -2,6 +2,9 @@
     <string name="app_name_full">myCoffee Assistant</string>
     <string name="app_name_short">myCoffee</string>
 
+    <string name="unknown">Unknown</string>
+    <string name="other">Other</string>
+
     <!--  Navigation Bar Tabs  -->
     <string name="tab_home">Home</string>
     <string name="tab_history">History</string>

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -23,8 +24,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.luczka.mycoffee.R
-import com.luczka.mycoffee.ui.components.buttons.BackIconButton
-import com.luczka.mycoffee.ui.components.buttons.DeleteIconButton
+import com.luczka.mycoffee.ui.components.icons.ArrowBackIcon
+import com.luczka.mycoffee.ui.components.icons.DeleteIcon
 import com.luczka.mycoffee.ui.components.listitem.HistoryDetailsCoffeeListItem
 import com.luczka.mycoffee.ui.screens.assistant.screens.SummaryParametersListItem
 import java.time.format.DateTimeFormatter
@@ -57,7 +58,11 @@ fun HistoryDetailsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                navigationIcon = { BackIconButton(onClick = navigateUp) },
+                navigationIcon = {
+                    IconButton(onClick = navigateUp) {
+                        ArrowBackIcon()
+                    }
+                },
                 title = {
                     val formatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT)
                     val date = historyDetailsUiState.brew.date.format(formatter)
@@ -68,7 +73,9 @@ fun HistoryDetailsScreen(
                     )
                 },
                 actions = {
-                    DeleteIconButton(onClick = { openDeleteDialog = true })
+                    IconButton(onClick = { openDeleteDialog = true }) {
+                        DeleteIcon()
+                    }
                 }
             )
         }

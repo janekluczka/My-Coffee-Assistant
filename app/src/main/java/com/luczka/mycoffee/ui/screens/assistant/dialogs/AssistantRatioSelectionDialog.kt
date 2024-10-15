@@ -26,7 +26,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.luczka.mycoffee.R
-import com.luczka.mycoffee.ui.components.textfield.FilteredOutlinedTextField
+import com.luczka.mycoffee.ui.components.textfields.FilteredMyCoffeeOutlinedTextField
 import com.luczka.mycoffee.ui.screens.assistant.RatioSelectionUiState
 
 // TODO: Fix error changing box size
@@ -122,7 +122,7 @@ private fun RatioInput(
     onWaterRatioValueChange: (String) -> Unit,
 ) {
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        FilteredOutlinedTextField(
+        FilteredMyCoffeeOutlinedTextField(
             modifier = Modifier.weight(1f),
             value = coffeeRatioValue,
             onValueChange = onCoffeeRatioValueChange,
@@ -161,7 +161,7 @@ private fun RatioInput(
                 color = MaterialTheme.colorScheme.onSurface
             )
         }
-        FilteredOutlinedTextField(
+        FilteredMyCoffeeOutlinedTextField(
             modifier = Modifier.weight(1f),
             value = waterRatioValue,
             onValueChange = onWaterRatioValueChange,

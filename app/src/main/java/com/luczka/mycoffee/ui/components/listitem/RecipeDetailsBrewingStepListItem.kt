@@ -18,7 +18,7 @@ import com.luczka.mycoffee.ui.theme.MyCoffeeTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BrewingStepListItem(stepUiState: StepUiState) {
+fun RecipeDetailsBrewingStepListItem(stepUiState: StepUiState) {
     ListItem(
         leadingContent = {
             Box(
@@ -71,7 +71,7 @@ private fun BrewingStepListItemPreview(darkTheme: Boolean) {
         time = "30-150 s"
     )
     MyCoffeeTheme(darkTheme = darkTheme) {
-        BrewingStepListItem(stepUiState = stepUiState)
+        RecipeDetailsBrewingStepListItem(stepUiState = stepUiState)
     }
 }
 
@@ -82,6 +82,6 @@ private fun BrewingStepListItemWithoutTrailingContentPreview(darkTheme: Boolean)
         description = "Grind coffee beans (15 grams) relatively fine",
     )
     MyCoffeeTheme(darkTheme = darkTheme) {
-        BrewingStepListItem(stepUiState = stepUiState)
+        RecipeDetailsBrewingStepListItem(stepUiState = stepUiState)
     }
 }

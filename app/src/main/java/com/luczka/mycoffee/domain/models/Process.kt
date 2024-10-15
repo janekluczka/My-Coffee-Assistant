@@ -14,5 +14,6 @@ enum class Process(
 ) {
     Natural(1, R.string.process_natural),
     Washed(2, R.string.process_washed),
-    Honey(3, R.string.process_honey)
+    Honey(3, R.string.process_honey),
+    Other(4, R.string.other)
 }

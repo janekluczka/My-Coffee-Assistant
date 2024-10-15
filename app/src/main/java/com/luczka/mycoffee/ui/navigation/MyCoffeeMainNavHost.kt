@@ -7,10 +7,9 @@ import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.navArgument
+import androidx.navigation.toRoute
 import com.luczka.mycoffee.ui.screens.assistant.AssistantAction
 import com.luczka.mycoffee.ui.screens.assistant.AssistantViewModel
 import com.luczka.mycoffee.ui.screens.assistant.screens.AssistantMainScreen
@@ -27,18 +26,19 @@ fun MyCoffeeMainNavHost(
 ) {
     NavHost(
         navController = mainNavController,
-        startDestination = MyCoffeeDestinations.ROUTE_MAIN,
+        startDestination = Routes.Main,
     ) {
-        composable(MyCoffeeDestinations.ROUTE_MAIN) {
-            NestedRoute(
+        composable<Routes.Main> {
+            MainRoute(
                 widthSizeClass = widthSizeClass,
                 nestedNavController = nestedNavController,
-                navigateToAssistant = mainNavController::navigateToAssistant,
-                navigateToAddCoffee = mainNavController::navigateToAddCoffee,
-                navigateToEditCoffee = mainNavController::navigateToEditCoffee
+                navigateToAssistant = { mainNavController.navigate(Routes.Assistant) },
+                navigateToCoffeeInput = { coffeeId ->
+                    mainNavController.navigate(Routes.CoffeeInput(coffeeId))
+                }
             )
         }
-        composable(MyCoffeeDestinations.ROUTE_ASSISTANT) {
+        composable<Routes.Assistant> {
             val viewModel = hiltViewModel<AssistantViewModel>()
             val uiState by viewModel.uiState.collectAsState()
             AssistantMainScreen(
@@ -52,27 +52,12 @@ fun MyCoffeeMainNavHost(
                 }
             )
         }
-        composable(
-            route = "${MyCoffeeDestinations.ROUTE_INPUT}?${MyCoffeeDestinations.KEY_COFFEE_ID}={${MyCoffeeDestinations.KEY_COFFEE_ID}}",
-            arguments = listOf(
-                navArgument(
-                    name = MyCoffeeDestinations.KEY_COFFEE_ID,
-                    builder = {
-                        type = NavType.StringType
-                        nullable = true
-                    }
-                )
-            )
-        ) { backStackEntry ->
-            val arguments = backStackEntry.arguments
-            val coffeeId = arguments?.getString(MyCoffeeDestinations.KEY_COFFEE_ID)?.toIntOrNull()
-
+        composable<Routes.CoffeeInput> { backStackEntry ->
+            val arguments = backStackEntry.toRoute<Routes.CoffeeInput>()
             val viewModel = hiltViewModel<CoffeeInputViewModel, CoffeeInputViewModelFactory> { factory ->
-                factory.create(coffeeId)
+                factory.create(arguments.coffeeId)
             }
-
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-
             CoffeeInputScreen(
                 uiState = uiState,
                 onAction = { action ->
@@ -85,16 +70,4 @@ fun MyCoffeeMainNavHost(
             )
         }
     }
-}
-
-private fun NavHostController.navigateToEditCoffee(coffeeId: Int) {
-    this.navigate(route = "${MyCoffeeDestinations.ROUTE_INPUT}?${MyCoffeeDestinations.KEY_COFFEE_ID}=${coffeeId}")
-}
-
-private fun NavHostController.navigateToAssistant() {
-    this.navigate(route = MyCoffeeDestinations.ROUTE_ASSISTANT)
-}
-
-private fun NavHostController.navigateToAddCoffee() {
-    this.navigate(route = MyCoffeeDestinations.ROUTE_INPUT)
 }

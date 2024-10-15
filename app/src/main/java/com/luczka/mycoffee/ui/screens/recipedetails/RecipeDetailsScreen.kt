@@ -43,8 +43,8 @@ import com.google.accompanist.web.AccompanistWebViewClient
 import com.google.accompanist.web.WebView
 import com.google.accompanist.web.rememberWebViewState
 import com.luczka.mycoffee.R
-import com.luczka.mycoffee.ui.components.buttons.BackIconButton
-import com.luczka.mycoffee.ui.components.listitem.BrewingStepListItem
+import com.luczka.mycoffee.ui.components.icons.ArrowBackIcon
+import com.luczka.mycoffee.ui.components.listitem.RecipeDetailsBrewingStepListItem
 import com.luczka.mycoffee.ui.models.RecipeUiState
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -74,12 +74,14 @@ fun RecipeDetailsScreen(
         topBar = {
             TopAppBar(
                 navigationIcon = {
-                    BackIconButton(
+                    IconButton(
                         onClick = {
                             val action = RecipeDetailsAction.NavigateUp
                             onAction(action)
                         }
-                    )
+                    ) {
+                        ArrowBackIcon()
+                    }
                 },
                 title = {
                     val title = when (uiState) {
@@ -148,7 +150,7 @@ fun RecipeDetailsScreen(
                                         }
                                     }
                                     items(uiState.recipe.steps) { stepUiState ->
-                                        BrewingStepListItem(stepUiState = stepUiState)
+                                        RecipeDetailsBrewingStepListItem(stepUiState = stepUiState)
                                     }
                                 }
                             }

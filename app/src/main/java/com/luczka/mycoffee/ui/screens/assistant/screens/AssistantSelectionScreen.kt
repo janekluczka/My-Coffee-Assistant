@@ -19,7 +19,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.luczka.mycoffee.R
-import com.luczka.mycoffee.ui.components.listitem.CoffeeSelectionListItem
+import com.luczka.mycoffee.ui.screens.assistant.components.AssistantSelectionListItem
 import com.luczka.mycoffee.ui.models.CoffeeUiState
 import com.luczka.mycoffee.ui.screens.assistant.AmountSelectionUiState
 import com.luczka.mycoffee.ui.screens.assistant.AssistantAction
@@ -89,7 +89,7 @@ fun AssistantSelectionScreen(
                     items = uiState.currentCoffees,
                     key = { it.coffeeId }
                 ) { coffeeUiState ->
-                    CoffeeSelectionListItem(
+                    AssistantSelectionListItem(
                         coffeeUiState = coffeeUiState,
                         isSelected = when (uiState) {
                             is AssistantUiState.NoneSelected -> false

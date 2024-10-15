@@ -98,8 +98,8 @@ class CoffeeInputViewModel @AssistedInject constructor(
             CoffeeInputAction.OnBrandInputFinished -> brandInputFinished()
             is CoffeeInputAction.OnAmountValueChanged -> updateAmount(action.amount)
             is CoffeeInputAction.OnScaScoreValueChanged -> updateScaScore(action.scaScore)
-            is CoffeeInputAction.OnProcessChanged -> updateProcess(action.process)
-            is CoffeeInputAction.OnRoastChanged -> updateRoast(action.roast)
+            is CoffeeInputAction.OnProcessClicked -> updateProcess(action.process)
+            is CoffeeInputAction.OnRoastClicked -> updateRoast(action.roast)
             CoffeeInputAction.OnSaveClicked -> saveCoffee()
             else -> {
 
@@ -144,12 +144,16 @@ class CoffeeInputViewModel @AssistedInject constructor(
         _uiState.update { it.copy(coffeeUiState = it.coffeeUiState.copy(scaScore = scaScore)) }
     }
 
-    private fun updateProcess(process: Process?) {
-        _uiState.update { it.copy(coffeeUiState = it.coffeeUiState.copy(process = process)) }
+    private fun updateProcess(process: Process) {
+        val selectedProcess = _uiState.value.coffeeUiState.process
+        val updatedProcess = if (selectedProcess == process) null else process
+        _uiState.update { it.copy(coffeeUiState = it.coffeeUiState.copy(process = updatedProcess)) }
     }
 
-    private fun updateRoast(roast: Roast?) {
-        _uiState.update { it.copy(coffeeUiState = it.coffeeUiState.copy(roast = roast)) }
+    private fun updateRoast(roast: Roast) {
+        val selectedRoast = _uiState.value.coffeeUiState.roast
+        val updatedRoast = if (selectedRoast == roast) null else roast
+        _uiState.update { it.copy(coffeeUiState = it.coffeeUiState.copy(roast = updatedRoast)) }
     }
 
     private fun saveCoffee() {

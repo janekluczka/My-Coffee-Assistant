@@ -1,24 +1,27 @@
-package com.luczka.mycoffee.ui.components.textfield
+package com.luczka.mycoffee.ui.components.textfields
 
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FilteredOutlinedTextField(
+fun MyCoffeeOutlinedTextField(
     value: String,
     onValueChange: (String) -> Unit,
-    regex: Regex,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     readOnly: Boolean = false,
@@ -34,16 +37,13 @@ fun FilteredOutlinedTextField(
     keyboardActions: KeyboardActions = KeyboardActions.Default,
     singleLine: Boolean = false,
     maxLines: Int = Int.MAX_VALUE,
+    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     shape: Shape = TextFieldDefaults.outlinedShape,
     colors: TextFieldColors = TextFieldDefaults.outlinedTextFieldColors()
 ) {
     OutlinedTextField(
         value = value,
-        onValueChange = { newValue ->
-            if (newValue.matches(regex) || newValue.isEmpty()) {
-                onValueChange(newValue)
-            }
-        },
+        onValueChange = onValueChange,
         modifier = modifier,
         enabled = enabled,
         readOnly = readOnly,
@@ -59,7 +59,20 @@ fun FilteredOutlinedTextField(
         keyboardActions = keyboardActions,
         singleLine = singleLine,
         maxLines = maxLines,
+        interactionSource = interactionSource,
         shape = shape,
         colors = colors
+    )
+}
+
+@Preview
+@Composable
+fun MyCoffeeOutlinedTextFieldPreview() {
+    MyCoffeeOutlinedTextField(
+        value = "Hello",
+        onValueChange = {},
+        label = { Text("Label") },
+        placeholder = { Text("Placeholder") },
+        supportingText = { Text("Supporting text") }
     )
 }

@@ -4,8 +4,6 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.keyframes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,17 +22,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -62,8 +55,11 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.luczka.mycoffee.R
-import com.luczka.mycoffee.ui.components.buttons.CloseIconButton
-import com.luczka.mycoffee.ui.components.textfield.FilteredOutlinedTextField
+import com.luczka.mycoffee.ui.components.buttons.MyCoffeeOutlinedButton
+import com.luczka.mycoffee.ui.components.chips.MyCoffeeFilterChip
+import com.luczka.mycoffee.ui.components.icons.CloseIcon
+import com.luczka.mycoffee.ui.components.textfields.FilteredMyCoffeeOutlinedTextField
+import com.luczka.mycoffee.ui.components.textfields.MyCoffeeOutlinedTextField
 import com.luczka.mycoffee.ui.models.CoffeeUiState
 import com.luczka.mycoffee.ui.theme.MyCoffeeTheme
 import java.io.File
@@ -155,7 +151,7 @@ private fun AddCoffeeTopBar(
     }
     TopAppBar(
         navigationIcon = {
-            CloseIconButton(
+            IconButton(
                 onClick = {
                     onBackPressed(
                         coffeeInputUiState = uiState,
@@ -166,7 +162,9 @@ private fun AddCoffeeTopBar(
                         onShowDiscardDialog = onShowDiscardDialog
                     )
                 }
-            )
+            ) {
+                CloseIcon()
+            }
         },
         title = {
             Text(
@@ -270,7 +268,7 @@ private fun AddCoffeeContent(
                         .padding(horizontal = 24.dp),
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    FilteredOutlinedTextField(
+                    FilteredMyCoffeeOutlinedTextField(
                         modifier = Modifier.weight(3f),
                         value = uiState.coffeeUiState.amount ?: "",
                         onValueChange = {
@@ -284,7 +282,7 @@ private fun AddCoffeeContent(
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                     )
                     // TODO: Fix regex
-                    FilteredOutlinedTextField(
+                    FilteredMyCoffeeOutlinedTextField(
                         modifier = Modifier.weight(2f),
                         value = uiState.coffeeUiState.scaScore ?: "",
                         onValueChange = {
@@ -372,7 +370,7 @@ private fun ImageSelectionBox(
             modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 12.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            OutlinedButton(
+            MyCoffeeOutlinedButton(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f),
@@ -384,7 +382,7 @@ private fun ImageSelectionBox(
             ) {
                 Text(text = stringResource(id = R.string.input_assist_chip_select))
             }
-            OutlinedButton(
+            MyCoffeeOutlinedButton(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f),
@@ -402,7 +400,6 @@ private fun ImageSelectionBox(
 }
 
 @Composable
-@OptIn(ExperimentalMaterial3Api::class)
 private fun RequiredOutlinedTextFieldWithErrorMessage(
     value: String,
     onValueChange: (String) -> Unit,
@@ -416,7 +413,7 @@ private fun RequiredOutlinedTextFieldWithErrorMessage(
     } else {
         stringResource(id = R.string.input_required_text_field_supporting_text_neutral)
     }
-    OutlinedTextField(
+    MyCoffeeOutlinedTextField(
         value = value,
         onValueChange = onValueChange,
         label = label,
@@ -460,28 +457,14 @@ private fun CoffeeProcessSelectionRow(
             key = { it.id }
         ) { process ->
             val isSelected = uiState.coffeeUiState.process == process
-            FilterChip(
+            MyCoffeeFilterChip(
                 selected = isSelected,
                 onClick = {
-                    val selectedProcess = if (isSelected) null else process
-                    val action = CoffeeInputAction.OnProcessChanged(selectedProcess)
+                    val action = CoffeeInputAction.OnProcessClicked(process)
                     onAction(action)
                 },
-                label = { Text(text = stringResource(id = process.stringResource)) },
-                leadingIcon = {
-                    Box(
-                        modifier = Modifier.animateContentSize(
-                            animationSpec = keyframes { durationMillis = 200 }
-                        )
-                    ) {
-                        if (isSelected) {
-                            Icon(
-                                imageVector = Icons.Filled.Done,
-                                contentDescription = null,
-                                modifier = Modifier.size(FilterChipDefaults.IconSize)
-                            )
-                        }
-                    }
+                label = {
+                    Text(text = stringResource(id = process.stringResource))
                 }
             )
         }
@@ -512,28 +495,14 @@ private fun CoffeeRoastSelectionRow(
             key = { roast -> roast.id }
         ) { coffeeRoast ->
             val isSelected = uiState.coffeeUiState.roast == coffeeRoast
-            FilterChip(
+            MyCoffeeFilterChip(
                 selected = isSelected,
                 onClick = {
-                    val selectedRoast = if (isSelected) null else coffeeRoast
-                    val action = CoffeeInputAction.OnRoastChanged(selectedRoast)
+                    val action = CoffeeInputAction.OnRoastClicked(coffeeRoast)
                     onAction(action)
                 },
-                label = { Text(text = stringResource(id = coffeeRoast.stringResource)) },
-                leadingIcon = {
-                    Box(
-                        modifier = Modifier.animateContentSize(
-                            animationSpec = keyframes { durationMillis = 200 }
-                        )
-                    ) {
-                        if (isSelected) {
-                            Icon(
-                                imageVector = Icons.Filled.Done,
-                                contentDescription = null,
-                                modifier = Modifier.size(FilterChipDefaults.IconSize)
-                            )
-                        }
-                    }
+                label = {
+                    Text(text = stringResource(id = coffeeRoast.stringResource))
                 }
             )
         }

@@ -9,9 +9,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -36,10 +39,10 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.luczka.mycoffee.R
-import com.luczka.mycoffee.ui.components.buttons.BackIconButton
-import com.luczka.mycoffee.ui.components.buttons.DeleteIconButton
-import com.luczka.mycoffee.ui.components.buttons.EditIconButton
-import com.luczka.mycoffee.ui.components.buttons.FavouriteToggleButton
+import com.luczka.mycoffee.ui.components.icons.ArrowBackIcon
+import com.luczka.mycoffee.ui.components.icons.DeleteIcon
+import com.luczka.mycoffee.ui.components.icons.EditIcon
+import com.luczka.mycoffee.ui.components.icons.FavouriteIcon
 import com.luczka.mycoffee.ui.models.CoffeeUiState
 import com.luczka.mycoffee.util.isPositiveFloat
 import java.io.File
@@ -181,12 +184,14 @@ private fun CoffeeDetailsTopBar(
 ) {
     TopAppBar(
         navigationIcon = {
-            BackIconButton(
+            IconButton(
                 onClick = {
                     val action = CoffeeDetailsAction.NavigateUp
                     onAction(action)
                 }
-            )
+            ) {
+                ArrowBackIcon()
+            }
         },
         title = {
             Text(
@@ -196,20 +201,32 @@ private fun CoffeeDetailsTopBar(
             )
         },
         actions = {
-            FavouriteToggleButton(
-                checked = coffeeUiState.isFavourite,
-                onCheckedChange = {
+            IconButton(
+                onClick = {
                     val action = CoffeeDetailsAction.OnFavouriteClicked
                     onAction(action)
                 }
-            )
-            EditIconButton(
+            ) {
+                if(coffeeUiState.isFavourite) {
+                    FavouriteIcon()
+                } else {
+                    Icon(
+                        imageVector = Icons.Filled.FavoriteBorder,
+                        contentDescription = null
+                    )
+                }
+            }
+            IconButton(
                 onClick = {
                     val action = CoffeeDetailsAction.OnEditClicked(coffeeId = coffeeUiState.coffeeId)
                     onAction(action)
                 }
-            )
-            DeleteIconButton(onClick = onShowDeleteDialog)
+            ) {
+                EditIcon()
+            }
+            IconButton(onClick = onShowDeleteDialog) {
+                DeleteIcon()
+            }
         }
     )
 }
