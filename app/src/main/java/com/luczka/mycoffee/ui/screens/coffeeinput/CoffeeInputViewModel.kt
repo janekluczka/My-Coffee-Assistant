@@ -7,10 +7,12 @@ import android.os.Build
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.luczka.mycoffee.domain.models.Process
-import com.luczka.mycoffee.domain.models.Roast
+import com.luczka.mycoffee.domain.mappers.toModel
+import com.luczka.mycoffee.domain.mappers.toUiState
 import com.luczka.mycoffee.domain.repository.MyCoffeeDatabaseRepository
 import com.luczka.mycoffee.ui.models.CoffeeUiState
+import com.luczka.mycoffee.ui.models.ProcessUiState
+import com.luczka.mycoffee.ui.models.RoastUiState
 import com.luczka.mycoffee.util.CustomBitmapFactory
 import com.luczka.mycoffee.util.compressBitmap
 import com.luczka.mycoffee.util.createScaledBitmap
@@ -36,8 +38,8 @@ import java.util.TimeZone
 import kotlin.math.roundToInt
 
 data class CoffeeInputUiState(
-    val roasts: List<Roast> = Roast.values().toList(),
-    val processes: List<Process> = Process.values().toList(),
+    val roasts: List<RoastUiState> = RoastUiState.entries,
+    val processes: List<ProcessUiState> = ProcessUiState.entries,
     val isEdit: Boolean = false,
     val coffeeUiState: CoffeeUiState = CoffeeUiState(),
     val isNameWrong: Boolean = false,
@@ -55,7 +57,7 @@ interface CoffeeInputViewModelFactory {
 
 @HiltViewModel(assistedFactory = CoffeeInputViewModelFactory::class)
 class CoffeeInputViewModel @AssistedInject constructor(
-    @Assisted private val coffeeId: Int? = null,
+    @Assisted coffeeId: Int? = null,
     @ApplicationContext private val context: Context,
     private val myCoffeeDatabaseRepository: MyCoffeeDatabaseRepository
 ) : ViewModel() {
@@ -76,11 +78,11 @@ class CoffeeInputViewModel @AssistedInject constructor(
         if (coffeeId != null) {
             // TODO: This does not have to be Flow
             viewModelScope.launch {
-                myCoffeeDatabaseRepository.getCoffeeStream(coffeeId).filterNotNull().collect { coffee ->
+                myCoffeeDatabaseRepository.getCoffeeStream(coffeeId).filterNotNull().collect { coffeeModel ->
                     _uiState.update {
                         it.copy(
                             isEdit = true,
-                            coffeeUiState = coffee.toCoffeeUiState()
+                            coffeeUiState = coffeeModel.toUiState()
                         )
                     }
                 }
@@ -144,13 +146,13 @@ class CoffeeInputViewModel @AssistedInject constructor(
         _uiState.update { it.copy(coffeeUiState = it.coffeeUiState.copy(scaScore = scaScore)) }
     }
 
-    private fun updateProcess(process: Process) {
+    private fun updateProcess(process: ProcessUiState) {
         val selectedProcess = _uiState.value.coffeeUiState.process
         val updatedProcess = if (selectedProcess == process) null else process
         _uiState.update { it.copy(coffeeUiState = it.coffeeUiState.copy(process = updatedProcess)) }
     }
 
-    private fun updateRoast(roast: Roast) {
+    private fun updateRoast(roast: RoastUiState) {
         val selectedRoast = _uiState.value.coffeeUiState.roast
         val updatedRoast = if (selectedRoast == roast) null else roast
         _uiState.update { it.copy(coffeeUiState = it.coffeeUiState.copy(roast = updatedRoast)) }
@@ -173,10 +175,12 @@ class CoffeeInputViewModel @AssistedInject constructor(
                 deleteCurrentPhotos()
                 saveImageInMultipleSizes()
 
+                val coffeeModel = _uiState.value.coffeeUiState.toModel()
+
                 if (_uiState.value.isEdit) {
-                    myCoffeeDatabaseRepository.updateCoffee(coffeeEntity = _uiState.value.coffeeUiState.toCoffee())
+                    myCoffeeDatabaseRepository.updateCoffee(coffeeModel)
                 } else {
-                    myCoffeeDatabaseRepository.insertCoffee(coffeeEntity = _uiState.value.coffeeUiState.toCoffee())
+                    myCoffeeDatabaseRepository.insertCoffee(coffeeModel)
                 }
             }
 

@@ -3,7 +3,6 @@ package com.luczka.mycoffee.ui.screens.assistant.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -26,7 +25,6 @@ import com.luczka.mycoffee.ui.models.CoffeeUiState
 import java.io.File
 
 @Composable
-@OptIn(ExperimentalMaterial3Api::class)
 fun AssistantSummaryCoffeeListItem(
     coffeeUiState: CoffeeUiState,
     selectedAmount: String? = null
@@ -52,7 +50,7 @@ fun AssistantSummaryCoffeeListItem(
                 }
             }
         },
-        headlineText = {
+        headlineContent = {
             Text(
                 text = stringResource(
                     id = R.string.coffee_parameters_name_and_brand,
@@ -64,7 +62,7 @@ fun AssistantSummaryCoffeeListItem(
                 overflow = TextOverflow.Ellipsis
             )
         },
-        supportingText = {
+        supportingContent = {
             Text(text = buildCoffeeAmountTakenString(coffeeUiState, selectedAmount))
         }
     )

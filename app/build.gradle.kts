@@ -72,6 +72,7 @@ dependencies {
     implementation(libs.google.material) // TODO: Remove if not needed
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material3.windowsizeclass)
+    implementation(libs.androidx.compose.material)
     implementation(libs.androidx.compose.material.icons.core)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.room.runtime)

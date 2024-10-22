@@ -22,7 +22,6 @@ import com.luczka.mycoffee.ui.models.CoffeeUiState
 import com.luczka.mycoffee.ui.theme.MyCoffeeTheme
 import java.io.File
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CoffeesListItem(
     coffeeUiState: CoffeeUiState,
@@ -47,7 +46,7 @@ fun CoffeesListItem(
                 }
             }
         },
-        headlineText = {
+        headlineContent = {
             Text(
                 text = coffeeUiState.name,
                 maxLines = 1,
@@ -55,7 +54,7 @@ fun CoffeesListItem(
                 style = MaterialTheme.typography.titleMedium
             )
         },
-        supportingText = {
+        supportingContent = {
             Text(
                 text = coffeeUiState.brand,
                 maxLines = 1,

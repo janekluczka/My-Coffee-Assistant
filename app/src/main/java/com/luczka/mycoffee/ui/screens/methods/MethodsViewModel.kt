@@ -2,6 +2,7 @@ package com.luczka.mycoffee.ui.screens.methods
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.luczka.mycoffee.domain.mappers.toUiState
 import com.luczka.mycoffee.domain.repository.FirebaseRepository
 import com.luczka.mycoffee.ui.models.MethodUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -59,9 +60,9 @@ class MethodsViewModel @Inject constructor(
         viewModelState.update { it.copy(isLoading = true) }
         viewModelScope.launch {
             firebaseRepository.getMethods(
-                onSuccess = { methodList ->
-                    val methodUiStateListSorted = methodList
-                        .map { it.toMethodUiState() }
+                onSuccess = { methodModels ->
+                    val methodUiStateListSorted = methodModels
+                        .map { it.toUiState() }
                         .sortedBy { it.name }
                     viewModelState.update {
                         it.copy(
@@ -69,13 +70,6 @@ class MethodsViewModel @Inject constructor(
                             methods = methodUiStateListSorted
                         )
                     }
-
-//                    viewModelState.update {
-//                        it.copy(
-//                            isLoading = false,
-//                            isError = true
-//                        )
-//                    }
                 },
                 onError = { errorMessage ->
                     viewModelState.update {

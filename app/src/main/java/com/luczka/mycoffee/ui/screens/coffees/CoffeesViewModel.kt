@@ -2,8 +2,9 @@ package com.luczka.mycoffee.ui.screens.coffees
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.luczka.mycoffee.domain.models.CoffeeFilter
+import com.luczka.mycoffee.domain.mappers.toUiState
 import com.luczka.mycoffee.domain.repository.MyCoffeeDatabaseRepository
+import com.luczka.mycoffee.ui.models.CoffeeFilterUiState
 import com.luczka.mycoffee.ui.models.CoffeeUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,35 +17,36 @@ import javax.inject.Inject
 
 private data class CoffeesViewModelState(
     val allCoffees: List<CoffeeUiState> = emptyList(),
-    val selectedFilter: CoffeeFilter = CoffeeFilter.All,
+    val selectedFilter: CoffeeFilterUiState = CoffeeFilterUiState.All,
+    val coffeeFilterUiStates: List<CoffeeFilterUiState> = CoffeeFilterUiState.entries,
 ) {
     fun toCoffeesUiState(): CoffeesUiState {
         return if (allCoffees.isEmpty()) {
             CoffeesUiState.NoCoffees
         } else {
             CoffeesUiState.HasCoffees(
-                coffeeFilters = CoffeeFilter.values().toList(),
-                filteredCoffees = filterCoffees(),
+                coffeeFilterUiStates = coffeeFilterUiStates,
                 selectedFilter = selectedFilter,
+                filteredCoffees = filterCoffees(),
             )
         }
     }
 
     private fun filterCoffees(): List<CoffeeUiState> {
         return when (selectedFilter) {
-            CoffeeFilter.Current -> {
+            CoffeeFilterUiState.Current -> {
                 allCoffees.filter { it.hasAmount() }
             }
 
-            CoffeeFilter.All -> {
+            CoffeeFilterUiState.All -> {
                 allCoffees
             }
 
-            CoffeeFilter.Favourites -> {
+            CoffeeFilterUiState.Favourites -> {
                 allCoffees.filter { it.isFavourite }
             }
 
-            CoffeeFilter.Low -> {
+            CoffeeFilterUiState.Low -> {
                 allCoffees.filter { it.hasAmountLowerThan(amount = 100f) }
             }
         }
@@ -67,9 +69,9 @@ class CoffeesViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            myCoffeeDatabaseRepository.getAllCoffeesStream().collect { coffeeList ->
+            myCoffeeDatabaseRepository.getAllCoffeesStream().collect { coffeeModels ->
                 viewModelState.update {
-                    it.copy(allCoffees = coffeeList.map { coffee -> coffee.toCoffeeUiState() })
+                    it.copy(allCoffees = coffeeModels.map { coffeeModel -> coffeeModel.toUiState() })
                 }
             }
         }
@@ -77,14 +79,14 @@ class CoffeesViewModel @Inject constructor(
 
     fun onAction(action: CoffeesAction) {
         when (action) {
-            is CoffeesAction.OnSelectedFilterChanged -> selectedFilterChanged(action.coffeeFilter)
+            is CoffeesAction.OnSelectedFilterChanged -> selectedFilterChanged(action.coffeeFilterUiState)
             else -> {}
         }
     }
 
-    fun selectedFilterChanged(coffeeFilter: CoffeeFilter) {
+    private fun selectedFilterChanged(coffeeFilterUiState: CoffeeFilterUiState) {
         viewModelState.update {
-            it.copy(selectedFilter = coffeeFilter)
+            it.copy(selectedFilter = coffeeFilterUiState)
         }
     }
 

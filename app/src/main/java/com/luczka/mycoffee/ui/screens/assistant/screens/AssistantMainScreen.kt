@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
@@ -17,9 +19,12 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -48,7 +53,14 @@ fun AssistantMainScreen(
     onAction: (AssistantAction) -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
-    val pagerState = rememberPagerState(initialPage = 0, pageCount = { 3 })
+
+    val sheetState = rememberModalBottomSheetState()
+    val pagerState = rememberPagerState(
+        initialPage = 0,
+        pageCount = { 3 }
+    )
+
+    var showBottomSheet by rememberSaveable { mutableStateOf(false) }
 
     var showAbortDialog by rememberSaveable { mutableStateOf(false) }
     var showFinishDialog by rememberSaveable { mutableStateOf(false) }
@@ -148,11 +160,32 @@ fun AssistantMainScreen(
             }
         }
     ) { innerPadding ->
+        if (showBottomSheet) {
+            ModalBottomSheet(
+                sheetState = sheetState,
+                onDismissRequest = {
+                    showBottomSheet = false
+                },
+            ) {
+                LazyColumn {
+                    items((1..10).toList()) {
+                        ListItem(headlineContent = { Text(text = it.toString()) })
+                    }
+                }
+            }
+        }
         AssistantContent(
             innerPadding = innerPadding,
             pagerState = pagerState,
             uiState = uiState,
-            onAction = onAction
+            onAction = { action ->
+                when(action) {
+                    is AssistantAction.OnSelectRecipeClicked -> {
+                        showBottomSheet = true
+                    }
+                    else -> onAction(action)
+                }
+            }
         )
     }
 }

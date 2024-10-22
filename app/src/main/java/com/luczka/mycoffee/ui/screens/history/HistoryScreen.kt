@@ -114,7 +114,6 @@ fun HistoryScreen(
 }
 
 @Composable
-@OptIn(ExperimentalMaterial3Api::class)
 private fun HistoryListItem(
     brewedUiState: BrewUiState,
     onClick: () -> Unit
@@ -144,7 +143,7 @@ private fun HistoryListItem(
                 }
             }
         },
-        overlineText = {
+        overlineContent = {
             Text(
                 text = date,
                 maxLines = 1,
@@ -152,7 +151,7 @@ private fun HistoryListItem(
                 style = MaterialTheme.typography.labelMedium
             )
         },
-        headlineText = {
+        headlineContent = {
             Text(
                 text = headlineText,
                 maxLines = 1,
@@ -160,7 +159,7 @@ private fun HistoryListItem(
                 style = MaterialTheme.typography.titleMedium
             )
         },
-        supportingText = {
+        supportingContent = {
             Text(
                 text = stringResource(
                     id = R.string.coffee_parameters_amount_with_unit,

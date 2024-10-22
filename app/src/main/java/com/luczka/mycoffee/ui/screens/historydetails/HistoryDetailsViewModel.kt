@@ -2,6 +2,8 @@ package com.luczka.mycoffee.ui.screens.historydetails
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.luczka.mycoffee.domain.mappers.toModel
+import com.luczka.mycoffee.domain.mappers.toUiState
 import com.luczka.mycoffee.domain.repository.MyCoffeeDatabaseRepository
 import com.luczka.mycoffee.ui.models.BrewUiState
 import dagger.assisted.Assisted
@@ -52,8 +54,8 @@ class HistoryDetailsViewModel @AssistedInject constructor(
 
     init {
         viewModelScope.launch {
-            myCoffeeDatabaseRepository.getBrewWithCoffees(brewId = brewId).collect { brew ->
-                viewModelState.update { it.copy(brew = brew?.toBrewUiState()) }
+            myCoffeeDatabaseRepository.getBrewWithCoffees(brewId = brewId).collect { brewModel ->
+                viewModelState.update { it.copy(brew = brewModel?.toUiState()) }
             }
         }
     }
@@ -69,7 +71,7 @@ class HistoryDetailsViewModel @AssistedInject constructor(
         val brew = viewModelState.value.brew ?: return
 
         viewModelScope.launch {
-            myCoffeeDatabaseRepository.deleteBrew(brew.toBrew())
+            myCoffeeDatabaseRepository.deleteBrew(brew.toModel())
         }
     }
 

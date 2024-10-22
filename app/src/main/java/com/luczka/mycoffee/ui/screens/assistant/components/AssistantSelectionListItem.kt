@@ -25,7 +25,6 @@ import com.luczka.mycoffee.ui.models.CoffeeUiState
 import com.luczka.mycoffee.ui.theme.MyCoffeeTheme
 import java.io.File
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AssistantSelectionListItem(
     coffeeUiState: CoffeeUiState,
@@ -57,7 +56,7 @@ fun AssistantSelectionListItem(
                 }
             }
         },
-        headlineText = {
+        headlineContent = {
             Text(
                 text = "${coffeeUiState.name}, ${coffeeUiState.brand}",
                 style = MaterialTheme.typography.titleMedium,
@@ -65,7 +64,7 @@ fun AssistantSelectionListItem(
                 overflow = TextOverflow.Ellipsis
             )
         },
-        supportingText = {
+        supportingContent = {
             coffeeUiState.amount?.let { coffeeAmount ->
                 Text(
                     text = stringResource(

@@ -2,6 +2,7 @@ package com.luczka.mycoffee.ui.screens.recipedetails
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.luczka.mycoffee.domain.mappers.toUiState
 import com.luczka.mycoffee.domain.repository.FirebaseRepository
 import com.luczka.mycoffee.ui.models.RecipeUiState
 import dagger.assisted.Assisted
@@ -70,11 +71,11 @@ class RecipeDetailsViewModel @AssistedInject constructor(
         viewModelScope.launch {
             firebaseRepository.getRecipe(
                 youtubeId = recipeId,
-                onSuccess = { recipe ->
+                onSuccess = { recipeModel ->
                     viewModelState.update {
                         it.copy(
                             isLoading = false,
-                            recipe = recipe.toRecipeDetailsUiState()
+                            recipe = recipeModel.toUiState()
                         )
                     }
                 }

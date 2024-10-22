@@ -34,11 +34,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.luczka.mycoffee.R
-import com.luczka.mycoffee.ui.screens.assistant.components.AssistantSummaryCoffeeListItem
 import com.luczka.mycoffee.ui.models.CoffeeUiState
 import com.luczka.mycoffee.ui.screens.assistant.AmountSelectionUiState
 import com.luczka.mycoffee.ui.screens.assistant.AssistantAction
 import com.luczka.mycoffee.ui.screens.assistant.AssistantUiState
+import com.luczka.mycoffee.ui.screens.assistant.components.AssistantSummaryCoffeeListItem
 import com.luczka.mycoffee.ui.theme.MyCoffeeTheme
 import com.luczka.mycoffee.util.hasMultipleElements
 
@@ -221,7 +221,6 @@ fun AssistantSummaryScreen(
 }
 
 @Composable
-@OptIn(ExperimentalMaterial3Api::class)
 fun SummaryParametersListItem(
     index: Int,
     headlineText: String,
@@ -238,7 +237,7 @@ fun SummaryParametersListItem(
                 Text(text = "${index + 1}")
             }
         },
-        headlineText = { Text(text = headlineText) },
+        headlineContent = { Text(text = headlineText) },
         trailingContent = { Text(text = trailingText) }
     )
 }

@@ -45,7 +45,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.luczka.mycoffee.R
-import com.luczka.mycoffee.domain.models.CoffeeFilter
+import com.luczka.mycoffee.ui.models.CoffeeFilterUiState
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -73,8 +73,8 @@ fun CoffeesScreen(
             }
 
             BackHandler {
-                if (uiState.selectedFilter != CoffeeFilter.Current) {
-                    val action = CoffeesAction.OnSelectedFilterChanged(CoffeeFilter.All)
+                if (uiState.selectedFilter != CoffeeFilterUiState.Current) {
+                    val action = CoffeesAction.OnSelectedFilterChanged(CoffeeFilterUiState.All)
                     onAction(action)
                     val currentFilterNotVisible = filterListState.firstVisibleItemIndex != 0
                     val firstVisibleFilterNotAligned = filterListState.firstVisibleItemScrollOffset != 0
@@ -191,8 +191,8 @@ private fun HasCoffeesScreen(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(
-                items = uiState.coffeeFilters,
-                key = { it.id }
+                items = uiState.coffeeFilterUiStates,
+                key = { it.name }
             ) { coffeeFilter ->
                 val isSelected = uiState.selectedFilter == coffeeFilter
                 FilterChip(
@@ -202,7 +202,7 @@ private fun HasCoffeesScreen(
                         onAction(action)
                     },
                     label = {
-                        Text(text = stringResource(id = coffeeFilter.stringResource))
+                        Text(text = stringResource(id = coffeeFilter.stringRes))
                     },
                     leadingIcon = {
                         Box(
@@ -231,7 +231,13 @@ private fun HasCoffeesScreen(
                 items = uiState.filteredCoffees,
                 key = { it.coffeeId }
             ) { coffeeUiState ->
-                Box(modifier = Modifier.animateItemPlacement(animationSpec = tween())) {
+                Box(
+                    modifier = Modifier.animateItem(
+                        fadeInSpec = null,
+                        fadeOutSpec = null,
+                        placementSpec = tween()
+                    )
+                ) {
                     CoffeesListItem(
                         coffeeUiState = coffeeUiState,
                         onClick = {

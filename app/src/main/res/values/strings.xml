@@ -144,6 +144,7 @@
     <string name="process_natural">Natural</string>
     <string name="process_washed">Washed</string>
     <string name="process_honey">Honey</string>
+    <string name="process_other">Other</string>
 
     <!--  Enum coffee roast  -->
     <string name="roast_light">Light</string>

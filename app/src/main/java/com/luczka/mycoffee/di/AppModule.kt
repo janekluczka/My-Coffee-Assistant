@@ -7,8 +7,8 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.ktx.app
 import com.luczka.mycoffee.data.database.MyCoffeeDao
 import com.luczka.mycoffee.data.database.MyCoffeeDatabase
-import com.luczka.mycoffee.data.repository.FirebaseRepositoryImpl
-import com.luczka.mycoffee.data.repository.MyCoffeeDatabaseRepositoryImpl
+import com.luczka.mycoffee.data.remote.FirebaseRepositoryImpl
+import com.luczka.mycoffee.data.database.MyCoffeeDatabaseRepositoryImpl
 import com.luczka.mycoffee.domain.repository.FirebaseRepository
 import com.luczka.mycoffee.domain.repository.MyCoffeeDatabaseRepository
 import dagger.Module

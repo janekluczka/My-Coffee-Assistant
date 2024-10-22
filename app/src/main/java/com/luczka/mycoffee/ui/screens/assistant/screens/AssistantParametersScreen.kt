@@ -1,5 +1,6 @@
 package com.luczka.mycoffee.ui.screens.assistant.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -31,7 +32,6 @@ import com.luczka.mycoffee.ui.screens.assistant.components.AssistantParametersLi
 import com.luczka.mycoffee.ui.screens.assistant.dialogs.AssistantAmountSelectionDialog
 import com.luczka.mycoffee.ui.screens.assistant.dialogs.AssistantRatioSelectionDialog
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AssistantParametersScreen(
     uiState: AssistantUiState,
@@ -58,7 +58,7 @@ fun AssistantParametersScreen(
                     end = 16.dp,
                     bottom = 8.dp
                 ),
-                text = "Recipe",
+                text = "Recipe (optional)",
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
@@ -66,7 +66,11 @@ fun AssistantParametersScreen(
         }
         item {
             ListItem(
-                headlineText = {
+                modifier = Modifier.clickable {
+                    val action = AssistantAction.OnSelectRecipeClicked
+                    onAction(action)
+                },
+                headlineContent = {
                     Text("Select recipe")
                 }
             )

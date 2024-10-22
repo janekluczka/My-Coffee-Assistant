@@ -2,6 +2,7 @@ package com.luczka.mycoffee.ui.screens.history
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.luczka.mycoffee.domain.mappers.toUiState
 import com.luczka.mycoffee.domain.repository.MyCoffeeDatabaseRepository
 import com.luczka.mycoffee.ui.models.BrewUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -14,13 +15,13 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 private data class HistoryViewModelState(
-    val brews: List<BrewUiState> = emptyList()
+    val brewUiStates: List<BrewUiState> = emptyList()
 ) {
     fun toHistoryUiState(): HistoryUiState {
-        return if (brews.isEmpty()) {
+        return if (brewUiStates.isEmpty()) {
             HistoryUiState.NoBrews
         } else {
-            HistoryUiState.HasBrews(brews = brews)
+            HistoryUiState.HasBrews(brews = brewUiStates)
         }
     }
 }
@@ -41,9 +42,11 @@ class HistoryViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            myCoffeeDatabaseRepository.getBrewsWithCoffees().collect { brewList ->
-                val brews = brewList.map { it.toBrewUiState() }.sortedByDescending { it.brewId }
-                viewModelState.update { it.copy(brews = brews) }
+            myCoffeeDatabaseRepository.getBrewsWithCoffees().collect { brewModels ->
+                val brewUiStates = brewModels
+                    .map { it.toUiState() }
+                    .sorted()
+                viewModelState.update { it.copy(brewUiStates = brewUiStates) }
             }
         }
     }

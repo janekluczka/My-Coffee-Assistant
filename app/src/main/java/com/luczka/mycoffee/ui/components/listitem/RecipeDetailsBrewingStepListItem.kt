@@ -3,7 +3,6 @@ package com.luczka.mycoffee.ui.components.listitem
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -16,7 +15,6 @@ import androidx.compose.ui.unit.dp
 import com.luczka.mycoffee.ui.models.StepUiState
 import com.luczka.mycoffee.ui.theme.MyCoffeeTheme
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RecipeDetailsBrewingStepListItem(stepUiState: StepUiState) {
     ListItem(
@@ -30,7 +28,7 @@ fun RecipeDetailsBrewingStepListItem(stepUiState: StepUiState) {
                 Text(text = "${stepUiState.number}")
             }
         },
-        headlineText = {
+        headlineContent = {
             Text(text = stepUiState.description)
         },
         trailingContent = {
@@ -80,6 +78,7 @@ private fun BrewingStepListItemWithoutTrailingContentPreview(darkTheme: Boolean)
     val stepUiState = StepUiState(
         number = 1,
         description = "Grind coffee beans (15 grams) relatively fine",
+        time = null,
     )
     MyCoffeeTheme(darkTheme = darkTheme) {
         RecipeDetailsBrewingStepListItem(stepUiState = stepUiState)

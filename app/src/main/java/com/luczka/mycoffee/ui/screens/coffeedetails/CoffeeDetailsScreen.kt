@@ -47,7 +47,6 @@ import com.luczka.mycoffee.ui.models.CoffeeUiState
 import com.luczka.mycoffee.util.isPositiveFloat
 import java.io.File
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CoffeeDetailsScreen(
     widthSizeClass: WindowWidthSizeClass,
@@ -155,20 +154,18 @@ private fun CoffeeDetailsList(coffeeUiState: CoffeeUiState) {
             }
         }
         if (coffeeUiState.roast != null) {
-            val roastStringResource = coffeeUiState.roast.stringResource
             item {
                 CoffeeDetailListItem(
                     supportingText = stringResource(id = R.string.coffee_parameters_roast),
-                    headlineText = stringResource(id = roastStringResource)
+                    headlineText = stringResource(id = coffeeUiState.roast.stringRes)
                 )
             }
         }
         if (coffeeUiState.process != null) {
-            val processStringResource = coffeeUiState.process.stringResource
             item {
                 CoffeeDetailListItem(
                     supportingText = stringResource(id = R.string.coffee_parameters_process),
-                    headlineText = stringResource(id = processStringResource)
+                    headlineText = stringResource(id = coffeeUiState.process.stringRes)
                 )
             }
         }
@@ -231,20 +228,19 @@ private fun CoffeeDetailsTopBar(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun CoffeeDetailListItem(
     supportingText: String,
     headlineText: String
 ) {
     ListItem(
-        headlineText = {
+        headlineContent = {
             Text(
                 text = headlineText,
                 style = MaterialTheme.typography.titleMedium
             )
         },
-        supportingText = {
+        supportingContent = {
             Text(
                 text = supportingText,
                 style = MaterialTheme.typography.bodyMedium

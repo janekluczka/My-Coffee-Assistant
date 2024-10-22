@@ -1,10 +1,13 @@
 package com.luczka.mycoffee.ui.screens.assistant
 
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.luczka.mycoffee.data.database.entities.BrewEntity
-import com.luczka.mycoffee.data.database.entities.BrewedCoffeeEntity
+import com.luczka.mycoffee.domain.mappers.toModel
+import com.luczka.mycoffee.domain.mappers.toUiState
 import com.luczka.mycoffee.domain.repository.MyCoffeeDatabaseRepository
+import com.luczka.mycoffee.ui.models.BrewUiState
+import com.luczka.mycoffee.ui.models.BrewedCoffeeUiState
 import com.luczka.mycoffee.ui.models.CoffeeUiState
 import com.luczka.mycoffee.util.toStringWithOneDecimalPoint
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -14,9 +17,21 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
+import java.time.LocalDate
 import javax.inject.Inject
+
+data class AssistantRecipeCategoryUiState(
+    @StringRes val nameRes: Int,
+    val recipes: List<AssistantRecipeUiState>
+)
+
+data class AssistantRecipeUiState(
+    @StringRes val nameRes: Int,
+    val coffeeAmount: String,
+    val coffeeRatio: Int,
+    val waterRatio: Int,
+    val waterAmount: String,
+)
 
 data class AmountSelectionUiState(
     val integerParts: List<Int> = (0..0).toList(),
@@ -39,6 +54,8 @@ private data class AssistantViewModelState(
     val currentCoffees: List<CoffeeUiState> = emptyList(),
     // TODO: Change to nullable key MutableMap<CoffeeUiState?, AmountSelectionUiState>
     val selectedCoffees: MutableMap<CoffeeUiState, AmountSelectionUiState> = mutableMapOf(),
+    val assistantRecipeCategoryUiStates: List<AssistantRecipeCategoryUiState> = emptyList(),
+    val selectedRecipe: AssistantRecipeUiState? = null,
     val amountSelectionUiState: AmountSelectionUiState = AmountSelectionUiState(integerParts = (0..99).toList()),
     val ratioSelectionUiState: RatioSelectionUiState = RatioSelectionUiState(),
     val rating: Int? = null,
@@ -81,7 +98,7 @@ private data class AssistantViewModelState(
         }
     }
 
-    fun toBrew(): BrewEntity {
+    fun toBrewModel(): BrewUiState {
         val coffeeAmountsSum = sumSelectedAmounts()
 
         val coffeeRatio = ratioSelectionUiState.selectedCoffeeRatio
@@ -89,15 +106,22 @@ private data class AssistantViewModelState(
 
         val waterAmount = coffeeAmountsSum * waterRatio / coffeeRatio
 
-        return BrewEntity(
-            brewId = 0,
-            date = LocalDateTime.now().format(DateTimeFormatter.BASIC_ISO_DATE),
+        val brewedCoffees = selectedCoffees.map { (coffeeUiState, amountSelectionUiState) ->
+            BrewedCoffeeUiState(
+                coffeeAmount = amountSelectionUiState.selectedAmount.toFloatOrNull() ?: 0f,
+                coffee = coffeeUiState,
+            )
+        }
+
+        return BrewUiState(
+            date = LocalDate.now(),
             coffeeAmount = coffeeAmountsSum,
             coffeeRatio = coffeeRatio,
             waterAmount = waterAmount,
             waterRatio = waterRatio,
             rating = rating,
-            notes = notes
+            notes = notes,
+            brewedCoffees = brewedCoffees
         )
     }
 
@@ -126,9 +150,9 @@ class AssistantViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            myCoffeeDatabaseRepository.getCurrentCoffeesStream().collect { coffeeList ->
-                val coffeeUiStateList = coffeeList
-                    .map { it.toCoffeeUiState() }
+            myCoffeeDatabaseRepository.getCurrentCoffeesStream().collect { coffeeModels ->
+                val coffeeUiStateList = coffeeModels
+                    .map { it.toUiState() }
                     .sortedWith(
                         compareBy<CoffeeUiState> { !it.isFavourite }
                             .thenBy { it.name }
@@ -142,7 +166,6 @@ class AssistantViewModel @Inject constructor(
 
     fun onAction(action: AssistantAction) {
         when (action) {
-            AssistantAction.NavigateUp -> {}
             is AssistantAction.OnSelectedCoffeeChanged -> selectCoffee(action.coffeeUiState)
             is AssistantAction.OnCoffeeAmountSelectionIntegerPartIndexChanged -> {
                 if (action.key == null) {
@@ -174,6 +197,7 @@ class AssistantViewModel @Inject constructor(
             is AssistantAction.OnNotesChanged -> updateNotes(action.notes)
             is AssistantAction.OnRatingChanged -> updateRating(action.rating)
             AssistantAction.OnFinishBrew -> finishBrew()
+            else -> {}
         }
     }
 
@@ -397,40 +421,27 @@ class AssistantViewModel @Inject constructor(
 
     private fun finishBrew() {
         viewModelScope.launch {
-            val brewId = insertBrew()
-            updateSelectedCoffees(brewId = brewId)
-            viewModelState.update { it.copy(isFinished = true) }
-        }
-    }
+            val brew = viewModelState.value.toBrewModel()
 
-    private suspend fun insertBrew(): Long {
-        val brew = viewModelState.value.toBrew()
-        return myCoffeeDatabaseRepository.insertBrew(brewEntity = brew)
-    }
+            myCoffeeDatabaseRepository.insertBrew(brew.toModel())
 
-    private suspend fun updateSelectedCoffees(brewId: Long) {
-        viewModelState.value.selectedCoffees.forEach { (selectedCoffee, amountSelectionUiState) ->
-            val selectedCoffeeAmount = selectedCoffee.amount?.toFloatOrNull() ?: 0f
+            viewModelState.value.selectedCoffees.forEach { (selectedCoffee, amountSelectionUiState) ->
+                val selectedCoffeeAmount = selectedCoffee.amount?.toFloatOrNull() ?: 0f
 
-            val selectedAmount = amountSelectionUiState.selectedAmount.toFloatOrNull() ?: 0f
+                val selectedAmount = amountSelectionUiState.selectedAmount.toFloatOrNull() ?: 0f
 
-            val updatedAmount = selectedCoffeeAmount - selectedAmount
+                val updatedAmount = selectedCoffeeAmount - selectedAmount
 
-            val updatedCoffee = if (updatedAmount <= 0) {
-                selectedCoffee.copy(amount = null)
-            } else {
-                selectedCoffee.copy(amount = updatedAmount.toString())
+                val updatedCoffee = if (updatedAmount <= 0) {
+                    selectedCoffee.copy(amount = null)
+                } else {
+                    selectedCoffee.copy(amount = updatedAmount.toString())
+                }
+
+                myCoffeeDatabaseRepository.updateCoffee(updatedCoffee.toModel())
             }
 
-            val brewedCoffeeEntity = BrewedCoffeeEntity(
-                brewId = brewId.toInt(),
-                coffeeId = selectedCoffee.coffeeId,
-                coffeeAmount = selectedAmount
-            )
-
-            myCoffeeDatabaseRepository.insertBrewedCoffee(brewedCoffeeEntity)
-
-            myCoffeeDatabaseRepository.updateCoffee(updatedCoffee.toCoffee())
+            viewModelState.update { it.copy(isFinished = true) }
         }
     }
 

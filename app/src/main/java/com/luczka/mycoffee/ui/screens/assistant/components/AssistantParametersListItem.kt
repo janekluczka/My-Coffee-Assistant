@@ -41,10 +41,10 @@ fun AssistantParametersListItem(
                 Text(text = "${index + 1}")
             }
         },
-        overlineText = {
+        overlineContent = {
             Text(text = overlineText)
         },
-        headlineText = {
+        headlineContent = {
             Text(
                 text = headlineText,
                 style = MaterialTheme.typography.bodyLarge.copy(

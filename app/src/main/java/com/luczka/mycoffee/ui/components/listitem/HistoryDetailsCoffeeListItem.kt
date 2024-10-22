@@ -3,7 +3,6 @@ package com.luczka.mycoffee.ui.components.listitem
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -21,9 +20,18 @@ import com.luczka.mycoffee.ui.models.CoffeeUiState
 import java.io.File
 
 @Composable
-@OptIn(ExperimentalMaterial3Api::class)
 fun HistoryDetailsCoffeeListItem(coffeeUiState: CoffeeUiState?) {
     val context = LocalContext.current
+
+    val headlineText = if (coffeeUiState == null) {
+        stringResource(R.string.unknown)
+    } else {
+        stringResource(
+            id = R.string.coffee_parameters_name_and_brand,
+            coffeeUiState.name,
+            coffeeUiState.brand
+        )
+    }
 
     ListItem(
         leadingContent = {
@@ -45,18 +53,9 @@ fun HistoryDetailsCoffeeListItem(coffeeUiState: CoffeeUiState?) {
                 }
             }
         },
-        headlineText = {
-            val headlineTextValue = if (coffeeUiState == null) {
-                "Unknown"
-            } else {
-                stringResource(
-                    id = R.string.coffee_parameters_name_and_brand,
-                    coffeeUiState.name,
-                    coffeeUiState.brand
-                )
-            }
+        headlineContent = {
             Text(
-                text = headlineTextValue,
+                text = headlineText,
                 style = MaterialTheme.typography.titleMedium,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis

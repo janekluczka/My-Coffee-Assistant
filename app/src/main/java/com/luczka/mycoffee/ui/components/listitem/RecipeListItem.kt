@@ -19,10 +19,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.luczka.mycoffee.domain.models.Recipe
 import com.luczka.mycoffee.ui.models.RecipeUiState
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -50,7 +48,7 @@ fun RecipeListItem(
             )
         }
         ListItem(
-            headlineText = {
+            headlineContent = {
                 Text(
                     text = recipeCardUiState.title,
                     maxLines = 2,
@@ -59,7 +57,7 @@ fun RecipeListItem(
                     color = MaterialTheme.colorScheme.onSurface,
                 )
             },
-            supportingText = {
+            supportingContent = {
                 Text(
                     text = recipeCardUiState.author,
                     maxLines = 1,
@@ -72,13 +70,13 @@ fun RecipeListItem(
     }
 }
 
-@Preview
-@Composable
-fun RecipeListItemPreview() {
-    val recipeCardUiState = Recipe(
-        title = "Rick Astley - Never Gonna Give You Up (Official Music Video)",
-        author = "Rick Astley",
-        youtubeId = "dQw4w9WgXcQ"
-    ).toRecipeDetailsUiState()
-    RecipeListItem(recipeCardUiState = recipeCardUiState, onClick = {})
-}
+//@Preview
+//@Composable
+//fun RecipeListItemPreview() {
+//    val recipeCardUiState = RecipeDto(
+//        title = "Rick Astley - Never Gonna Give You Up (Official Music Video)",
+//        author = "Rick Astley",
+//        youtubeId = "dQw4w9WgXcQ"
+//    ).toRecipeDetailsUiState()
+//    RecipeListItem(recipeCardUiState = recipeCardUiState, onClick = {})
+//}

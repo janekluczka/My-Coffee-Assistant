@@ -1,17 +1,13 @@
 package com.luczka.mycoffee.ui.models
 
-import com.luczka.mycoffee.data.database.entities.CoffeeEntity
-import com.luczka.mycoffee.domain.models.Process
-import com.luczka.mycoffee.domain.models.Roast
-
 data class CoffeeUiState(
     val coffeeId: Int = 0,
     val name: String = "",
     val brand: String = "",
     val amount: String? = null,
     val scaScore: String? = null,
-    val process: Process? = null,
-    val roast: Roast? = null,
+    val process: ProcessUiState? = null,
+    val roast: RoastUiState? = null,
     val isFavourite: Boolean = false,
     val imageFile240x240: String? = null,
     val imageFile360x360: String? = null,
@@ -28,22 +24,6 @@ data class CoffeeUiState(
             { it.coffeeId }
         ).compare(this, other)
     }
-
-    fun toCoffee(): CoffeeEntity = CoffeeEntity(
-        coffeeId = coffeeId,
-        name = name.trim(),
-        brand = brand.trim(),
-        amount = amount?.toFloatOrNull(),
-        scaScore = scaScore?.toFloatOrNull(),
-        process = process?.id,
-        roast = roast?.id,
-        isFavourite = isFavourite,
-        imageFile240x240 = imageFile240x240,
-        imageFile360x360 = imageFile360x360,
-        imageFile480x480 = imageFile480x480,
-        imageFile720x720 = imageFile720x720,
-        imageFile960x960 = imageFile960x960,
-    )
 
     fun isBlank(): Boolean {
         if (coffeeId != 0) return false

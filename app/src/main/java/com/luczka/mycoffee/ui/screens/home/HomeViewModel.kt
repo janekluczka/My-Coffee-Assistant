@@ -2,6 +2,7 @@ package com.luczka.mycoffee.ui.screens.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.luczka.mycoffee.domain.mappers.toUiState
 import com.luczka.mycoffee.domain.repository.MyCoffeeDatabaseRepository
 import com.luczka.mycoffee.ui.models.CoffeeUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -53,8 +54,8 @@ class HomeViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            myCoffeeDatabaseRepository.getCurrentCoffeesStream().collect { coffeeList ->
-                val currentCoffees = coffeeList.map { it.toCoffeeUiState() }
+            myCoffeeDatabaseRepository.getCurrentCoffeesStream().collect { coffeeModels ->
+                val currentCoffees = coffeeModels.map { it.toUiState() }
                 viewModelState.update {
                     it.copy(currentCoffees = currentCoffees)
                 }

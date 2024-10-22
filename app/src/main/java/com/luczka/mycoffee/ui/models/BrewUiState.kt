@@ -1,10 +1,9 @@
 package com.luczka.mycoffee.ui.models
 
-import com.luczka.mycoffee.data.database.entities.BrewEntity
 import java.time.LocalDate
 
 data class BrewUiState(
-    val brewId: Int,
+    val brewId: Int = 0,
     val date: LocalDate,
     val coffeeAmount: Float,
     val coffeeRatio: Int,
@@ -14,6 +13,7 @@ data class BrewUiState(
     val notes: String,
     val brewedCoffees: List<BrewedCoffeeUiState>
 ) : Comparable<BrewUiState> {
+
     override fun compareTo(other: BrewUiState): Int {
         return compareBy<BrewUiState>(
             { it.brewId },
@@ -21,14 +21,4 @@ data class BrewUiState(
         ).compare(this, other)
     }
 
-    fun toBrew(): BrewEntity = BrewEntity(
-        brewId = brewId,
-        date = "",
-        coffeeAmount = coffeeAmount,
-        coffeeRatio = coffeeRatio,
-        waterAmount = waterAmount,
-        waterRatio = waterRatio,
-        rating = rating,
-        notes = notes,
-    )
 }

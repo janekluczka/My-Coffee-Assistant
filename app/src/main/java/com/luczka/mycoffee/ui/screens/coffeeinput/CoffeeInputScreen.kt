@@ -454,7 +454,7 @@ private fun CoffeeProcessSelectionRow(
     ) {
         items(
             items = uiState.processes,
-            key = { it.id }
+            key = { it.name }
         ) { process ->
             val isSelected = uiState.coffeeUiState.process == process
             MyCoffeeFilterChip(
@@ -464,7 +464,7 @@ private fun CoffeeProcessSelectionRow(
                     onAction(action)
                 },
                 label = {
-                    Text(text = stringResource(id = process.stringResource))
+                    Text(text = stringResource(id = process.stringRes))
                 }
             )
         }
@@ -492,7 +492,7 @@ private fun CoffeeRoastSelectionRow(
     ) {
         items(
             items = uiState.roasts,
-            key = { roast -> roast.id }
+            key = { roast -> roast.name }
         ) { coffeeRoast ->
             val isSelected = uiState.coffeeUiState.roast == coffeeRoast
             MyCoffeeFilterChip(
@@ -502,7 +502,7 @@ private fun CoffeeRoastSelectionRow(
                     onAction(action)
                 },
                 label = {
-                    Text(text = stringResource(id = coffeeRoast.stringResource))
+                    Text(text = stringResource(id = coffeeRoast.stringRes))
                 }
             )
         }

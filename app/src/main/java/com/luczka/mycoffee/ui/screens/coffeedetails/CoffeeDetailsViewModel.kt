@@ -3,6 +3,8 @@ package com.luczka.mycoffee.ui.screens.coffeedetails
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.luczka.mycoffee.domain.mappers.toModel
+import com.luczka.mycoffee.domain.mappers.toUiState
 import com.luczka.mycoffee.domain.repository.MyCoffeeDatabaseRepository
 import com.luczka.mycoffee.ui.models.CoffeeUiState
 import dagger.assisted.Assisted
@@ -62,9 +64,9 @@ class CoffeeDetailsViewModel @AssistedInject constructor(
 
     init {
         viewModelScope.launch {
-            myCoffeeDatabaseRepository.getCoffeeStream(coffeeId).collect { coffee ->
+            myCoffeeDatabaseRepository.getCoffeeStream(coffeeId).collect { coffeeModel ->
                 viewModelState.update {
-                    it.copy(coffee = coffee?.toCoffeeUiState())
+                    it.copy(coffee = coffeeModel?.toUiState())
                 }
             }
         }
@@ -83,7 +85,7 @@ class CoffeeDetailsViewModel @AssistedInject constructor(
 
         viewModelScope.launch {
             val updatedCoffee = selectedCoffee.copy(isFavourite = !selectedCoffee.isFavourite)
-            myCoffeeDatabaseRepository.updateCoffee(coffeeEntity = updatedCoffee.toCoffee())
+            myCoffeeDatabaseRepository.updateCoffee(coffeeModel = updatedCoffee.toModel())
         }
     }
 
@@ -103,7 +105,7 @@ class CoffeeDetailsViewModel @AssistedInject constructor(
             val file720x720 = imageFile720x720?.let { File(filesDir, it) }
             val file960x960 = imageFile960x960?.let { File(filesDir, it) }
 
-            myCoffeeDatabaseRepository.deleteCoffee(coffeeEntity = selectedCoffee.toCoffee())
+            myCoffeeDatabaseRepository.deleteCoffee(coffeeModel = selectedCoffee.toModel())
 
             file240x240?.delete()
             file360x360?.delete()

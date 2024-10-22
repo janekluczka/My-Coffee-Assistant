@@ -10,6 +10,7 @@ import androidx.room.Update
 import com.luczka.mycoffee.data.database.entities.BrewEntity
 import com.luczka.mycoffee.data.database.entities.BrewedCoffeeEntity
 import com.luczka.mycoffee.data.database.entities.CoffeeEntity
+import com.luczka.mycoffee.data.database.queries.BrewWithBrewedCoffeesRelation
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -75,17 +76,27 @@ interface MyCoffeeDao {
 
     @Transaction
     @Query("SELECT * FROM BrewEntity")
-    fun getBrewsWithCoffees(): Flow<List<BrewWithBrewedCoffees>>
+    fun getBrewsWithCoffees(): Flow<List<BrewWithBrewedCoffeesRelation>>
 
     @Transaction
     @Query("SELECT * FROM BrewEntity WHERE brewId = :id")
-    fun getBrewWithCoffees(id: Int): Flow<BrewWithBrewedCoffees>
+    fun getBrewWithCoffees(id: Int): Flow<BrewWithBrewedCoffeesRelation>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertBrew(brewEntity: BrewEntity): Long
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertBrewedCoffee(brewedCoffeeEntity: BrewedCoffeeEntity)
+
+    @Insert
+    suspend fun insertBrewedCoffees(brewedCoffees: List<BrewedCoffeeEntity>)
+
+    @Transaction
+    suspend fun insertBrewWithBrewedCoffees(brewEntity: BrewEntity, brewedCoffeeEntities: List<BrewedCoffeeEntity>) {
+        val brewId = insertBrew(brewEntity).toInt()
+        val brewedCoffeeEntitiesWithId = brewedCoffeeEntities.map { it.copy(brewId = brewId) }
+        insertBrewedCoffees(brewedCoffeeEntitiesWithId)
+    }
 
     @Delete
     suspend fun delete(brewEntity: BrewEntity)
