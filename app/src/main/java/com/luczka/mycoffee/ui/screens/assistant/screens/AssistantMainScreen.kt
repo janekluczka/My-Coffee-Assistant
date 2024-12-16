@@ -2,14 +2,17 @@ package com.luczka.mycoffee.ui.screens.assistant.screens
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
@@ -20,6 +23,7 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -34,17 +38,41 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.core.text.buildSpannedString
 import com.luczka.mycoffee.R
 import com.luczka.mycoffee.ui.components.icons.CloseIcon
 import com.luczka.mycoffee.ui.screens.assistant.AssistantAction
 import com.luczka.mycoffee.ui.screens.assistant.AssistantUiState
 import com.luczka.mycoffee.ui.screens.assistant.dialogs.AssistantAbortDialog
-import com.luczka.mycoffee.ui.screens.assistant.dialogs.AssistantFinishDialog
+import com.luczka.mycoffee.ui.screens.assistant.dialogs.AssistantSaveDialog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+
+enum class AssistantPage {
+    SELECTION,
+    PARAMETERS,
+    SUMMARY
+}
+
+data class AssistantRecipeCategoryUiState(
+    val name: String = "Aeropress",
+    val recipes: List<AssistantRecipeUiState> = (1..10).map { AssistantRecipeUiState() }
+)
+
+data class AssistantRecipeUiState(
+    val name: String = "Aeropress (Original)",
+    val coffeeAmountIntegerPart: Int = 15,
+    val coffeeAmountFractionalPart: Int = 0,
+    val coffeeRatio: Int = 1,
+    val waterRatio: Int = 10,
+    val waterAmount: String = "150"
+)
+
+val categories = (1..3).map { AssistantRecipeCategoryUiState() }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -54,12 +82,12 @@ fun AssistantMainScreen(
 ) {
     val coroutineScope = rememberCoroutineScope()
 
-    val sheetState = rememberModalBottomSheetState()
     val pagerState = rememberPagerState(
-        initialPage = 0,
-        pageCount = { 3 }
+        initialPage = uiState.initialPage,
+        pageCount = { uiState.pages.size }
     )
 
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var showBottomSheet by rememberSaveable { mutableStateOf(false) }
 
     var showAbortDialog by rememberSaveable { mutableStateOf(false) }
@@ -67,7 +95,8 @@ fun AssistantMainScreen(
 
     LaunchedEffect(uiState.isFinished) {
         if (uiState.isFinished) {
-            onAction(AssistantAction.NavigateUp)
+            val action = AssistantAction.NavigateToAssistantRating(brewId = 0L) // TODO: Change to actual value
+            onAction(action)
         }
     }
 
@@ -75,12 +104,14 @@ fun AssistantMainScreen(
         if (pagerState.currentPage == 0) {
             when (uiState) {
                 is AssistantUiState.NoneSelected -> {
-                    onAction(AssistantAction.NavigateUp)
+                    val action = AssistantAction.NavigateUp
+                    onAction(action)
                 }
 
                 is AssistantUiState.CoffeeSelected -> {
                     if (uiState.selectedCoffees.isEmpty()) {
-                        onAction(AssistantAction.NavigateUp)
+                        val action = AssistantAction.NavigateUp
+                        onAction(action)
                     } else {
                         showAbortDialog = true
                     }
@@ -103,20 +134,22 @@ fun AssistantMainScreen(
             },
             onPositive = {
                 showAbortDialog = false
-                onAction(AssistantAction.NavigateUp)
+                val action = AssistantAction.NavigateUp
+                onAction(action)
             }
         )
     }
 
     if (showFinishDialog) {
-        AssistantFinishDialog(
+        AssistantSaveDialog(
             uiState = uiState,
             onNegative = {
                 showFinishDialog = false
             },
             onPositive = {
                 showFinishDialog = false
-                onAction(AssistantAction.OnFinishBrew)
+                val action = AssistantAction.OnFinishButtonClicked
+                onAction(action)
             }
         )
     }
@@ -124,53 +157,83 @@ fun AssistantMainScreen(
     Scaffold(
         topBar = {
             AssistantTopBar(
-                uiState = uiState,
                 pagerState = pagerState,
-                navigateUp = {
-                    onAction(AssistantAction.NavigateUp)
-                },
-                onShowAbortDialog = {
-                    showAbortDialog = true
+                uiState = uiState,
+                onAction = { action ->
+                    when(action) {
+                        is AssistantAction.OnShowAbortDialog -> showAbortDialog = true
+                        else -> {}
+                    }
+                    onAction(action)
                 }
             )
         },
         bottomBar = {
-            Row(
-                modifier = Modifier
-                    .height(80.dp)
-                    .padding(horizontal = 16.dp, vertical = 12.dp),
-                verticalAlignment = Alignment.Top,
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                PreviousButton(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f),
-                    pagerState = pagerState,
-                    coroutineScope = coroutineScope
-                )
-                NextOrFinishButton(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f),
-                    pagerState = pagerState,
-                    coroutineScope = coroutineScope,
-                    onShowFinishDialog = { showFinishDialog = true }
-                )
-            }
+            AssistantBottomBar(
+                pagerState = pagerState,
+                coroutineScope = coroutineScope,
+                uiState = uiState,
+                onAction = { action ->
+                    when(action) {
+                        is AssistantAction.OnShowFinishDialog -> showFinishDialog = true
+                        else -> {}
+                    }
+                    onAction(action)
+                }
+            )
         }
     ) { innerPadding ->
         if (showBottomSheet) {
+            val bottomSystemBarHeight = with(LocalDensity.current) {
+                WindowInsets.systemBars.getBottom(this).toDp()
+            }
+
             ModalBottomSheet(
                 sheetState = sheetState,
                 onDismissRequest = {
                     showBottomSheet = false
                 },
+                tonalElevation = 0.dp
             ) {
-                LazyColumn {
-                    items((1..10).toList()) {
-                        ListItem(headlineContent = { Text(text = it.toString()) })
+                LazyColumn(contentPadding = PaddingValues(bottom = bottomSystemBarHeight)) {
+                    categories.forEachIndexed { index, categoryUiState ->
+                        item {
+                            val paddingTop = if (index == 0) 0.dp else 24.dp
+                            Text(
+                                modifier = Modifier.padding(
+                                    top = paddingTop,
+                                    start = 16.dp,
+                                    end = 16.dp,
+                                    bottom = 8.dp
+                                ),
+                                text = categoryUiState.name,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                        items(categoryUiState.recipes) {
+                            val supportingText = buildSpannedString {
+                                append("${it.coffeeAmountIntegerPart}.${it.coffeeAmountFractionalPart} g of coffee")
+                                append(" • ")
+                                append("${it.coffeeRatio}:${it.waterRatio} ratio")
+                                append(" • ")
+                                append("${it.waterAmount} of water")
+                            }.toString()
+
+                            ListItem(
+                                modifier = Modifier.clickable {
+
+                                },
+                                headlineContent = {
+                                    Text(text = it.name)
+                                },
+                                supportingContent = {
+                                    Text(text = supportingText)
+                                }
+                            )
+                        }
                     }
+
                 }
             }
         }
@@ -179,12 +242,11 @@ fun AssistantMainScreen(
             pagerState = pagerState,
             uiState = uiState,
             onAction = { action ->
-                when(action) {
-                    is AssistantAction.OnSelectRecipeClicked -> {
-                        showBottomSheet = true
-                    }
-                    else -> onAction(action)
+                when (action) {
+                    is AssistantAction.OnSelectRecipeClicked -> showBottomSheet = true
+                    else -> {}
                 }
+                onAction(action)
             }
         )
     }
@@ -193,10 +255,9 @@ fun AssistantMainScreen(
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 private fun AssistantTopBar(
-    uiState: AssistantUiState,
     pagerState: PagerState,
-    navigateUp: () -> Unit,
-    onShowAbortDialog: () -> Unit
+    uiState: AssistantUiState,
+    onAction: (AssistantAction) -> Unit
 ) {
     TopAppBar(
         navigationIcon = {
@@ -204,19 +265,21 @@ private fun AssistantTopBar(
                 onClick = {
                     when (uiState) {
                         is AssistantUiState.NoneSelected -> {
-                            if (pagerState.currentPage == 0) {
-                                navigateUp()
+                            val action = if (pagerState.currentPage == 0) {
+                                AssistantAction.NavigateUp
                             } else {
-                                onShowAbortDialog()
+                                AssistantAction.OnShowAbortDialog
                             }
+                            onAction(action)
                         }
 
                         is AssistantUiState.CoffeeSelected -> {
-                            if (uiState.selectedCoffees.isEmpty()) {
-                                navigateUp()
+                            val action = if (uiState.selectedCoffees.isEmpty()) {
+                                AssistantAction.NavigateUp
                             } else {
-                                onShowAbortDialog()
+                                AssistantAction.OnShowAbortDialog
                             }
+                            onAction(action)
                         }
                     }
                 }
@@ -250,24 +313,22 @@ private fun AssistantContent(
             state = pagerState,
             beyondViewportPageCount = 2,
             userScrollEnabled = false
-        ) { page ->
-            when (page) {
-                0 -> AssistantSelectionScreen(
+        ) { pageIndex ->
+            when (uiState.pages[pageIndex]) {
+                AssistantPage.SELECTION -> AssistantSelectionScreen(
                     uiState = uiState,
                     onAction = onAction
                 )
 
-                1 -> AssistantParametersScreen(
+                AssistantPage.PARAMETERS -> AssistantParametersScreen(
                     uiState = uiState,
                     onAction = onAction
                 )
 
-                2 -> AssistantSummaryScreen(
+                AssistantPage.SUMMARY -> AssistantSummaryScreen(
                     uiState = uiState,
                     onAction = onAction
                 )
-
-                else -> {}
             }
         }
         Divider(modifier = Modifier.fillMaxWidth())
@@ -275,55 +336,71 @@ private fun AssistantContent(
 }
 
 @Composable
-private fun PreviousButton(
-    modifier: Modifier,
-    pagerState: PagerState,
-    coroutineScope: CoroutineScope
-) {
-    Button(
-        modifier = modifier,
-        enabled = pagerState.currentPage != 0,
-        onClick = {
-            coroutineScope.launch {
-                pagerState.animateScrollToPage(
-                    page = pagerState.currentPage - 1,
-                    animationSpec = tween(500)
-                )
-            }
-        }
-    ) {
-        Text(text = stringResource(id = R.string.assistant_button_previous))
-    }
-}
-
-@Composable
-private fun NextOrFinishButton(
-    modifier: Modifier,
-    pagerState: PagerState,
+private fun AssistantBottomBar(
     coroutineScope: CoroutineScope,
-    onShowFinishDialog: () -> Unit
+    pagerState: PagerState,
+    uiState: AssistantUiState,
+    onAction: (AssistantAction) -> Unit
 ) {
-    val isNotLastPage = pagerState.currentPage != 2
-    val text = if (isNotLastPage) {
-        stringResource(id = R.string.assistant_button_next)
-    } else {
-        stringResource(id = R.string.assistant_button_finish)
-    }
-    Button(
-        modifier = modifier,
-        onClick = {
-            if (isNotLastPage) {
+    Row(
+        modifier = Modifier
+            .heightIn(min = 80.dp)
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.Top,
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        val isFirstPage = pagerState.currentPage == 0
+        val isLastPage = pagerState.currentPage ==uiState.pages.lastIndex
+
+        val text = if (isLastPage) {
+            stringResource(id = R.string.button_save)
+        } else {
+            stringResource(id = R.string.button_next)
+        }
+
+        Button(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f),
+            enabled = !isFirstPage,
+            onClick = {
                 coroutineScope.launch {
                     pagerState.animateScrollToPage(
-                        page = pagerState.currentPage + 1,
+                        page = pagerState.currentPage - 1,
                         animationSpec = tween(500)
                     )
                 }
-            } else {
-                onShowFinishDialog()
             }
+        ) {
+            Text(
+                text = stringResource(id = R.string.button_previous),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
         }
-    ) {
-        Text(text = text)
+        Button(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f),
+            onClick = {
+                if (isLastPage) {
+                    val action = AssistantAction.OnShowFinishDialog
+                    onAction(action)
+                } else {
+                    coroutineScope.launch {
+                        pagerState.animateScrollToPage(
+                            page = pagerState.currentPage + 1,
+                            animationSpec = tween(500)
+                        )
+                    }
+                }
+            }
+        ) {
+            Text(
+                text = text,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
     }
 }

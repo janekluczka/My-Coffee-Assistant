@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Divider
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -21,6 +20,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -29,12 +29,10 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 
 @Composable
-@OptIn(ExperimentalMaterial3Api::class)
 fun MainRoute(
     widthSizeClass: WindowWidthSizeClass,
     nestedNavController: NavHostController,
-    navigateToAssistant: () -> Unit,
-    navigateToCoffeeInput: (Int?) -> Unit
+    onAction: (MainNavHostAction) -> Unit,
 ) {
     val navigationType = when (widthSizeClass) {
         WindowWidthSizeClass.Compact -> MyCoffeeNavigationType.BOTTOM_NAVIGATION
@@ -46,15 +44,16 @@ fun MainRoute(
     when (navigationType) {
         MyCoffeeNavigationType.BOTTOM_NAVIGATION -> {
             Scaffold(
-                bottomBar = { MyCoffeeNavigationBar(navController = nestedNavController) }
+                bottomBar = {
+                    MyCoffeeNavigationBar(navController = nestedNavController)
+                }
             ) { innerPadding ->
                 Column(modifier = Modifier.padding(innerPadding)) {
                     MyCoffeeNestedNavHost(
                         modifier = Modifier.weight(1f),
                         widthSizeClass = widthSizeClass,
                         navController = nestedNavController,
-                        navigateToAssistant = navigateToAssistant,
-                        navigateToCoffeeInput = navigateToCoffeeInput
+                        onAction = onAction
                     )
                     Divider()
                 }
@@ -68,8 +67,7 @@ fun MainRoute(
                     modifier = Modifier,
                     widthSizeClass = widthSizeClass,
                     navController = nestedNavController,
-                    navigateToAssistant = navigateToAssistant,
-                    navigateToCoffeeInput = navigateToCoffeeInput
+                    onAction = onAction
                 )
             }
         }
@@ -91,7 +89,13 @@ private fun MyCoffeeNavigationRail(navController: NavHostController) {
                         contentDescription = null
                     )
                 },
-                label = { Text(text = stringResource(id = topLevelRoute.stringRes)) },
+                label = {
+                    Text(
+                        text = stringResource(id = topLevelRoute.stringRes),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                },
                 selected = currentDestination?.hierarchy?.any {
                     it.hasRoute(topLevelRoute.route::class)
                 } == true,
@@ -124,7 +128,13 @@ private fun MyCoffeeNavigationBar(navController: NavHostController) {
                         contentDescription = null
                     )
                 },
-                label = { Text(text = stringResource(id = topLevelRoute.stringRes)) },
+                label = {
+                    Text(
+                        text = stringResource(id = topLevelRoute.stringRes),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                },
                 selected = currentDestination?.hierarchy?.any {
                     it.hasRoute(topLevelRoute.route::class)
                 } == true,

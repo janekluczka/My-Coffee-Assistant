@@ -1,6 +1,6 @@
 package com.luczka.mycoffee.ui.screens.historydetails
 
 sealed class HistoryDetailsAction {
-    object NavigateUp : HistoryDetailsAction()
-    object OnDeleteClicked : HistoryDetailsAction()
+    data object NavigateUp : HistoryDetailsAction()
+    data object OnDeleteClicked : HistoryDetailsAction()
 }

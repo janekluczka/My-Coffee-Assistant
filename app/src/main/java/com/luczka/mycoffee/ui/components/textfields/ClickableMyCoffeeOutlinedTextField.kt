@@ -16,7 +16,6 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.VisualTransformation
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ClickableMyCoffeeOutlinedTextField(
     value: String,

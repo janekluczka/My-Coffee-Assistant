@@ -7,10 +7,10 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.ktx.app
 import com.luczka.mycoffee.data.database.MyCoffeeDao
 import com.luczka.mycoffee.data.database.MyCoffeeDatabase
-import com.luczka.mycoffee.data.remote.FirebaseRepositoryImpl
-import com.luczka.mycoffee.data.database.MyCoffeeDatabaseRepositoryImpl
-import com.luczka.mycoffee.domain.repository.FirebaseRepository
-import com.luczka.mycoffee.domain.repository.MyCoffeeDatabaseRepository
+import com.luczka.mycoffee.data.repositories.FirebaseRepositoryImpl
+import com.luczka.mycoffee.data.repositories.MyCoffeeDatabaseRepositoryImpl
+import com.luczka.mycoffee.domain.repositories.FirebaseRepository
+import com.luczka.mycoffee.domain.repositories.MyCoffeeDatabaseRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -42,8 +42,11 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun providesMyCoffeeDatabaseRepository(myCoffeeDao: MyCoffeeDao) : MyCoffeeDatabaseRepository {
-        return MyCoffeeDatabaseRepositoryImpl(myCoffeeDao)
+    fun providesMyCoffeeDatabaseRepository(
+        @ApplicationContext context: Context,
+        myCoffeeDao: MyCoffeeDao
+    ) : MyCoffeeDatabaseRepository {
+        return MyCoffeeDatabaseRepositoryImpl(context, myCoffeeDao)
     }
 
     @Provides
@@ -53,8 +56,11 @@ object AppModule {
     }
 
     @Provides
-    fun providesFirebaseRepository(firebaseFirestore: FirebaseFirestore) : FirebaseRepository {
-        return FirebaseRepositoryImpl(firebaseFirestore)
+    fun providesFirebaseRepository(
+        @ApplicationContext context: Context,
+        firebaseFirestore: FirebaseFirestore
+    ) : FirebaseRepository {
+        return FirebaseRepositoryImpl(context, firebaseFirestore)
     }
 
 }

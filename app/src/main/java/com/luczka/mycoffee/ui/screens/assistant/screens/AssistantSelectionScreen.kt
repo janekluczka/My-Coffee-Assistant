@@ -16,14 +16,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.luczka.mycoffee.R
-import com.luczka.mycoffee.ui.screens.assistant.components.AssistantSelectionListItem
-import com.luczka.mycoffee.ui.models.CoffeeUiState
-import com.luczka.mycoffee.ui.screens.assistant.AmountSelectionUiState
 import com.luczka.mycoffee.ui.screens.assistant.AssistantAction
 import com.luczka.mycoffee.ui.screens.assistant.AssistantUiState
+import com.luczka.mycoffee.ui.screens.assistant.components.AssistantSelectionListItem
 
 @Composable
 fun AssistantSelectionScreen(
@@ -93,10 +90,7 @@ fun AssistantSelectionScreen(
                         coffeeUiState = coffeeUiState,
                         isSelected = when (uiState) {
                             is AssistantUiState.NoneSelected -> false
-
-                            is AssistantUiState.CoffeeSelected -> {
-                                uiState.selectedCoffees.containsKey(coffeeUiState)
-                            }
+                            is AssistantUiState.CoffeeSelected -> uiState.selectedCoffees.containsKey(coffeeUiState)
                         },
                         onClick = {
                             onAction(AssistantAction.OnSelectedCoffeeChanged(it))
@@ -108,24 +102,24 @@ fun AssistantSelectionScreen(
     }
 }
 
-@Preview
-@Composable
-fun AssistantSelectionScreenPreview() {
-    val firstSelectedCoffee = CoffeeUiState(
-        coffeeId = 1,
-        name = "ethiopia sami",
-        brand = "monko.",
-        amount = "250.0"
-    )
-    val secondSelectedCoffee = CoffeeUiState(
-        coffeeId = 2,
-        name = "Kolumbia",
-        brand = "Mała Czarna",
-        amount = "200.0"
-    )
-    val uiState = AssistantUiState.CoffeeSelected(
-        currentCoffees = listOf(firstSelectedCoffee, secondSelectedCoffee),
-        selectedCoffees = mapOf(Pair(firstSelectedCoffee, AmountSelectionUiState()))
-    )
-    AssistantSelectionScreen(uiState = uiState, onAction = {})
-}
+//@Preview
+//@Composable
+//fun AssistantSelectionScreenPreview() {
+//    val firstSelectedCoffee = CoffeeUiState(
+//        coffeeId = 1,
+//        name = "ethiopia sami",
+//        brand = "monko.",
+//        amount = "250.0"
+//    )
+//    val secondSelectedCoffee = CoffeeUiState(
+//        coffeeId = 2,
+//        name = "Kolumbia",
+//        brand = "Mała Czarna",
+//        amount = "200.0"
+//    )
+//    val uiState = AssistantUiState.CoffeeSelected(
+//        currentCoffees = listOf(firstSelectedCoffee, secondSelectedCoffee),
+//        selectedCoffees = mapOf(Pair(firstSelectedCoffee, AmountSelectionUiState()))
+//    )
+//    AssistantSelectionScreen(uiState = uiState, onAction = {})
+//}

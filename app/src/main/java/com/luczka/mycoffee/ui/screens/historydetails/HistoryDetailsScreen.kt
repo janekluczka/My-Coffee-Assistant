@@ -26,8 +26,8 @@ import androidx.compose.ui.unit.dp
 import com.luczka.mycoffee.R
 import com.luczka.mycoffee.ui.components.icons.ArrowBackIcon
 import com.luczka.mycoffee.ui.components.icons.DeleteIcon
+import com.luczka.mycoffee.ui.components.listitem.BrewDetailsParametersListItem
 import com.luczka.mycoffee.ui.components.listitem.HistoryDetailsCoffeeListItem
-import com.luczka.mycoffee.ui.screens.assistant.screens.SummaryParametersListItem
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
@@ -35,8 +35,7 @@ import java.time.format.FormatStyle
 @Composable
 fun HistoryDetailsScreen(
     historyDetailsUiState: HistoryDetailsUiState,
-    navigateUp: () -> Unit,
-    onDelete: () -> Unit
+    onAction: (HistoryDetailsAction) -> Unit
 ) {
     historyDetailsUiState.brew ?: return
 
@@ -50,7 +49,8 @@ fun HistoryDetailsScreen(
             },
             onPositive = {
                 openDeleteDialog = false
-                onDelete()
+                val action = HistoryDetailsAction.OnDeleteClicked
+                onAction(action)
             }
         )
     }
@@ -59,13 +59,18 @@ fun HistoryDetailsScreen(
         topBar = {
             TopAppBar(
                 navigationIcon = {
-                    IconButton(onClick = navigateUp) {
+                    IconButton(
+                        onClick = {
+                            val action = HistoryDetailsAction.NavigateUp
+                            onAction(action)
+                        }
+                    ) {
                         ArrowBackIcon()
                     }
                 },
                 title = {
                     val formatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT)
-                    val date = historyDetailsUiState.brew.date.format(formatter)
+                    val date = historyDetailsUiState.brew.addedOn.format(formatter)
                     Text(
                         text = date,
                         maxLines = 1,
@@ -114,7 +119,6 @@ fun HistoryDetailsScreen(
                             }
                         }
                     }
-
                     item {
                         Spacer(modifier = Modifier.height(24.dp))
                     }
@@ -133,28 +137,28 @@ fun HistoryDetailsScreen(
                         )
                     }
                     item {
-                        SummaryParametersListItem(
+                        BrewDetailsParametersListItem(
                             index = 0,
                             headlineText = stringResource(id = R.string.assistant_ratio),
                             trailingText = stringResource(
-                                id = R.string.assistant_ratio_format,
+                                id = R.string.format_ratio,
                                 brewUiState.coffeeRatio,
                                 brewUiState.waterRatio
                             )
                         )
-                        SummaryParametersListItem(
+                        BrewDetailsParametersListItem(
                             index = 1,
                             headlineText = stringResource(id = R.string.assistant_coffee),
                             trailingText = stringResource(
-                                id = R.string.coffee_parameters_amount_with_unit,
+                                id = R.string.format_coffee_amount_grams,
                                 brewUiState.coffeeAmount
                             )
                         )
-                        SummaryParametersListItem(
+                        BrewDetailsParametersListItem(
                             index = 2,
                             headlineText = stringResource(id = R.string.assistant_water),
                             trailingText = stringResource(
-                                id = R.string.coffee_parameters_amount_with_unit,
+                                id = R.string.format_coffee_amount_grams,
                                 brewUiState.waterAmount
                             )
                         )

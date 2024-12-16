@@ -1,56 +1,49 @@
 package com.luczka.mycoffee.ui.models
 
+import java.time.LocalDate
+
 data class CoffeeUiState(
-    val coffeeId: Int = 0,
-    val name: String = "",
-    val brand: String = "",
-    val amount: String? = null,
-    val scaScore: String? = null,
+    val coffeeId: Long = 0L,
+    val coffeeImages: List<CoffeeImageUiState> = emptyList(),
+    val roasterOrBrand: String = "",
+    val originOrName: String = "",
+    val amount: String = "",
     val process: ProcessUiState? = null,
     val roast: RoastUiState? = null,
+    val plantation: String? = null,
+    val altitude: String? = null,
+    val scaScore: String? = null,
+    val additionalInformation: String? = null,
     val isFavourite: Boolean = false,
-    val imageFile240x240: String? = null,
-    val imageFile360x360: String? = null,
-    val imageFile480x480: String? = null,
-    val imageFile720x720: String? = null,
-    val imageFile960x960: String? = null,
+    val updatedOn: LocalDate? = null,
+    val addedOn: LocalDate? = null
 ) : Comparable<CoffeeUiState> {
 
     override fun compareTo(other: CoffeeUiState): Int {
         return compareBy<CoffeeUiState>(
-            { it.name },
-            { it.brand },
+            { it.originOrName },
+            { it.roasterOrBrand },
             { it.amount },
             { it.coffeeId }
         ).compare(this, other)
     }
 
     fun isBlank(): Boolean {
-        if (coffeeId != 0) return false
-        if (name != "") return false
-        if (brand != "") return false
-        if (amount != null) return false
-        if (process != null) return false
+        if (coffeeId != 0L) return false
+        if (coffeeImages.isNotEmpty()) return false
+        if (roasterOrBrand != "") return false
+        if (originOrName != "") return false
+        if (amount != "") return false
         if (roast != null) return false
-        if (imageFile240x240 != null) return false
-        if (imageFile360x360 != null) return false
-        if (imageFile480x480 != null) return false
-        if (imageFile720x720 != null) return false
-        if (imageFile960x960 != null) return false
+        if (process != null) return false
+        if (plantation != null) return false
+        if (altitude != null) return false
+        if (scaScore != null) return false
+        if (additionalInformation != null) return false
+        if (isFavourite) return false
+        if (updatedOn != null) return false
+        if (addedOn != null) return false
         return true
     }
-
-    fun isNameWrong(): Boolean = name.isBlank()
-
-    fun isBrandWrong(): Boolean = brand.isBlank()
-
-    fun hasAmount(): Boolean = amount != null
-
-    fun hasAmountLowerThan(amount: Float): Boolean {
-        val amountFloat = this.amount?.toFloatOrNull() ?: return false
-        return amountFloat < amount
-    }
-
-    override fun toString(): String = "$name, $brand ($amount\u00A0g)"
 
 }

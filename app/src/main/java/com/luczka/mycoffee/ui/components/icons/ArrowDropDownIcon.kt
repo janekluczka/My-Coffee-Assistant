@@ -15,7 +15,7 @@ fun ArrowDropDownIcon(
 ) {
     Icon(
         modifier = modifier,
-        painter = painterResource(id = R.drawable.arrow_drop_down_24px),
+        painter = painterResource(id = R.drawable.ic_arrow_drop_down_24_fill_0_weight_300_grade_0_opticalsize_24),
         contentDescription = null,
         tint = tint
     )

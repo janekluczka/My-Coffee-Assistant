@@ -17,7 +17,7 @@ sealed class EquipmentEntity {
     abstract val brand: String?
     abstract val boughtOn: LocalDate?
     abstract val price: Float?
-    abstract val receiptId: Int?
+    abstract val receiptId: Long?
 
     /**
      * Represents an electric coffee machine.
@@ -36,12 +36,12 @@ sealed class EquipmentEntity {
     @Entity
     data class CoffeeMachineEntity(
         @PrimaryKey(autoGenerate = true)
-        val coffeeMachineId: Int,
+        val coffeeMachineId: Long,
         override val name: String,
         override val brand: String?,
         override val boughtOn: LocalDate?,
         override val price: Float?,
-        override val receiptId: Int?,
+        override val receiptId: Long?,
         val type: CoffeeMachineType
     ) : EquipmentEntity()
 
@@ -62,12 +62,12 @@ sealed class EquipmentEntity {
     @Entity
     data class GrinderEntity(
         @PrimaryKey(autoGenerate = true)
-        val grinderId: Int,
+        val grinderId: Long,
         override val name: String,
         override val brand: String?,
         override val boughtOn: LocalDate?,
         override val price: Float?,
-        override val receiptId: Int?,
+        override val receiptId: Long?,
         val type: GrinderType
     ) : EquipmentEntity()
 }

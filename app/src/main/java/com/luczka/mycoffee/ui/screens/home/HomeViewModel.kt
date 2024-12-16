@@ -2,8 +2,9 @@ package com.luczka.mycoffee.ui.screens.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.luczka.mycoffee.domain.mappers.toUiState
-import com.luczka.mycoffee.domain.repository.MyCoffeeDatabaseRepository
+import com.luczka.mycoffee.ui.mappers.toUiState
+import com.luczka.mycoffee.domain.repositories.MyCoffeeDatabaseRepository
+import com.luczka.mycoffee.ui.models.BrewUiState
 import com.luczka.mycoffee.ui.models.CoffeeUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,26 +15,14 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-sealed interface HomeUiState {
-    val lowAmountCoffees: List<CoffeeUiState>
-    val hasMoreLowAmountCoffees: Boolean
-
-    data class HasCoffees(
-        override val lowAmountCoffees: List<CoffeeUiState>,
-        override val hasMoreLowAmountCoffees: Boolean,
-    ) : HomeUiState
-}
-
 private data class HomeViewModelState(
-    val currentCoffees: List<CoffeeUiState> = emptyList(),
+    val recentBrews: List<BrewUiState> = emptyList(),
+    val recentlyAddedCoffees: List<CoffeeUiState> = emptyList(),
 ) {
     fun toHomeUiState(): HomeUiState {
-        val rowItemsAmount = 4
-        val lowAmountCoffees = currentCoffees.filter { it.hasAmountLowerThan(100f) }
-
         return HomeUiState.HasCoffees(
-            lowAmountCoffees = lowAmountCoffees.take(rowItemsAmount),
-            hasMoreLowAmountCoffees = lowAmountCoffees.size > rowItemsAmount,
+            recentBrews = recentBrews,
+            recentlyAddedCoffees = recentlyAddedCoffees
         )
     }
 }
@@ -54,10 +43,18 @@ class HomeViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            myCoffeeDatabaseRepository.getCurrentCoffeesStream().collect { coffeeModels ->
-                val currentCoffees = coffeeModels.map { it.toUiState() }
+            myCoffeeDatabaseRepository.getRecentlyAddedCoffeesFlow(amount = 5).collect { coffeeModels ->
+                val recentlyAddedCoffees = coffeeModels.map { it.toUiState() }
                 viewModelState.update {
-                    it.copy(currentCoffees = currentCoffees)
+                    it.copy(recentlyAddedCoffees = recentlyAddedCoffees)
+                }
+            }
+        }
+        viewModelScope.launch {
+            myCoffeeDatabaseRepository.getRecentBrewsFlow(amount = 5).collect { brewModels ->
+                val recentBrews = brewModels.map { it.toUiState() }
+                viewModelState.update {
+                    it.copy(recentBrews = recentBrews)
                 }
             }
         }

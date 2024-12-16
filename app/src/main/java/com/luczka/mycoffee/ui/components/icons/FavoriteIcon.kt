@@ -9,15 +9,14 @@ import androidx.compose.ui.res.painterResource
 import com.luczka.mycoffee.R
 
 @Composable
-fun FavouriteIcon(
+fun FavoriteIcon(
     modifier: Modifier = Modifier,
     tint: Color = LocalContentColor.current,
 ) {
     Icon(
         modifier = modifier,
-        painter = painterResource(id = R.drawable.favorite_24px),
+        painter = painterResource(id = R.drawable.ic_favorite_filled_24_fill_0_weight_300_grade_0_opticalsize_24),
         contentDescription = null,
         tint = tint
     )
-
 }

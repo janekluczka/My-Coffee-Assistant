@@ -6,15 +6,21 @@ import com.luczka.mycoffee.ui.models.RoastUiState
 
 sealed class CoffeeInputAction {
     data object NavigateUp : CoffeeInputAction()
-    data class OnImageUriChanged(val uri: Uri?) : CoffeeInputAction()
-    data object OnDeleteImageClicked : CoffeeInputAction()
-    data class OnNameValueChanged(val name: String) : CoffeeInputAction()
-    data object OnNameInputFinished : CoffeeInputAction()
-    data class OnBrandValueChanged(val brand: String) : CoffeeInputAction()
-    data object OnBrandInputFinished : CoffeeInputAction()
+    data object OnOpenDiscardDialog : CoffeeInputAction()
+    data object OnAddImageClicked : CoffeeInputAction()
+
+    data class OnImagesSelected(val uris: List<Uri>) : CoffeeInputAction()
+    data class OnImageClicked(val index: Int) : CoffeeInputAction()
+
+    data class OnRoasterOrBrandValueChanged(val brand: String) : CoffeeInputAction()
+    data class OnOriginOrNameValueChanged(val name: String) : CoffeeInputAction()
     data class OnAmountValueChanged(val amount: String) : CoffeeInputAction()
-    data class OnScaScoreValueChanged(val scaScore: String) : CoffeeInputAction()
-    data class OnProcessClicked(val process: ProcessUiState) : CoffeeInputAction()
     data class OnRoastClicked(val roast: RoastUiState) : CoffeeInputAction()
+    data class OnProcessClicked(val process: ProcessUiState) : CoffeeInputAction()
+    data class OnPlantationValueChanged(val plantation: String) : CoffeeInputAction()
+    data class OnScaScoreValueChanged(val scaScore: String) : CoffeeInputAction()
+    data object OnScaInfoButtonClicked : CoffeeInputAction()
+    data class OnAltitudeValueChanged(val altitude: String) : CoffeeInputAction()
+    data class OnAdditionalInformationValueChanged(val additionalInformation: String) : CoffeeInputAction()
     data object OnSaveClicked : CoffeeInputAction()
 }

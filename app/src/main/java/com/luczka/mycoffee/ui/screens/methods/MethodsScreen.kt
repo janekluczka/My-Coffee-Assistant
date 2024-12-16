@@ -1,15 +1,15 @@
 package com.luczka.mycoffee.ui.screens.methods
 
-import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Scaffold
@@ -18,15 +18,14 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.luczka.mycoffee.R
 import com.luczka.mycoffee.ui.components.cards.MethodCard
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -64,10 +63,10 @@ fun MethodsScreen(
         topBar = {
             when (widthSizeClass) {
                 WindowWidthSizeClass.Compact -> {
-                    CenterAlignedTopAppBar(
+                    TopAppBar(
                         title = {
                             Text(
-                                text = stringResource(R.string.app_name_short),
+                                text = "Recipe categories",
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
                             )
@@ -78,48 +77,39 @@ fun MethodsScreen(
         }
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
-            if (uiState.isLoading) {
-                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-            }
-            Crossfade(
-                targetState = uiState.isLoading,
-                label = ""
-            ) { isLoading ->
-                if (isLoading) {
-
-                } else {
+            Column {
+                Divider()
+                LazyVerticalGrid(
+                    columns = GridCells.Adaptive(150.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    contentPadding = PaddingValues(16.dp)
+                ) {
                     when (uiState) {
                         is MethodsUiState.HasMethods -> {
-                            LazyVerticalGrid(
-                                columns = GridCells.Adaptive(150.dp),
-                                verticalArrangement = Arrangement.spacedBy(8.dp),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                contentPadding = PaddingValues(16.dp)
-                            ) {
-                                items(
-                                    items = uiState.methods,
-                                    key = { it.id }
-                                ) { methodCardUiState ->
-                                    MethodCard(
-                                        methodUiState = methodCardUiState,
-                                        onClick = {
-                                            val action = MethodsAction.NavigateToRecipes(methodCardUiState.id)
-                                            onAction(action)
-                                        }
-                                    )
-                                }
+                            items(
+                                items = uiState.methods,
+                                key = { it.id }
+                            ) { methodCardUiState ->
+                                MethodCard(
+                                    modifier = Modifier.animateItem(),
+                                    methodUiState = methodCardUiState,
+                                    onClick = {
+                                        val action = MethodsAction.NavigateToRecipes(methodCardUiState)
+                                        onAction(action)
+                                    }
+                                )
                             }
                         }
 
-                        is MethodsUiState.NoMethods -> {
-
-                        }
-
-                        is MethodsUiState.IsError -> {
+                        else -> {
 
                         }
                     }
                 }
+            }
+            if (uiState.isLoading) {
+                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
             }
         }
     }

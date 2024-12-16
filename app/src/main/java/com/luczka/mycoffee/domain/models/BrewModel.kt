@@ -3,7 +3,7 @@ package com.luczka.mycoffee.domain.models
 import java.time.LocalDate
 
 data class BrewModel(
-    val id: Int,
+    val id: Long,
     val date: LocalDate,
     val coffeeAmount: Float,
     val coffeeRatio: Int,

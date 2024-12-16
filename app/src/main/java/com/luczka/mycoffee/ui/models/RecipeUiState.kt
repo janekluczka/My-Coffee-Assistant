@@ -5,5 +5,5 @@ data class RecipeUiState(
     val youtubeId: String = "",
     val author: String = "",
     val title: String = "",
-    val steps: List<StepUiState> = emptyList(),
+    val steps: List<BrewingStepUiState> = emptyList(),
 )

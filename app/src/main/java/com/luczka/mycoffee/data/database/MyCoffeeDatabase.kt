@@ -8,22 +8,24 @@ import com.luczka.mycoffee.data.database.converters.GrinderTypeConverter
 import com.luczka.mycoffee.data.database.converters.LocalDateConverter
 import com.luczka.mycoffee.data.database.converters.ProcessTypeConverter
 import com.luczka.mycoffee.data.database.converters.RoastTypeConverter
+import com.luczka.mycoffee.data.database.entities.BrewCoffeeCrossRef
 import com.luczka.mycoffee.data.database.entities.BrewEntity
-import com.luczka.mycoffee.data.database.entities.BrewedCoffeeEntity
 import com.luczka.mycoffee.data.database.entities.CoffeeEntity
+import com.luczka.mycoffee.data.database.entities.CoffeeImageEntity
 import com.luczka.mycoffee.data.database.entities.EquipmentEntity
 import com.luczka.mycoffee.data.database.entities.ReceiptEntity
 
 @Database(
     entities = [
-        BrewedCoffeeEntity::class,
+        BrewCoffeeCrossRef::class,
         BrewEntity::class,
         CoffeeEntity::class,
+        CoffeeImageEntity::class,
         EquipmentEntity.CoffeeMachineEntity::class,
         EquipmentEntity.GrinderEntity::class,
         ReceiptEntity::class
     ],
-    version = 29,
+    version = 34,
     exportSchema = false
 )
 @TypeConverters(

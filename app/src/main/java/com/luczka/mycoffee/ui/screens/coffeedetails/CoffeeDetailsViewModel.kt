@@ -1,59 +1,55 @@
 package com.luczka.mycoffee.ui.screens.coffeedetails
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.luczka.mycoffee.domain.mappers.toModel
-import com.luczka.mycoffee.domain.mappers.toUiState
-import com.luczka.mycoffee.domain.repository.MyCoffeeDatabaseRepository
+import com.luczka.mycoffee.ui.mappers.toModel
+import com.luczka.mycoffee.ui.mappers.toUiState
+import com.luczka.mycoffee.domain.repositories.MyCoffeeDatabaseRepository
 import com.luczka.mycoffee.ui.models.CoffeeUiState
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.io.File
 
 data class CoffeeDetailsViewModelState(
-    val coffeeId: Int,
-    val coffee: CoffeeUiState? = null,
+    val coffeeUiState: CoffeeUiState? = null,
+    val isLoading: Boolean = false,
     val isDeleted: Boolean = false
 ) {
     fun toCoffeeDetailsUiState(): CoffeeDetailsUiState {
-        return if (coffee == null) {
-            CoffeeDetailsUiState.NoCoffee(
-                coffeeId = coffeeId,
+        if (coffeeUiState == null) {
+            return CoffeeDetailsUiState.NoCoffee(
+                isLoading = isLoading,
                 isDeleted = isDeleted
             )
-        } else {
-            CoffeeDetailsUiState.HasCoffee(
-                coffee = coffee
-            )
         }
+
+        return CoffeeDetailsUiState.HasCoffee(
+            coffee = coffeeUiState,
+            isLoading = isLoading,
+            isDeleted = isDeleted
+        )
     }
 }
 
 @AssistedFactory
 interface CoffeeDetailsViewModelFactory {
-    fun create(coffeeId: Int): CoffeeDetailsViewModel
+    fun create(coffeeId: Long): CoffeeDetailsViewModel
 }
 
 @HiltViewModel(assistedFactory = CoffeeDetailsViewModelFactory::class)
 class CoffeeDetailsViewModel @AssistedInject constructor(
-    @Assisted coffeeId: Int,
-    @ApplicationContext context: Context,
+    @Assisted coffeeId: Long,
     private val myCoffeeDatabaseRepository: MyCoffeeDatabaseRepository
 ) : ViewModel() {
 
-    private val filesDir = context.filesDir
-
-    private val viewModelState = MutableStateFlow(CoffeeDetailsViewModelState(coffeeId = coffeeId))
+    private val viewModelState = MutableStateFlow(CoffeeDetailsViewModelState())
     val uiState = viewModelState
         .map(CoffeeDetailsViewModelState::toCoffeeDetailsUiState)
         .stateIn(
@@ -64,9 +60,9 @@ class CoffeeDetailsViewModel @AssistedInject constructor(
 
     init {
         viewModelScope.launch {
-            myCoffeeDatabaseRepository.getCoffeeStream(coffeeId).collect { coffeeModel ->
+            myCoffeeDatabaseRepository.getCoffeeFlow(coffeeId).collect { coffeeModel ->
                 viewModelState.update {
-                    it.copy(coffee = coffeeModel?.toUiState())
+                    it.copy(coffeeUiState = coffeeModel?.toUiState())
                 }
             }
         }
@@ -74,44 +70,36 @@ class CoffeeDetailsViewModel @AssistedInject constructor(
 
     fun onAction(action: CoffeeDetailsAction) {
         when (action) {
-            CoffeeDetailsAction.OnFavouriteClicked -> onUpdateFavourite()
-            CoffeeDetailsAction.OnDeleteClicked -> onDelete()
+            CoffeeDetailsAction.OnFavouriteClicked -> updateFavourite()
+            CoffeeDetailsAction.OnDeleteClicked -> delete()
             else -> {}
         }
     }
 
-    private fun onUpdateFavourite() {
-        val selectedCoffee = viewModelState.value.coffee ?: return
-
+    private fun updateFavourite() {
+        val coffeeUiState = viewModelState.value.coffeeUiState ?: return
         viewModelScope.launch {
-            val updatedCoffee = selectedCoffee.copy(isFavourite = !selectedCoffee.isFavourite)
-            myCoffeeDatabaseRepository.updateCoffee(coffeeModel = updatedCoffee.toModel())
+            val updatedCoffeeUiState = coffeeUiState.copy(isFavourite = !coffeeUiState.isFavourite)
+            myCoffeeDatabaseRepository.updateCoffeeOld(coffeeModel = updatedCoffeeUiState.toModel())
         }
     }
 
-    private fun onDelete() {
-        val selectedCoffee = viewModelState.value.coffee ?: return
+    private fun delete() {
+        val coffeeUiState = viewModelState.value.coffeeUiState ?: return
 
         viewModelScope.launch {
-            val imageFile240x240 = selectedCoffee.imageFile240x240
-            val imageFile360x360 = selectedCoffee.imageFile360x360
-            val imageFile480x480 = selectedCoffee.imageFile480x480
-            val imageFile720x720 = selectedCoffee.imageFile720x720
-            val imageFile960x960 = selectedCoffee.imageFile960x960
+            viewModelState.update {
+                it.copy(isLoading = true)
+            }
 
-            val file240x240 = imageFile240x240?.let { File(filesDir, it) }
-            val file360x360 = imageFile360x360?.let { File(filesDir, it) }
-            val file480x480 = imageFile480x480?.let { File(filesDir, it) }
-            val file720x720 = imageFile720x720?.let { File(filesDir, it) }
-            val file960x960 = imageFile960x960?.let { File(filesDir, it) }
+            myCoffeeDatabaseRepository.deleteCoffee(coffeeModel = coffeeUiState.toModel())
 
-            myCoffeeDatabaseRepository.deleteCoffee(coffeeModel = selectedCoffee.toModel())
-
-            file240x240?.delete()
-            file360x360?.delete()
-            file480x480?.delete()
-            file720x720?.delete()
-            file960x960?.delete()
+            viewModelState.update {
+                it.copy(
+                    isLoading = false,
+                    isDeleted = true
+                )
+            }
         }
     }
 

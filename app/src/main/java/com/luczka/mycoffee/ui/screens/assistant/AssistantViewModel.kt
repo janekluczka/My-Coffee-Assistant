@@ -3,14 +3,19 @@ package com.luczka.mycoffee.ui.screens.assistant
 import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.luczka.mycoffee.domain.mappers.toModel
-import com.luczka.mycoffee.domain.mappers.toUiState
-import com.luczka.mycoffee.domain.repository.MyCoffeeDatabaseRepository
+import com.luczka.mycoffee.R
+import com.luczka.mycoffee.domain.repositories.MyCoffeeDatabaseRepository
+import com.luczka.mycoffee.ui.mappers.toModel
+import com.luczka.mycoffee.ui.mappers.toUiState
 import com.luczka.mycoffee.ui.models.BrewUiState
 import com.luczka.mycoffee.ui.models.BrewedCoffeeUiState
 import com.luczka.mycoffee.ui.models.CoffeeUiState
-import com.luczka.mycoffee.util.toStringWithOneDecimalPoint
+import com.luczka.mycoffee.ui.screens.assistant.components.DoubleVerticalPagerState
+import com.luczka.mycoffee.ui.util.TimeFormatter
+import com.luczka.mycoffee.ui.util.toStringWithOneDecimalPoint
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
@@ -33,40 +38,34 @@ data class AssistantRecipeUiState(
     val waterAmount: String,
 )
 
-data class AmountSelectionUiState(
-    val integerParts: List<Int> = (0..0).toList(),
-    val decimalParts: List<Int> = (0..9).toList(),
-    val integerPartIndex: Int = 0,
-    val decimalPartIndex: Int = 0,
-    val selectedAmount: String = "0.0"
-)
-
-data class RatioSelectionUiState(
-    val coffeeRatios: List<Int> = (1..10).toList(),
-    val waterRatios: List<Int> = (1..100).toList(),
-    val coffeeRatioIndex: Int = 0,
-    val waterRatioIndex: Int = 0,
-    val selectedCoffeeRatio: Int = 1,
-    val selectedWaterRatio: Int = 1
-)
-
 private data class AssistantViewModelState(
     val currentCoffees: List<CoffeeUiState> = emptyList(),
-    // TODO: Change to nullable key MutableMap<CoffeeUiState?, AmountSelectionUiState>
-    val selectedCoffees: MutableMap<CoffeeUiState, AmountSelectionUiState> = mutableMapOf(),
+    val selectedCoffees: Map<CoffeeUiState, DoubleVerticalPagerState> = mapOf(),
     val assistantRecipeCategoryUiStates: List<AssistantRecipeCategoryUiState> = emptyList(),
     val selectedRecipe: AssistantRecipeUiState? = null,
-    val amountSelectionUiState: AmountSelectionUiState = AmountSelectionUiState(integerParts = (0..99).toList()),
-    val ratioSelectionUiState: RatioSelectionUiState = RatioSelectionUiState(),
-    val rating: Int? = null,
-    val notes: String = "",
+    val defaultAmountDoubleVerticalPagerState: DoubleVerticalPagerState = DoubleVerticalPagerState(
+        leftPagerItems = (0..100).toList(),
+        rightPagerItems = (0..9).toList(),
+        leftPagerPageIndex = 0,
+        rightPagerPageIndex = 0,
+        separatorRes = R.string.separator_amount
+    ),
+    val ratioDoubleVerticalPagerState: DoubleVerticalPagerState = DoubleVerticalPagerState(
+        leftPagerItems = (1..10).toList(),
+        rightPagerItems = (1..100).toList(),
+        leftPagerPageIndex = 0,
+        rightPagerPageIndex = 0,
+        separatorRes = R.string.separator_ratio
+    ),
+    val isTimerRunning: Boolean = false,
+    val timeInSeconds: Int? = null,
     val isFinished: Boolean = false,
 ) {
     fun toAssistantUiState(): AssistantUiState {
         val selectedAmountsSum = sumSelectedAmounts()
 
-        val selectedWaterRatio = ratioSelectionUiState.selectedWaterRatio
-        val selectedCoffeeRatio = ratioSelectionUiState.selectedCoffeeRatio
+        val selectedCoffeeRatio = ratioDoubleVerticalPagerState.currentLeftPagerItem()
+        val selectedWaterRatio = ratioDoubleVerticalPagerState.currentRightPagerItem()
 
         val waterAmount = selectedAmountsSum * selectedWaterRatio / selectedCoffeeRatio
 
@@ -79,10 +78,10 @@ private data class AssistantViewModelState(
                 isFinished = isFinished,
                 selectedAmountsSum = selectedAmountsSumFormatted,
                 waterAmount = waterAmountFormatted,
-                amountSelectionUiState = amountSelectionUiState,
-                ratioSelectionUiState = ratioSelectionUiState,
-                rating = rating,
-                notes = notes
+                defaultAmountDoubleVerticalPagerState = defaultAmountDoubleVerticalPagerState,
+                ratioSelectionUiState = ratioDoubleVerticalPagerState,
+                isTimerRunning = isTimerRunning,
+                formattedTime = TimeFormatter.formatTime(timeInSeconds)
             )
         } else {
             AssistantUiState.CoffeeSelected(
@@ -91,45 +90,54 @@ private data class AssistantViewModelState(
                 isFinished = isFinished,
                 selectedAmountsSum = selectedAmountsSumFormatted,
                 waterAmount = waterAmountFormatted,
-                ratioSelectionUiState = ratioSelectionUiState,
-                rating = rating,
-                notes = notes
+                ratioSelectionUiState = ratioDoubleVerticalPagerState,
+                isTimerRunning = isTimerRunning,
+                formattedTime = TimeFormatter.formatTime(timeInSeconds)
             )
         }
     }
 
     fun toBrewModel(): BrewUiState {
-        val coffeeAmountsSum = sumSelectedAmounts()
+        val selectedAmountsSum = sumSelectedAmounts()
 
-        val coffeeRatio = ratioSelectionUiState.selectedCoffeeRatio
-        val waterRatio = ratioSelectionUiState.selectedWaterRatio
+        val selectedCoffeeRatio = ratioDoubleVerticalPagerState.currentLeftPagerItem()
+        val selectedWaterRatio = ratioDoubleVerticalPagerState.currentRightPagerItem()
 
-        val waterAmount = coffeeAmountsSum * waterRatio / coffeeRatio
+        val waterAmount = selectedAmountsSum * selectedWaterRatio / selectedCoffeeRatio
 
-        val brewedCoffees = selectedCoffees.map { (coffeeUiState, amountSelectionUiState) ->
+        val brewedCoffees = selectedCoffees.map { (coffeeUiState, amountDoubleVerticalPagerState) ->
+            val integerPart = amountDoubleVerticalPagerState.currentLeftPagerItem()
+            val fractionalPart = amountDoubleVerticalPagerState.currentRightPagerItem()
+            val coffeeAmount = "$integerPart.$fractionalPart".toFloatOrNull() ?: 0f
             BrewedCoffeeUiState(
-                coffeeAmount = amountSelectionUiState.selectedAmount.toFloatOrNull() ?: 0f,
+                coffeeAmount = coffeeAmount,
                 coffee = coffeeUiState,
             )
         }
 
         return BrewUiState(
-            date = LocalDate.now(),
-            coffeeAmount = coffeeAmountsSum,
-            coffeeRatio = coffeeRatio,
+            addedOn = LocalDate.now(),
+            coffeeAmount = selectedAmountsSum,
+            coffeeRatio = selectedCoffeeRatio,
             waterAmount = waterAmount,
-            waterRatio = waterRatio,
-            rating = rating,
-            notes = notes,
+            waterRatio = selectedWaterRatio,
             brewedCoffees = brewedCoffees
         )
     }
 
     private fun sumSelectedAmounts(): Float {
         return if (selectedCoffees.isEmpty()) {
-            amountSelectionUiState.selectedAmount.toFloatOrNull() ?: 0f
+            val integerPart = defaultAmountDoubleVerticalPagerState.currentLeftPagerItem()
+            val fractionalPart = defaultAmountDoubleVerticalPagerState.currentRightPagerItem()
+            "$integerPart.$fractionalPart".toFloatOrNull() ?: 0f
         } else {
-            selectedCoffees.values.map { it.selectedAmount.toFloatOrNull() ?: 0f }.sum()
+            selectedCoffees.values
+                .map { amountDoubleVerticalPagerState ->
+                    val integerPart = amountDoubleVerticalPagerState.currentLeftPagerItem()
+                    val fractionalPart = amountDoubleVerticalPagerState.currentRightPagerItem()
+                    "$integerPart.$fractionalPart".toFloatOrNull() ?: 0f
+                }
+                .sum()
         }
     }
 }
@@ -148,6 +156,8 @@ class AssistantViewModel @Inject constructor(
             initialValue = viewModelState.value.toAssistantUiState()
         )
 
+    private var timerJob: Job? = null
+
     init {
         viewModelScope.launch {
             myCoffeeDatabaseRepository.getCurrentCoffeesStream().collect { coffeeModels ->
@@ -155,8 +165,8 @@ class AssistantViewModel @Inject constructor(
                     .map { it.toUiState() }
                     .sortedWith(
                         compareBy<CoffeeUiState> { !it.isFavourite }
-                            .thenBy { it.name }
-                            .thenBy { it.brand }
+                            .thenBy { it.originOrName }
+                            .thenBy { it.roasterOrBrand }
                             .thenBy { it.amount }
                     )
                 viewModelState.update { it.copy(currentCoffees = coffeeUiStateList) }
@@ -166,48 +176,56 @@ class AssistantViewModel @Inject constructor(
 
     fun onAction(action: AssistantAction) {
         when (action) {
+            is AssistantAction.NavigateUp -> {}
+            is AssistantAction.NavigateToAssistantRating -> {}
+
+            is AssistantAction.OnShowAbortDialog -> {}
+            is AssistantAction.OnSelectRecipeClicked -> {}
+            is AssistantAction.OnShowFinishDialog -> {}
+
             is AssistantAction.OnSelectedCoffeeChanged -> selectCoffee(action.coffeeUiState)
-            is AssistantAction.OnCoffeeAmountSelectionIntegerPartIndexChanged -> {
+            is AssistantAction.OnAmountSelectionIntegerPartIndexChanged -> {
                 if (action.key == null) {
-                    updateAmountSelectionIntegerPart(action.integerPartIndex)
+                    updateAmountLeftPagerIndex(leftPagerPageIndex = action.leftPagerPageIndex)
                 } else {
-                    updateAmountSelectionIntegerPart(action.key, action.integerPartIndex)
+                    updateAmountLeftPagerIndex(key = action.key, leftPagerPageIndex = action.leftPagerPageIndex)
                 }
             }
 
-            is AssistantAction.OnCoffeeAmountSelectionDecimalPartIndexChanged -> {
+            is AssistantAction.OnAmountSelectionFractionalPartIndexChanged -> {
                 if (action.key == null) {
-                    updateAmountSelectionDecimalPart(action.decimalPartIndex)
+                    updateAmountRightPagerIndex(rightPagerPageIndex = action.rightPagerPageIndex)
                 } else {
-                    updateAmountSelectionDecimalPart(action.key, action.decimalPartIndex)
+                    updateAmountRightPagerIndex(key = action.key, rightPagerPageIndex = action.rightPagerPageIndex)
                 }
             }
 
-            is AssistantAction.OnCoffeeAmountSelectionValueChanged -> {
+            is AssistantAction.OnAmountSelectionIntegerAndFractionalPartsValueChanged -> {
                 if (action.key == null) {
-                    updateAmountSelectionValue(action.amountSelectionValue)
+                    updateAmountSelectionValue(action.leftInputValue, action.rightInputValue)
                 } else {
-                    updateAmountSelectionValue(action.key, action.amountSelectionValue)
+                    updateAmountSelectionValue(action.key, action.leftInputValue, action.rightInputValue)
                 }
             }
 
-            is AssistantAction.OnCoffeeRatioIndexChanged -> updateCoffeeRatioIndex(action.coffeeRatioIndex)
-            is AssistantAction.OnWaterRatioIndexChanged -> updateWaterRatioIndex(action.waterRatioIndex)
-            is AssistantAction.OnRatioValueChanged -> updateRatioValues(action.coffeeRatioValue, action.waterRatioValue)
-            is AssistantAction.OnNotesChanged -> updateNotes(action.notes)
-            is AssistantAction.OnRatingChanged -> updateRating(action.rating)
-            AssistantAction.OnFinishBrew -> finishBrew()
-            else -> {}
+            is AssistantAction.OnRatioSelectionCoffeeIndexChanged -> updateCoffeeRatioIndex(action.leftPagerPageIndex)
+            is AssistantAction.OnRatioSelectionWaterIndexChanged -> updateWaterRatioIndex(action.rightPagerPageIndex)
+            is AssistantAction.OnRatioSelectionCoffeeAndWaterValueChanged -> updateRatioValues(action.leftInputValue, action.rightInputValue)
+            is AssistantAction.OnResetTimerClicked -> resetTimer()
+            is AssistantAction.OnStartStopTimerClicked -> startStopTimerTimer()
+//            is AssistantAction.OnFinishButtonClicked -> finishBrew()
+            is AssistantAction.OnFinishButtonClicked -> tempFinishBrew()
+
         }
     }
 
     private fun selectCoffee(coffeeUiState: CoffeeUiState) {
-        val selectedCoffeeAmount = coffeeUiState.amount?.toFloatOrNull()?.toInt()
+        val selectedCoffeeAmount = coffeeUiState.amount.toFloatOrNull()?.toInt()
 
-        val lastIntegerPart = when {
+        val maxLeftPagerIndex = when {
             selectedCoffeeAmount == null -> 0
-            selectedCoffeeAmount > 99 -> 99
-            else -> selectedCoffeeAmount
+            selectedCoffeeAmount < 100 -> selectedCoffeeAmount
+            else -> 100
         }
 
         val updatedSelectedCoffees = viewModelState.value.selectedCoffees.toMutableMap()
@@ -215,82 +233,64 @@ class AssistantViewModel @Inject constructor(
         if (updatedSelectedCoffees.containsKey(coffeeUiState)) {
             updatedSelectedCoffees.remove(coffeeUiState)
         } else {
-            updatedSelectedCoffees[coffeeUiState] = AmountSelectionUiState(
-                integerParts = (0..lastIntegerPart).toList()
+            updatedSelectedCoffees[coffeeUiState] = DoubleVerticalPagerState(
+                leftPagerItems = (0..maxLeftPagerIndex).toList(),
+                rightPagerItems = (0..9).toList(),
+                leftPagerPageIndex = 0,
+                rightPagerPageIndex = 0,
+                separatorRes = R.string.separator_amount
             )
         }
 
-        viewModelState.update { it.copy(selectedCoffees = updatedSelectedCoffees) }
+        viewModelState.update {
+            it.copy(selectedCoffees = updatedSelectedCoffees)
+        }
     }
 
-    private fun updateAmountSelectionIntegerPart(integerPartIndex: Int) {
-        val amountSelectionUiState = viewModelState.value.amountSelectionUiState
-
-        val decimalPartIndex = amountSelectionUiState.decimalPartIndex
-
-        val integerPart = amountSelectionUiState.integerParts[integerPartIndex]
-        val decimalPart = amountSelectionUiState.decimalParts[decimalPartIndex]
-
-        val updatedAmountSelectionUiState = amountSelectionUiState.copy(
-            integerPartIndex = integerPartIndex,
-            selectedAmount = "$integerPart.$decimalPart"
-        )
-
-        viewModelState.update { it.copy(amountSelectionUiState = updatedAmountSelectionUiState) }
+    private fun updateAmountLeftPagerIndex(leftPagerPageIndex: Int) {
+        val amountSelectionUiState = viewModelState.value.defaultAmountDoubleVerticalPagerState
+        val updatedAmountSelectionUiState = amountSelectionUiState.copy(leftPagerPageIndex = leftPagerPageIndex)
+        viewModelState.update {
+            it.copy(defaultAmountDoubleVerticalPagerState = updatedAmountSelectionUiState)
+        }
     }
 
-    private fun updateAmountSelectionDecimalPart(decimalPartIndex: Int) {
-        val amountSelectionUiState = viewModelState.value.amountSelectionUiState
-
-        val integerPartIndex = amountSelectionUiState.integerPartIndex
-
-        val integerPart = amountSelectionUiState.integerParts[integerPartIndex]
-        val decimalPart = amountSelectionUiState.decimalParts[decimalPartIndex]
-
-        val updatedAmountSelectionUiState = amountSelectionUiState.copy(
-            decimalPartIndex = decimalPartIndex,
-            selectedAmount = "$integerPart.$decimalPart"
-        )
-
-        viewModelState.update { it.copy(amountSelectionUiState = updatedAmountSelectionUiState) }
+    private fun updateAmountRightPagerIndex(rightPagerPageIndex: Int) {
+        val amountSelectionUiState = viewModelState.value.defaultAmountDoubleVerticalPagerState
+        val updatedAmountSelectionUiState = amountSelectionUiState.copy(rightPagerPageIndex = rightPagerPageIndex)
+        viewModelState.update {
+            it.copy(defaultAmountDoubleVerticalPagerState = updatedAmountSelectionUiState)
+        }
     }
 
-    private fun updateAmountSelectionIntegerPart(key: CoffeeUiState, integerPartIndex: Int) {
+    private fun updateAmountLeftPagerIndex(key: CoffeeUiState, leftPagerPageIndex: Int) {
         val selectedCoffees = viewModelState.value.selectedCoffees.toMutableMap()
 
-        val amountSelectionUiState = selectedCoffees[key] ?: return
+        val amountDoubleVerticalPagerState = selectedCoffees[key] ?: return
 
-        val decimalPartIndex = amountSelectionUiState.decimalPartIndex
+        val integerPart = amountDoubleVerticalPagerState.currentLeftPagerItem()
+        val fractionalPart = amountDoubleVerticalPagerState.currentRightPagerItem()
 
-        val integerPart = amountSelectionUiState.integerParts[integerPartIndex]
-        val decimalPart = amountSelectionUiState.decimalParts[decimalPartIndex]
-
-        val maxAmount = key.amount ?: return
-        val selectedAmount = "$integerPart.$decimalPart"
+        val maxAmount = key.amount
+        val selectedAmount = "$integerPart.$fractionalPart"
 
         val maxAmountFloat = maxAmount.toFloatOrNull() ?: return
         val selectedAmountFloat = selectedAmount.toFloatOrNull() ?: return
 
         val updatedAmountSelectionUiState = if (selectedAmountFloat > maxAmountFloat) {
-            val selectedAmountDecimalPart = selectedAmount.split(".")[1].toIntOrNull() ?: return
-            val maxAmountDecimalPart = maxAmount.split(".")[1].toIntOrNull() ?: return
+            val selectedAmountFractionalPart = selectedAmount.split(".")[1].toIntOrNull() ?: return
+            val maxAmountFractionalPart = maxAmount.split(".")[1].toIntOrNull() ?: return
 
-            val decimalPartIndexOffset = selectedAmountDecimalPart - maxAmountDecimalPart
+            val fractionalPartIndexOffset = selectedAmountFractionalPart - maxAmountFractionalPart
 
-            val updatedDecimalPartIndex = decimalPartIndex - decimalPartIndexOffset
+            val adjustedFractionalPartIndex = amountDoubleVerticalPagerState.leftPagerPageIndex - fractionalPartIndexOffset
 
-            val updatedDecimalPart = amountSelectionUiState.decimalParts[updatedDecimalPartIndex]
-
-            amountSelectionUiState.copy(
-                integerPartIndex = integerPartIndex,
-                decimalPartIndex = updatedDecimalPartIndex,
-                selectedAmount = "$integerPart.$updatedDecimalPart",
+            amountDoubleVerticalPagerState.copy(
+                leftPagerPageIndex = leftPagerPageIndex,
+                rightPagerPageIndex = adjustedFractionalPartIndex,
             )
         } else {
-            amountSelectionUiState.copy(
-                integerPartIndex = integerPartIndex,
-                selectedAmount = "$integerPart.$decimalPart"
-            )
+            amountDoubleVerticalPagerState.copy(leftPagerPageIndex = leftPagerPageIndex)
         }
 
         selectedCoffees.replace(key, updatedAmountSelectionUiState)
@@ -298,66 +298,64 @@ class AssistantViewModel @Inject constructor(
         viewModelState.update { it.copy(selectedCoffees = selectedCoffees) }
     }
 
-    private fun updateAmountSelectionDecimalPart(key: CoffeeUiState, decimalPartIndex: Int) {
+    private fun updateAmountRightPagerIndex(key: CoffeeUiState, rightPagerPageIndex: Int) {
         val selectedCoffees = viewModelState.value.selectedCoffees.toMutableMap()
 
         val amountSelectionUiState = selectedCoffees[key] ?: return
 
-        val integerPartIndex = amountSelectionUiState.integerPartIndex
-
-        val integerPart = amountSelectionUiState.integerParts[integerPartIndex]
-        val decimalPart = amountSelectionUiState.decimalParts[decimalPartIndex]
-
-        val updatedAmountSelectionUiState = amountSelectionUiState.copy(
-            decimalPartIndex = decimalPartIndex,
-            selectedAmount = "$integerPart.$decimalPart"
-        )
+        val updatedAmountSelectionUiState = amountSelectionUiState.copy(rightPagerPageIndex = rightPagerPageIndex)
 
         selectedCoffees.replace(key, updatedAmountSelectionUiState)
 
         viewModelState.update { it.copy(selectedCoffees = selectedCoffees) }
     }
 
-    private fun updateAmountSelectionValue(coffeeAmountValue: String) {
-        val amountSelectionUiState = viewModelState.value.amountSelectionUiState
+    private fun updateAmountSelectionValue(leftInputValue: String, rightInputValue: String) {
+        val amountSelectionUiState = viewModelState.value.defaultAmountDoubleVerticalPagerState
 
-        val coffeeAmountFloat = coffeeAmountValue.toFloatOrNull() ?: return
-
-        val coffeeAmountValueWithDecimalPoint = coffeeAmountFloat.toStringWithOneDecimalPoint()
-
-        val coffeeAmountSplit = coffeeAmountValueWithDecimalPoint.split(".")
-
-        val integerPart = coffeeAmountSplit[0].toIntOrNull() ?: return
-        val decimalPart = coffeeAmountSplit[1].toIntOrNull() ?: return
+        val integerPart = leftInputValue.toIntOrNull() ?: return
+        val fractionalPart = rightInputValue.toIntOrNull() ?: return
 
         val updatedAmountSelectionUiState = amountSelectionUiState.copy(
-            selectedAmount = coffeeAmountValue,
-            integerPartIndex = amountSelectionUiState.integerParts.indexOf(integerPart),
-            decimalPartIndex = amountSelectionUiState.decimalParts.indexOf(decimalPart)
+            leftPagerPageIndex = amountSelectionUiState.leftPagerItems.indexOf(integerPart),
+            rightPagerPageIndex = amountSelectionUiState.rightPagerItems.indexOf(fractionalPart)
         )
 
-        viewModelState.update { it.copy(amountSelectionUiState = updatedAmountSelectionUiState) }
+        viewModelState.update { it.copy(defaultAmountDoubleVerticalPagerState = updatedAmountSelectionUiState) }
     }
 
-    private fun updateAmountSelectionValue(key: CoffeeUiState, coffeeAmountValue: String) {
-        val selectedCoffees = viewModelState.value.selectedCoffees
+    private fun updateAmountSelectionValue(key: CoffeeUiState, leftInputValue: String, rightInputValue: String) {
+        val selectedCoffees = viewModelState.value.selectedCoffees.toMutableMap()
 
         val amountSelectionUiState = selectedCoffees[key] ?: return
 
-        val coffeeAmountFloat = coffeeAmountValue.toFloatOrNull() ?: return
+        val integerPart = leftInputValue.toIntOrNull() ?: return
+        val fractionalPart = rightInputValue.toIntOrNull() ?: return
 
-        val coffeeAmountValueWithDecimalPoint = coffeeAmountFloat.toStringWithOneDecimalPoint()
+        val maxAmount = key.amount
+        val selectedAmount = "$integerPart.$fractionalPart"
 
-        val coffeeAmountSplit = coffeeAmountValueWithDecimalPoint.split(".")
+        val maxAmountFloat = maxAmount.toFloatOrNull() ?: return
+        val selectedAmountFloat = selectedAmount.toFloatOrNull() ?: return
 
-        val integerPart = coffeeAmountSplit[0].toIntOrNull() ?: return
-        val decimalPart = coffeeAmountSplit[1].toIntOrNull() ?: return
+        val updatedAmountSelectionUiState = if (selectedAmountFloat > maxAmountFloat) {
+            val selectedAmountFractionalPart = selectedAmount.split(".")[1].toIntOrNull() ?: return
+            val maxAmountFractionalPart = maxAmount.split(".")[1].toIntOrNull() ?: return
 
-        val updatedAmountSelectionUiState = amountSelectionUiState.copy(
-            selectedAmount = coffeeAmountValue,
-            integerPartIndex = amountSelectionUiState.integerParts.indexOf(integerPart),
-            decimalPartIndex = amountSelectionUiState.decimalParts.indexOf(decimalPart)
-        )
+            val fractionalPartIndexOffset = selectedAmountFractionalPart - maxAmountFractionalPart
+
+            val adjustedFractionalPartIndex = amountSelectionUiState.leftPagerPageIndex - fractionalPartIndexOffset
+
+            amountSelectionUiState.copy(
+                leftPagerPageIndex = amountSelectionUiState.leftPagerItems.indexOf(integerPart),
+                rightPagerPageIndex = adjustedFractionalPartIndex,
+            )
+        } else {
+            amountSelectionUiState.copy(
+                leftPagerPageIndex = amountSelectionUiState.leftPagerItems.indexOf(integerPart),
+                rightPagerPageIndex = amountSelectionUiState.rightPagerItems.indexOf(fractionalPart)
+            )
+        }
 
         selectedCoffees.replace(key, updatedAmountSelectionUiState)
 
@@ -365,59 +363,93 @@ class AssistantViewModel @Inject constructor(
     }
 
     private fun updateCoffeeRatioIndex(coffeeRatioIndex: Int) {
-        val ratioSelectionUiState = viewModelState.value.ratioSelectionUiState
+        val ratioSelectionUiState = viewModelState.value.ratioDoubleVerticalPagerState
 
-        val updatedRatioSelectionUiState = ratioSelectionUiState.copy(
-            coffeeRatioIndex = coffeeRatioIndex,
-            selectedCoffeeRatio = ratioSelectionUiState.coffeeRatios[coffeeRatioIndex],
-        )
+        val updatedRatioSelectionUiState = ratioSelectionUiState.copy(leftPagerPageIndex = coffeeRatioIndex)
 
-        viewModelState.update { it.copy(ratioSelectionUiState = updatedRatioSelectionUiState) }
+        viewModelState.update { it.copy(ratioDoubleVerticalPagerState = updatedRatioSelectionUiState) }
     }
 
     private fun updateWaterRatioIndex(waterRatioIndex: Int) {
-        val ratioSelectionUiState = viewModelState.value.ratioSelectionUiState
+        val ratioSelectionUiState = viewModelState.value.ratioDoubleVerticalPagerState
 
-        val updatedRatioSelectionUiState = ratioSelectionUiState.copy(
-            waterRatioIndex = waterRatioIndex,
-            selectedWaterRatio = ratioSelectionUiState.waterRatios[waterRatioIndex],
-        )
+        val updatedRatioSelectionUiState = ratioSelectionUiState.copy(rightPagerPageIndex = waterRatioIndex)
 
-        viewModelState.update { it.copy(ratioSelectionUiState = updatedRatioSelectionUiState) }
+        viewModelState.update { it.copy(ratioDoubleVerticalPagerState = updatedRatioSelectionUiState) }
     }
 
     private fun updateRatioValues(coffeeRatioValue: String, waterRatioValue: String) {
-        val ratioSelectionUiState = viewModelState.value.ratioSelectionUiState
+        val ratioSelectionUiState = viewModelState.value.ratioDoubleVerticalPagerState
 
         val selectedCoffeeRatio = if (coffeeRatioValue.isNotBlank()) {
             coffeeRatioValue.toIntOrNull() ?: return
         } else {
-            ratioSelectionUiState.selectedCoffeeRatio
+            ratioSelectionUiState.currentLeftPagerItem()
         }
 
         val selectedWaterRatio = if (waterRatioValue.isNotBlank()) {
             waterRatioValue.toIntOrNull() ?: return
         } else {
-            ratioSelectionUiState.selectedWaterRatio
+            ratioSelectionUiState.currentRightPagerItem()
         }
 
         val updatedRatioSelectionUiState = ratioSelectionUiState.copy(
-            selectedCoffeeRatio = selectedCoffeeRatio,
-            selectedWaterRatio = selectedWaterRatio,
-            coffeeRatioIndex = ratioSelectionUiState.coffeeRatios.indexOf(selectedCoffeeRatio),
-            waterRatioIndex = ratioSelectionUiState.waterRatios.indexOf(selectedWaterRatio)
+            leftPagerPageIndex = ratioSelectionUiState.leftPagerItems.indexOf(selectedCoffeeRatio),
+            rightPagerPageIndex = ratioSelectionUiState.rightPagerItems.indexOf(selectedWaterRatio)
         )
 
-        viewModelState.update { it.copy(ratioSelectionUiState = updatedRatioSelectionUiState) }
+        viewModelState.update { it.copy(ratioDoubleVerticalPagerState = updatedRatioSelectionUiState) }
     }
 
-    private fun updateRating(rating: Int?) {
-        viewModelState.update { it.copy(rating = rating) }
+    private fun resetTimer() {
+        stopTimer()
+        viewModelState.update { state ->
+            state.copy(timeInSeconds = null)
+        }
     }
 
-    private fun updateNotes(notes: String) {
-        viewModelState.update { it.copy(notes = notes) }
+    private fun startStopTimerTimer() {
+        if (timerJob?.isActive == true) {
+            stopTimer()
+        } else {
+
+            startTimer()
+        }
     }
+
+    private fun startTimer() {
+        viewModelState.update {
+            it.copy(isTimerRunning = true)
+        }
+
+        timerJob = viewModelScope.launch {
+            while (true) {
+                if (viewModelState.value.timeInSeconds == null) {
+                    viewModelState.update {
+                        it.copy(timeInSeconds = 0)
+                    }
+                }
+                delay(1000)
+                viewModelState.update {
+                    it.copy(timeInSeconds = (it.timeInSeconds ?: 0) + 1)
+                }
+            }
+        }
+    }
+
+    private fun stopTimer() {
+        viewModelState.update {
+            it.copy(isTimerRunning = false)
+        }
+        timerJob?.cancel()
+        timerJob = null
+    }
+
+
+    private fun tempFinishBrew() {
+        viewModelState.update { it.copy(isFinished = true) }
+    }
+
 
     private fun finishBrew() {
         viewModelScope.launch {
@@ -425,20 +457,23 @@ class AssistantViewModel @Inject constructor(
 
             myCoffeeDatabaseRepository.insertBrew(brew.toModel())
 
-            viewModelState.value.selectedCoffees.forEach { (selectedCoffee, amountSelectionUiState) ->
-                val selectedCoffeeAmount = selectedCoffee.amount?.toFloatOrNull() ?: 0f
+            viewModelState.value.selectedCoffees.forEach { (selectedCoffee, amountDoubleVerticalPagerState) ->
+                val selectedCoffeeAmount = selectedCoffee.amount.toFloatOrNull() ?: 0f
 
-                val selectedAmount = amountSelectionUiState.selectedAmount.toFloatOrNull() ?: 0f
+                val integerPart = amountDoubleVerticalPagerState.currentLeftPagerItem()
+                val fractionalPart = amountDoubleVerticalPagerState.currentRightPagerItem()
+
+                val selectedAmount = "$integerPart.$fractionalPart".toFloatOrNull() ?: 0f
 
                 val updatedAmount = selectedCoffeeAmount - selectedAmount
 
                 val updatedCoffee = if (updatedAmount <= 0) {
-                    selectedCoffee.copy(amount = null)
+                    selectedCoffee.copy(amount = 0.0f.toString())
                 } else {
                     selectedCoffee.copy(amount = updatedAmount.toString())
                 }
 
-                myCoffeeDatabaseRepository.updateCoffee(updatedCoffee.toModel())
+                myCoffeeDatabaseRepository.updateCoffeeOld(updatedCoffee.toModel())
             }
 
             viewModelState.update { it.copy(isFinished = true) }

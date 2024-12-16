@@ -1,36 +1,34 @@
 package com.luczka.mycoffee.ui.screens.history
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ListItem
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.luczka.mycoffee.R
-import com.luczka.mycoffee.ui.models.BrewUiState
-import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
+import com.luczka.mycoffee.ui.components.icons.AddIcon
+import com.luczka.mycoffee.ui.components.listitem.HistoryListItem
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -39,16 +37,20 @@ fun HistoryScreen(
     uiState: HistoryUiState,
     onAction: (HistoryAction) -> Unit,
 ) {
-    val brewListState = rememberLazyListState()
+    val brewsListState = rememberLazyListState()
+
+    val fabExpanded by remember {
+        derivedStateOf { brewsListState.firstVisibleItemIndex == 0 }
+    }
 
     Scaffold(
         topBar = {
             when (widthSizeClass) {
                 WindowWidthSizeClass.Compact -> {
-                    CenterAlignedTopAppBar(
+                    TopAppBar(
                         title = {
                             Text(
-                                text = stringResource(R.string.app_name_short),
+                                text = "Brewing history",
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
                             )
@@ -56,6 +58,22 @@ fun HistoryScreen(
                     )
                 }
             }
+        },
+        floatingActionButton = {
+            ExtendedFloatingActionButton(
+                text = {
+                    Text(text = "Use assistant")
+                },
+                icon = {
+                    AddIcon()
+                },
+                elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp),
+                onClick = {
+                    val action = HistoryAction.NavigateToAssistant
+                    onAction(action)
+                },
+                expanded = fabExpanded
+            )
         }
     ) { innerPadding ->
         when (uiState) {
@@ -68,7 +86,7 @@ fun HistoryScreen(
                 ) {
                     Column(
                         modifier = Modifier
-                            .padding(16.dp)
+                            .padding(32.dp)
                             .fillMaxWidth(),
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
@@ -89,9 +107,9 @@ fun HistoryScreen(
 
             is HistoryUiState.HasBrews -> {
                 Column(modifier = Modifier.padding(innerPadding)) {
+                    Divider()
                     LazyColumn(
-                        state = brewListState,
-                        contentPadding = PaddingValues(vertical = 8.dp),
+                        state = brewsListState,
                         modifier = Modifier.fillMaxSize()
                     ) {
                         items(
@@ -99,9 +117,9 @@ fun HistoryScreen(
                             key = { it.brewId }
                         ) { brewedUiState ->
                             HistoryListItem(
-                                brewedUiState = brewedUiState,
+                                brewUiState = brewedUiState,
                                 onClick = {
-                                    val action = HistoryAction.NavigateToHistoryDetails(brewedUiState.brewId)
+                                    val action = HistoryAction.NavigateToBrewDetails(brewedUiState.brewId)
                                     onAction(action)
                                 }
                             )
@@ -113,62 +131,3 @@ fun HistoryScreen(
     }
 }
 
-@Composable
-private fun HistoryListItem(
-    brewedUiState: BrewUiState,
-    onClick: () -> Unit
-) {
-    val formatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT)
-    val date = brewedUiState.date.format(formatter)
-
-    val headlineText = when (brewedUiState.brewedCoffees.size) {
-        0 -> "Unknown"
-        1 -> brewedUiState.brewedCoffees.first().let { "${it.coffee.name}, ${it.coffee.brand}" }
-        else -> brewedUiState.brewedCoffees.joinToString(separator = " + ") { it.coffee.name }
-    }
-
-    ListItem(
-        modifier = Modifier.clickable {
-            onClick()
-        },
-        leadingContent = {
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .background(MaterialTheme.colorScheme.inverseOnSurface),
-                contentAlignment = Alignment.Center
-            ) {
-                if (brewedUiState.rating != null) {
-                    Text(text = "${brewedUiState.rating}")
-                }
-            }
-        },
-        overlineContent = {
-            Text(
-                text = date,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                style = MaterialTheme.typography.labelMedium
-            )
-        },
-        headlineContent = {
-            Text(
-                text = headlineText,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                style = MaterialTheme.typography.titleMedium
-            )
-        },
-        supportingContent = {
-            Text(
-                text = stringResource(
-                    id = R.string.coffee_parameters_amount_with_unit,
-                    brewedUiState.coffeeAmount
-                ),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                style = MaterialTheme.typography.bodyMedium
-            )
-        }
-    )
-}

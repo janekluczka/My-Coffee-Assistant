@@ -2,7 +2,6 @@ package com.luczka.mycoffee.ui.components.textfields
 
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.TextFieldColors
@@ -12,7 +11,6 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.VisualTransformation
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FilteredMyCoffeeOutlinedTextField(
     value: String,

@@ -2,9 +2,9 @@ package com.luczka.mycoffee.ui.screens.historydetails
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.luczka.mycoffee.domain.mappers.toModel
-import com.luczka.mycoffee.domain.mappers.toUiState
-import com.luczka.mycoffee.domain.repository.MyCoffeeDatabaseRepository
+import com.luczka.mycoffee.ui.mappers.toModel
+import com.luczka.mycoffee.ui.mappers.toUiState
+import com.luczka.mycoffee.domain.repositories.MyCoffeeDatabaseRepository
 import com.luczka.mycoffee.ui.models.BrewUiState
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -34,12 +34,12 @@ private data class HistoryDetailsViewModelState(
 
 @AssistedFactory
 interface HistoryDetailsViewModelFactory {
-    fun create(brewId: Int): HistoryDetailsViewModel
+    fun create(brewId: Long): HistoryDetailsViewModel
 }
 
 @HiltViewModel(assistedFactory = HistoryDetailsViewModelFactory::class)
 class HistoryDetailsViewModel @AssistedInject constructor(
-    @Assisted brewId: Int,
+    @Assisted brewId: Long,
     private val myCoffeeDatabaseRepository: MyCoffeeDatabaseRepository
 ) : ViewModel() {
 
@@ -54,7 +54,7 @@ class HistoryDetailsViewModel @AssistedInject constructor(
 
     init {
         viewModelScope.launch {
-            myCoffeeDatabaseRepository.getBrewWithCoffees(brewId = brewId).collect { brewModel ->
+            myCoffeeDatabaseRepository.getBrewFlow(brewId = brewId).collect { brewModel ->
                 viewModelState.update { it.copy(brew = brewModel?.toUiState()) }
             }
         }

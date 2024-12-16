@@ -1,14 +1,16 @@
 package com.luczka.mycoffee.ui.components.listitem
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Surface
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -27,28 +29,29 @@ fun HistoryDetailsCoffeeListItem(coffeeUiState: CoffeeUiState?) {
         stringResource(R.string.unknown)
     } else {
         stringResource(
-            id = R.string.coffee_parameters_name_and_brand,
-            coffeeUiState.name,
-            coffeeUiState.brand
+            id = R.string.format_coffee_name_coma_brand,
+            coffeeUiState.originOrName,
+            coffeeUiState.roasterOrBrand
         )
     }
 
     ListItem(
         leadingContent = {
-            Box(
-                modifier = Modifier
-                    .size(56.dp)
-                    .background(MaterialTheme.colorScheme.inverseOnSurface),
-                contentAlignment = Alignment.Center
+            Surface(
+                modifier = Modifier.size(56.dp),
+                shape = RoundedCornerShape(4.dp),
+                color = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp),
             ) {
-                coffeeUiState?.imageFile240x240?.let { imageFile ->
-                    val cacheFile = File(context.filesDir, imageFile)
+                coffeeUiState?.coffeeImages?.firstOrNull()?.filename?.let { filename ->
+                    val file = File(context.filesDir, filename)
                     val model = ImageRequest.Builder(context)
-                        .data(cacheFile)
+                        .data(file)
                         .build()
                     AsyncImage(
+                        modifier = Modifier.fillMaxSize(),
                         model = model,
-                        contentDescription = null
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop
                     )
                 }
             }

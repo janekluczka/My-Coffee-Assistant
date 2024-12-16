@@ -5,8 +5,8 @@ plugins {
     alias(libs.plugins.google.gms.google.services)
     alias(libs.plugins.google.firebase.crashlytics)
     alias(libs.plugins.google.devtools.ksp)
-    id("kotlin-kapt")
-    id("com.google.dagger.hilt.android")
+    alias(libs.plugins.google.dagger.hilt.android)
+    id("kotlin-parcelize")
 }
 
 android {
@@ -28,7 +28,7 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = true
+            isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             signingConfig = signingConfigs.getByName("debug")
         }
@@ -69,7 +69,7 @@ dependencies {
     implementation(libs.androidx.legacy.support.v4)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
-    implementation(libs.google.material) // TODO: Remove if not needed
+    implementation(libs.google.material)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material3.windowsizeclass)
     implementation(libs.androidx.compose.material)
@@ -82,7 +82,7 @@ dependencies {
     implementation(libs.google.accompanist.webview)
 
     implementation(libs.google.dagger.hilt.android)
-    kapt(libs.google.dagger.hilt.android.compiler)
+    ksp(libs.google.dagger.hilt.android.compiler)
 
     // Import the Firebase BoM
     implementation(platform(libs.google.firebase.bom))

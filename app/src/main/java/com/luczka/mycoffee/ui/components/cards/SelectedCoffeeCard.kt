@@ -1,21 +1,24 @@
 package com.luczka.mycoffee.ui.components.cards
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Surface
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -38,20 +41,21 @@ fun SelectedCoffeeCard(
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(
-                modifier = Modifier
-                    .size(80.dp)
-                    .background(MaterialTheme.colorScheme.inverseOnSurface),
-                contentAlignment = Alignment.Center
+            Surface(
+                modifier = Modifier.size(80.dp),
+                shape = RoundedCornerShape(4.dp),
+                color = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp),
             ) {
-                coffeeUiState.imageFile240x240?.let { imageFile ->
-                    val cacheFile = File(context.filesDir, imageFile)
+                coffeeUiState.coffeeImages.firstOrNull()?.filename?.let { filename ->
+                    val file = File(context.filesDir, filename)
                     val model = ImageRequest.Builder(context)
-                        .data(cacheFile)
+                        .data(file)
                         .build()
                     AsyncImage(
+                        modifier = Modifier.fillMaxSize(),
                         model = model,
-                        contentDescription = null
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop
                     )
                 }
             }
@@ -65,9 +69,9 @@ fun SelectedCoffeeCard(
             ) {
                 Text(
                     text = stringResource(
-                        id = R.string.coffee_parameters_name_and_brand,
-                        coffeeUiState.name,
-                        coffeeUiState.brand
+                        id = R.string.format_coffee_name_coma_brand,
+                        coffeeUiState.originOrName,
+                        coffeeUiState.roasterOrBrand
                     ),
                     style = MaterialTheme.typography.titleMedium,
                     maxLines = 1,
@@ -76,8 +80,8 @@ fun SelectedCoffeeCard(
                 Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(
                         text = stringResource(
-                            id = R.string.coffee_parameters_amount_with_unit,
-                            coffeeUiState.amount.toString(),
+                            id = R.string.format_coffee_amount_grams,
+                            coffeeUiState.amount,
                         ),
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

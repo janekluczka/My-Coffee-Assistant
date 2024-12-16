@@ -14,7 +14,7 @@ import androidx.room.PrimaryKey
 @Entity
 data class ReceiptEntity(
     @PrimaryKey(autoGenerate = true)
-    val receiptId: Int,
+    val receiptId: Long,
     val pdfFile: String?,
     val imageFile: String?
 )

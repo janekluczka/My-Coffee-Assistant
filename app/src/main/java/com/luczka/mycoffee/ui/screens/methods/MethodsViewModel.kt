@@ -2,8 +2,8 @@ package com.luczka.mycoffee.ui.screens.methods
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.luczka.mycoffee.domain.mappers.toUiState
-import com.luczka.mycoffee.domain.repository.FirebaseRepository
+import com.luczka.mycoffee.domain.repositories.FirebaseRepository
+import com.luczka.mycoffee.ui.mappers.toUiState
 import com.luczka.mycoffee.ui.models.MethodUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -59,9 +59,11 @@ class MethodsViewModel @Inject constructor(
     init {
         viewModelState.update { it.copy(isLoading = true) }
         viewModelScope.launch {
-            firebaseRepository.getMethods(
-                onSuccess = { methodModels ->
-                    val methodUiStateListSorted = methodModels
+            val result = firebaseRepository.getMethods()
+            when {
+                result.isSuccess -> {
+                    val methodUiStateListSorted = result
+                        .getOrDefault(emptyList())
                         .map { it.toUiState() }
                         .sortedBy { it.name }
                     viewModelState.update {
@@ -70,8 +72,9 @@ class MethodsViewModel @Inject constructor(
                             methods = methodUiStateListSorted
                         )
                     }
-                },
-                onError = { errorMessage ->
+                }
+
+                result.isFailure -> {
                     viewModelState.update {
                         it.copy(
                             isLoading = false,
@@ -79,7 +82,7 @@ class MethodsViewModel @Inject constructor(
                         )
                     }
                 }
-            )
+            }
         }
     }
 

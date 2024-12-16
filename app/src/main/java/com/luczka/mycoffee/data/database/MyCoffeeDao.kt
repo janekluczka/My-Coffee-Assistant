@@ -7,98 +7,91 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
+import com.luczka.mycoffee.data.database.entities.BrewCoffeeCrossRef
 import com.luczka.mycoffee.data.database.entities.BrewEntity
-import com.luczka.mycoffee.data.database.entities.BrewedCoffeeEntity
 import com.luczka.mycoffee.data.database.entities.CoffeeEntity
+import com.luczka.mycoffee.data.database.entities.CoffeeImageEntity
 import com.luczka.mycoffee.data.database.queries.BrewWithBrewedCoffeesRelation
+import com.luczka.mycoffee.data.database.queries.CoffeeWithCoffeeImagesRelation
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface MyCoffeeDao {
-    /**
-     * Insert a coffee into the database.
-     */
+
+    @Transaction
+    suspend fun insertCoffeeWithImages(
+        coffeeEntity: CoffeeEntity,
+        coffeeImageEntities: List<CoffeeImageEntity>
+    ) {
+        val coffeeId = insertCoffee(coffeeEntity)
+        val coffeeImageEntitiesWithCoffeeId = coffeeImageEntities.map { it.copy(coffeeId = coffeeId) }
+        insertCoffeeImages(coffeeImageEntitiesWithCoffeeId)
+    }
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(coffeeEntity: CoffeeEntity)
+    suspend fun insertCoffee(coffee: CoffeeEntity): Long
 
-    /**
-     * Update a coffee in the database.
-     */
-    @Update
-    suspend fun update(coffeeEntity: CoffeeEntity)
+    @Insert
+    suspend fun insertCoffeeImages(coffeeImageEntities: List<CoffeeImageEntity>)
 
-    /**
-     * Get a coffee by its ID.
-     * @param id The ID of the coffee.
-     * @return A [Flow] emitting the coffee, or null if not found.
-     */
-    @Query("SELECT * FROM coffeeentity WHERE coffeeId = :id")
-    fun getCoffee(id: Int): Flow<CoffeeEntity?>
+    @Transaction
+    @Query("SELECT * FROM CoffeeEntity WHERE coffeeId = :coffeeId")
+    suspend fun getCoffeeWithImages(coffeeId: Long): CoffeeWithCoffeeImagesRelation?
 
-    /**
-     * Get all coffees in ascending order of coffeeId.
-     * @return A [Flow] emitting a list of all coffees.
-     */
-    @Query("SELECT * FROM coffeeentity ORDER BY coffeeId ASC")
-    fun getAllCoffeesStream(): Flow<List<CoffeeEntity>>
+    @Transaction
+    @Query("SELECT * FROM CoffeeEntity WHERE coffeeId = :coffeeId")
+    fun getCoffeeWithImagesFlow(coffeeId: Long): Flow<CoffeeWithCoffeeImagesRelation?>
 
-    /**
-     * Get favorite coffees in descending order of coffeeId.
-     * @return A [Flow] emitting a list of favorite coffees.
-     */
-    @Query("SELECT * FROM coffeeentity WHERE isFavourite = 1 ORDER BY coffeeId DESC")
-    fun getFavouriteCoffees(): Flow<List<CoffeeEntity>>
+    @Transaction
+    @Query("SELECT * FROM CoffeeEntity ORDER BY addedOn, coffeeId DESC")
+    fun getAllCoffeesWithImagesFlow(): Flow<List<CoffeeWithCoffeeImagesRelation>>
 
-    /**
-     * Get current coffees (amount > 0) in ascending order of coffeeId.
-     * @return A [Flow] emitting a list of current coffees.
-     */
-    @Query("SELECT * FROM coffeeentity WHERE amount > 0 ORDER BY coffeeId ASC")
-    fun getCurrentCoffeesStream(): Flow<List<CoffeeEntity>>
+    @Transaction
+    @Query("SELECT * FROM CoffeeEntity ORDER BY addedOn, coffeeId DESC LIMIT :amount")
+    fun getRecentlyAddedCoffeesWithImagesFlow(amount: Int): Flow<List<CoffeeWithCoffeeImagesRelation>>
 
-    @Query("SELECT * FROM coffeeentity WHERE amount > 0 ORDER BY coffeeId ASC")
-    fun getCurrentCoffees(): List<CoffeeEntity>
+    @Query("SELECT * FROM CoffeeEntity WHERE amount > 0 ORDER BY name, brand, coffeeId ASC")
+    fun getCurrentCoffeesWithImagesFlow(): Flow<List<CoffeeWithCoffeeImagesRelation>>
 
-    /**
-     * Get current coffees (amount > 0) with an amount less than the specified amount (amount < [amount]),
-     * ordered by amount in ascending order.
-     * @param amount The maximum amount to filter by.
-     * @return A [Flow] emitting a list of coffees below the specified amount.
-     */
-    @Query("SELECT * FROM coffeeentity WHERE amount < :amount AND amount > 0 ORDER BY amount ASC")
-    fun getBelowAmountCoffees(amount: Float): Flow<List<CoffeeEntity>>
-
-    /**
-     * Delete a coffee from the database.
-     */
     @Delete
     suspend fun delete(coffeeEntity: CoffeeEntity)
 
-    @Transaction
-    @Query("SELECT * FROM BrewEntity")
-    fun getBrewsWithCoffees(): Flow<List<BrewWithBrewedCoffeesRelation>>
 
     @Transaction
-    @Query("SELECT * FROM BrewEntity WHERE brewId = :id")
-    fun getBrewWithCoffees(id: Int): Flow<BrewWithBrewedCoffeesRelation>
+    suspend fun insertBrewWithBrewedCoffees(
+        brewEntity: BrewEntity,
+        brewCoffeeCrossRefs: List<BrewCoffeeCrossRef>
+    ) {
+        val brewId = insertBrew(brewEntity)
+        val brewCoffeeCrossRefsWithBrewId = brewCoffeeCrossRefs.map { it.copy(brewId = brewId) }
+        insertBrewedCoffees(brewCoffeeCrossRefsWithBrewId)
+    }
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertBrew(brewEntity: BrewEntity): Long
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertBrewedCoffee(brewedCoffeeEntity: BrewedCoffeeEntity)
-
     @Insert
-    suspend fun insertBrewedCoffees(brewedCoffees: List<BrewedCoffeeEntity>)
+    suspend fun insertBrewedCoffees(brewCoffeeCrossRefs: List<BrewCoffeeCrossRef>)
 
     @Transaction
-    suspend fun insertBrewWithBrewedCoffees(brewEntity: BrewEntity, brewedCoffeeEntities: List<BrewedCoffeeEntity>) {
-        val brewId = insertBrew(brewEntity).toInt()
-        val brewedCoffeeEntitiesWithId = brewedCoffeeEntities.map { it.copy(brewId = brewId) }
-        insertBrewedCoffees(brewedCoffeeEntitiesWithId)
-    }
+    @Query("SELECT * FROM BrewEntity WHERE brewId = :brewId")
+    fun getBrewWithCoffeesFlow(brewId: Long): Flow<BrewWithBrewedCoffeesRelation>
+
+    @Transaction
+    @Query("SELECT * FROM BrewEntity ORDER BY date, brewId DESC")
+    fun getBrewsWithCoffeesFlow(): Flow<List<BrewWithBrewedCoffeesRelation>>
+
+    @Transaction
+    @Query("SELECT * FROM BrewEntity ORDER BY date, brewId DESC LIMIT :amount")
+    fun getRecentBrewsWithCoffeesFlow(amount: Int): Flow<List<BrewWithBrewedCoffeesRelation>>
 
     @Delete
     suspend fun delete(brewEntity: BrewEntity)
+
+
+
+
+    @Update
+    suspend fun update(coffeeEntity: CoffeeEntity)
 
 }

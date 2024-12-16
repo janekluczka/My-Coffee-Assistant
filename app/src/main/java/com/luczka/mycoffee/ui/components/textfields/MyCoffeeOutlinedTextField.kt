@@ -3,7 +3,6 @@ package com.luczka.mycoffee.ui.components.textfields
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -66,7 +65,7 @@ fun MyCoffeeOutlinedTextField(
 
 @Preview
 @Composable
-fun MyCoffeeOutlinedTextFieldPreview() {
+private fun MyCoffeeOutlinedTextFieldPreview() {
     MyCoffeeOutlinedTextField(
         value = "Hello",
         onValueChange = {},

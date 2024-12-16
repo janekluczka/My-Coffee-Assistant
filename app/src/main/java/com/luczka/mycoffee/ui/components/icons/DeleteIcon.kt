@@ -15,8 +15,9 @@ fun DeleteIcon(
 ) {
     Icon(
         modifier = modifier,
-        painter = painterResource(id = R.drawable.delete_24px),
+        painter = painterResource(id = R.drawable.ic_delete_24_fill_0_weight_300_grade_0_opticalsize_24),
         contentDescription = null,
         tint = tint
     )
 }
+

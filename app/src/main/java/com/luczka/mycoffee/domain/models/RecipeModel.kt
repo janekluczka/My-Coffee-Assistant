@@ -4,5 +4,5 @@ data class RecipeModel(
     val youtubeId: String,
     val author: String,
     val title: String,
-    val steps: List<StepModel> = emptyList()
+    val steps: List<StepModel>
 )

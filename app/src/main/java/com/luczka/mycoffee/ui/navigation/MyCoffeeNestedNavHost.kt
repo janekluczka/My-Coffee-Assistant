@@ -10,19 +10,15 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
-import com.luczka.mycoffee.ui.screens.coffeedetails.CoffeeDetailsAction
-import com.luczka.mycoffee.ui.screens.coffeedetails.CoffeeDetailsScreen
-import com.luczka.mycoffee.ui.screens.coffeedetails.CoffeeDetailsViewModel
-import com.luczka.mycoffee.ui.screens.coffeedetails.CoffeeDetailsViewModelFactory
+import com.luczka.mycoffee.ui.models.MethodUiState
 import com.luczka.mycoffee.ui.screens.coffees.CoffeesAction
 import com.luczka.mycoffee.ui.screens.coffees.CoffeesScreen
 import com.luczka.mycoffee.ui.screens.coffees.CoffeesViewModel
+import com.luczka.mycoffee.ui.screens.equipments.EquipmentsAction
+import com.luczka.mycoffee.ui.screens.equipments.EquipmentsScreen
 import com.luczka.mycoffee.ui.screens.history.HistoryAction
 import com.luczka.mycoffee.ui.screens.history.HistoryScreen
 import com.luczka.mycoffee.ui.screens.history.HistoryViewModel
-import com.luczka.mycoffee.ui.screens.historydetails.HistoryDetailsScreen
-import com.luczka.mycoffee.ui.screens.historydetails.HistoryDetailsViewModel
-import com.luczka.mycoffee.ui.screens.historydetails.HistoryDetailsViewModelFactory
 import com.luczka.mycoffee.ui.screens.home.HomeAction
 import com.luczka.mycoffee.ui.screens.home.HomeScreen
 import com.luczka.mycoffee.ui.screens.home.HomeViewModel
@@ -37,14 +33,14 @@ import com.luczka.mycoffee.ui.screens.recipes.RecipesAction
 import com.luczka.mycoffee.ui.screens.recipes.RecipesScreen
 import com.luczka.mycoffee.ui.screens.recipes.RecipesViewModel
 import com.luczka.mycoffee.ui.screens.recipes.RecipesViewModelFactory
+import kotlin.reflect.typeOf
 
 @Composable
 fun MyCoffeeNestedNavHost(
     widthSizeClass: WindowWidthSizeClass,
     modifier: Modifier,
     navController: NavHostController,
-    navigateToAssistant: () -> Unit,
-    navigateToCoffeeInput: (Int?) -> Unit
+    onAction: (MainNavHostAction) -> Unit,
 ) {
     NavHost(
         modifier = modifier,
@@ -59,7 +55,9 @@ fun MyCoffeeNestedNavHost(
                 uiState = uiState,
                 onAction = { action ->
                     when (action) {
-                        HomeAction.NavigateToAssistant -> navigateToAssistant()
+                        is HomeAction.NavigateToAssistant -> onAction(MainNavHostAction.NavigateToAssistant)
+                        is HomeAction.NavigateToBrewDetails -> onAction(MainNavHostAction.NavigateToBrewDetails(brewId = action.brewId))
+                        is HomeAction.NavigateToCoffeeDetails -> onAction(MainNavHostAction.NavigateToCoffeeDetails(coffeeId = action.coffeeId))
                     }
                 }
             )
@@ -72,23 +70,13 @@ fun MyCoffeeNestedNavHost(
                 uiState = uiState,
                 onAction = { action ->
                     when (action) {
-                        is HistoryAction.NavigateToHistoryDetails -> navController.navigate(Routes.Main.HistoryDetails(action.brewId))
+                        is HistoryAction.NavigateToAssistant -> onAction(MainNavHostAction.NavigateToAssistant)
+                        is HistoryAction.NavigateToBrewDetails -> onAction(MainNavHostAction.NavigateToBrewDetails(brewId = action.brewId))
                     }
                 }
             )
         }
-        composable<Routes.Main.HistoryDetails> { backStackEntry ->
-            val arguments = backStackEntry.toRoute<Routes.Main.HistoryDetails>()
-            val viewModel = hiltViewModel<HistoryDetailsViewModel, HistoryDetailsViewModelFactory> { factory ->
-                factory.create(arguments.brewId)
-            }
-            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-            HistoryDetailsScreen(
-                historyDetailsUiState = uiState,
-                navigateUp = navController::navigateUp,
-                onDelete = viewModel::delete
-            )
-        }
+
         composable<Routes.Main.Coffees> {
             val viewModel = hiltViewModel<CoffeesViewModel>()
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -97,31 +85,23 @@ fun MyCoffeeNestedNavHost(
                 uiState = uiState,
                 onAction = { action ->
                     when (action) {
-                        CoffeesAction.NavigateUp -> navController.navigateUp()
-                        CoffeesAction.NavigateToAddCoffee -> navigateToCoffeeInput(null)
-                        is CoffeesAction.NavigateToCoffeeDetails -> navController.navigate(Routes.Main.CoffeeDetails(action.coffeeId))
+                        is CoffeesAction.NavigateUp -> navController.navigateUp()
+                        is CoffeesAction.NavigateToAddCoffee -> onAction(MainNavHostAction.NavigateToCoffeeInput(coffeeId = null))
+                        is CoffeesAction.NavigateToCoffeeDetails -> onAction(MainNavHostAction.NavigateToCoffeeDetails(coffeeId = action.coffeeId))
+                        is CoffeesAction.OnEditClicked -> onAction(MainNavHostAction.NavigateToCoffeeInput(coffeeId = action.coffeeId))
                         else -> {}
                     }
                     viewModel.onAction(action)
                 },
             )
         }
-        composable<Routes.Main.CoffeeDetails> { backStackEntry ->
-            val arguments = backStackEntry.toRoute<Routes.Main.CoffeeDetails>()
-            val viewModel = hiltViewModel<CoffeeDetailsViewModel, CoffeeDetailsViewModelFactory> { factory ->
-                factory.create(arguments.coffeeId)
-            }
-            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-            CoffeeDetailsScreen(
-                widthSizeClass = widthSizeClass,
-                uiState = uiState,
+
+        composable<Routes.Main.Equipment> {
+            EquipmentsScreen(
                 onAction = { action ->
-                    when (action) {
-                        is CoffeeDetailsAction.NavigateUp -> navController.navigateUp()
-                        is CoffeeDetailsAction.OnEditClicked -> navigateToCoffeeInput(action.coffeeId)
-                        else -> {}
+                    when(action) {
+                        EquipmentsAction.NavigateToEquipmentInput -> onAction(MainNavHostAction.NavigateToEquipmentInput(equipmentId = null))
                     }
-                    viewModel.onAction(action)
                 }
             )
         }
@@ -133,15 +113,19 @@ fun MyCoffeeNestedNavHost(
                 uiState = uiState,
                 onAction = { action ->
                     when (action) {
-                        is MethodsAction.NavigateToRecipes -> navController.navigate(Routes.Main.Recipes(action.methodId))
+                        is MethodsAction.NavigateToRecipes -> navController.navigate(Routes.Main.Recipes(action.methodUiState))
                     }
                 }
             )
         }
-        composable<Routes.Main.Recipes> { backStackEntry ->
+        composable<Routes.Main.Recipes>(
+            typeMap = mapOf(
+                typeOf<MethodUiState>() to MyCoffeeNavTypes.MethodUiStateNavType
+            )
+        ) { backStackEntry ->
             val arguments = backStackEntry.toRoute<Routes.Main.Recipes>()
             val viewModel = hiltViewModel<RecipesViewModel, RecipesViewModelFactory> { factory ->
-                factory.create(arguments.methodId)
+                factory.create(arguments.methodUiState)
             }
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
             RecipesScreen(

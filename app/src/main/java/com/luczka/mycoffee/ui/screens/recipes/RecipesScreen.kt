@@ -18,12 +18,17 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.luczka.mycoffee.ui.components.icons.ArrowBackIcon
+import com.luczka.mycoffee.ui.components.icons.InfoIcon
 import com.luczka.mycoffee.ui.components.listitem.RecipeListItem
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -32,6 +37,17 @@ fun RecipesScreen(
     uiState: RecipesUiState,
     onAction: (RecipesAction) -> Unit,
 ) {
+    var openMethodInfoDialog by rememberSaveable { mutableStateOf(false) }
+
+    if (openMethodInfoDialog) {
+        MethodInfoDialog(
+            method = uiState.methodUiState,
+            onDismiss = {
+                openMethodInfoDialog = false
+            }
+        )
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -47,10 +63,21 @@ fun RecipesScreen(
                 },
                 title = {
                     Text(
-                        text = uiState.title,
+                        text = uiState.methodUiState.name,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
+                },
+                actions = {
+                    if (uiState.showInfoButton) {
+                        IconButton(
+                            onClick = {
+                                openMethodInfoDialog = true
+                            }
+                        ) {
+                            InfoIcon()
+                        }
+                    }
                 }
             )
         }
@@ -89,10 +116,7 @@ fun RecipesScreen(
                                         RecipeListItem(
                                             recipeCardUiState = recipeCardUiState,
                                             onClick = {
-                                                val action = RecipesAction.NavigateToRecipeDetails(
-                                                    methodId = uiState.methodId,
-                                                    recipeId = recipeCardUiState.youtubeId
-                                                )
+                                                val action = RecipesAction.NavigateToRecipeDetails(recipeCardUiState.youtubeId)
                                                 onAction(action)
                                             }
                                         )
@@ -110,3 +134,4 @@ fun RecipesScreen(
         }
     }
 }
+

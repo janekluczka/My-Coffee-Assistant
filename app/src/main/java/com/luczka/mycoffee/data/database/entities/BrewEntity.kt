@@ -7,7 +7,7 @@ import java.time.LocalDate
 @Entity
 data class BrewEntity(
     @PrimaryKey(autoGenerate = true)
-    val brewId: Int,
+    val brewId: Long,
     val date: LocalDate,
     val coffeeAmount: Float,
     val coffeeRatio: Int,

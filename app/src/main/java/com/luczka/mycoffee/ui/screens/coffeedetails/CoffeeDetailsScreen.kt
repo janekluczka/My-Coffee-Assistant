@@ -1,23 +1,22 @@
 package com.luczka.mycoffee.ui.screens.coffeedetails
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.surfaceColorAtElevation
@@ -28,23 +27,24 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.luczka.mycoffee.R
+import com.luczka.mycoffee.ui.components.chips.MyCoffeeFilterChip
+import com.luczka.mycoffee.ui.components.dialogs.DeleteCoffeeDialog
 import com.luczka.mycoffee.ui.components.icons.ArrowBackIcon
 import com.luczka.mycoffee.ui.components.icons.DeleteIcon
 import com.luczka.mycoffee.ui.components.icons.EditIcon
-import com.luczka.mycoffee.ui.components.icons.FavouriteIcon
-import com.luczka.mycoffee.ui.models.CoffeeUiState
-import com.luczka.mycoffee.util.isPositiveFloat
+import com.luczka.mycoffee.ui.components.icons.FavoriteIcon
+import com.luczka.mycoffee.ui.components.icons.FavoriteOutlinedIcon
 import java.io.File
 
 @Composable
@@ -53,20 +53,22 @@ fun CoffeeDetailsScreen(
     uiState: CoffeeDetailsUiState,
     onAction: (CoffeeDetailsAction) -> Unit
 ) {
-    when (uiState) {
-        is CoffeeDetailsUiState.NoCoffee -> {
-            LaunchedEffect(uiState.isDeleted) {
-                if (uiState.isDeleted) {
-                    val action = CoffeeDetailsAction.NavigateUp
-                    onAction(action)
-                }
-            }
+    var openDeleteDialog by rememberSaveable { mutableStateOf(false) }
+
+    LaunchedEffect(uiState.isDeleted) {
+        if (uiState.isDeleted) {
+            val action = CoffeeDetailsAction.NavigateUp
+            onAction(action)
         }
+    }
 
-        is CoffeeDetailsUiState.HasCoffee -> {
-            var openDeleteDialog by rememberSaveable { mutableStateOf(false) }
+    if (openDeleteDialog) {
+        when (uiState) {
+            is CoffeeDetailsUiState.NoCoffee -> {
 
-            if (openDeleteDialog) {
+            }
+
+            is CoffeeDetailsUiState.HasCoffee -> {
                 DeleteCoffeeDialog(
                     coffeeUiState = uiState.coffee,
                     onNegative = {
@@ -79,94 +81,150 @@ fun CoffeeDetailsScreen(
                     }
                 )
             }
+        }
 
-            Scaffold(
-                topBar = {
-                    CoffeeDetailsTopBar(
-                        coffeeUiState = uiState.coffee,
-                        onAction = onAction,
-                        onShowDeleteDialog = { openDeleteDialog = true }
-                    )
+    }
+
+    Scaffold(
+        topBar = {
+            CoffeeDetailsTopBar(
+                uiState = uiState,
+                onAction = { action ->
+                    when(action) {
+                        CoffeeDetailsAction.ShowDeleteDialog -> openDeleteDialog = true
+                        else -> {}
+                    }
+                    onAction(action)
                 }
-            ) { innerPadding ->
-                Column(modifier = Modifier.padding(innerPadding)) {
-                    Divider()
-                    CoffeeDetailsList(coffeeUiState = uiState.coffee)
-                }
+            )
+        }
+    ) { innerPadding ->
+        Column(modifier = Modifier.padding(innerPadding)) {
+            Divider()
+            if (uiState is CoffeeDetailsUiState.HasCoffee) {
+                CoffeeDetailsList(uiState)
             }
         }
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
-private fun CoffeeDetailsList(coffeeUiState: CoffeeUiState) {
-    val filesDir = LocalContext.current.filesDir
+private fun CoffeeDetailsList(uiState: CoffeeDetailsUiState.HasCoffee) {
+    val context = LocalContext.current
 
     LazyColumn(contentPadding = PaddingValues(top = 16.dp, bottom = 16.dp)) {
         item {
-            Box(
-                modifier = Modifier
-                    .padding(start = 16.dp, end = 16.dp)
-                    .fillMaxWidth()
-                    .aspectRatio(1f / 1f)
-                    .background(MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp)),
-                contentAlignment = Alignment.Center
-            ) {
-                if (coffeeUiState.imageFile960x960 != null) {
-                    val cacheFile = File(filesDir, coffeeUiState.imageFile960x960)
-                    val model = ImageRequest.Builder(LocalContext.current)
-                        .data(cacheFile)
-                        .build()
-                    AsyncImage(
-                        model = model,
-                        contentDescription = "",
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                } else {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_baseline_photo_camera),
-                        contentDescription = "",
-                        modifier = Modifier.size(48.dp),
-                        tint = MaterialTheme.colorScheme.surfaceVariant
-                    )
+            val images = uiState.coffee.coffeeImages
+            if (images.isNotEmpty()) {
+                LazyRow(
+                    contentPadding = PaddingValues(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    images.forEach { coffeeImageUiState ->
+                        coffeeImageUiState.filename?.let { filename ->
+                            item {
+                                val imageFile = File(context.filesDir, filename)
+                                val model = ImageRequest.Builder(context)
+                                    .data(imageFile)
+                                    .build()
+                                AsyncImage(
+                                    modifier = Modifier
+                                        .height(256.dp)
+                                        .clip(RoundedCornerShape(12.dp)),
+                                    model = model,
+                                    contentDescription = "",
+                                    contentScale = ContentScale.Crop
+                                )
+                            }
+                        }
+                    }
+                }
+            } else {
+                Surface(
+                    modifier = Modifier.height(160.dp),
+                    color = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp),
+                ) {
+
                 }
             }
         }
         item {
             CoffeeDetailListItem(
                 supportingText = stringResource(id = R.string.coffee_parameters_name),
-                headlineText = coffeeUiState.name
+                headlineText = uiState.coffee.originOrName
             )
         }
         item {
             CoffeeDetailListItem(
                 supportingText = stringResource(id = R.string.coffee_parameters_brand),
-                headlineText = coffeeUiState.brand
+                headlineText = uiState.coffee.roasterOrBrand
             )
         }
-        if (coffeeUiState.amount?.isPositiveFloat() == true) {
-            item {
-                CoffeeDetailListItem(
-                    supportingText = stringResource(id = R.string.coffee_parameters_amount),
-                    headlineText = coffeeUiState.amount + " " + stringResource(id = R.string.unit_gram_short)
+        item {
+            CoffeeDetailListItem(
+                supportingText = stringResource(id = R.string.coffee_parameters_amount),
+                headlineText = uiState.coffee.amount + " " + stringResource(id = R.string.unit_gram_short)
+            )
+        }
+        item {
+            Column {
+                Text(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    text = stringResource(id = R.string.coffee_parameters_roast),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
                 )
+                FlowRow(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy((-8).dp)
+                ) {
+                    uiState.roasts.forEach { roastUiState ->
+                        val isSelected = uiState.coffee.roast == roastUiState
+                        MyCoffeeFilterChip(
+                            selected = isSelected,
+                            onClick = {
+
+                            },
+                            label = {
+                                Text(text = stringResource(id = roastUiState.stringRes))
+                            },
+                            enabled = false
+                        )
+                    }
+                }
             }
         }
-        if (coffeeUiState.roast != null) {
-            item {
-                CoffeeDetailListItem(
-                    supportingText = stringResource(id = R.string.coffee_parameters_roast),
-                    headlineText = stringResource(id = coffeeUiState.roast.stringRes)
+        item {
+            Column {
+                Text(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    text = stringResource(id = R.string.coffee_parameters_process),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
                 )
-            }
-        }
-        if (coffeeUiState.process != null) {
-            item {
-                CoffeeDetailListItem(
-                    supportingText = stringResource(id = R.string.coffee_parameters_process),
-                    headlineText = stringResource(id = coffeeUiState.process.stringRes)
-                )
+                FlowRow(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy((-8).dp)
+                ) {
+                    uiState.processes.forEach { processUiState ->
+                        val isSelected = uiState.coffee.process == processUiState
+                        MyCoffeeFilterChip(
+                            selected = isSelected,
+                            onClick = {
+
+                            },
+                            label = {
+                                Text(text = stringResource(id = processUiState.stringRes))
+                            },
+                            enabled = false
+                        )
+                    }
+                }
             }
         }
     }
@@ -175,9 +233,8 @@ private fun CoffeeDetailsList(coffeeUiState: CoffeeUiState) {
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 private fun CoffeeDetailsTopBar(
-    coffeeUiState: CoffeeUiState,
-    onAction: (CoffeeDetailsAction) -> Unit,
-    onShowDeleteDialog: () -> Unit
+    uiState: CoffeeDetailsUiState,
+    onAction: (CoffeeDetailsAction) -> Unit
 ) {
     TopAppBar(
         navigationIcon = {
@@ -191,38 +248,59 @@ private fun CoffeeDetailsTopBar(
             }
         },
         title = {
-            Text(
-                text = coffeeUiState.name,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        },
-        actions = {
-            IconButton(
-                onClick = {
-                    val action = CoffeeDetailsAction.OnFavouriteClicked
-                    onAction(action)
+            when (uiState) {
+                is CoffeeDetailsUiState.NoCoffee -> {
+
                 }
-            ) {
-                if(coffeeUiState.isFavourite) {
-                    FavouriteIcon()
-                } else {
-                    Icon(
-                        imageVector = Icons.Filled.FavoriteBorder,
-                        contentDescription = null
+
+                is CoffeeDetailsUiState.HasCoffee -> {
+                    Text(
+                        text = uiState.coffee.originOrName,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
             }
-            IconButton(
-                onClick = {
-                    val action = CoffeeDetailsAction.OnEditClicked(coffeeId = coffeeUiState.coffeeId)
-                    onAction(action)
+        },
+        actions = {
+            when (uiState) {
+                is CoffeeDetailsUiState.NoCoffee -> {
+
                 }
-            ) {
-                EditIcon()
-            }
-            IconButton(onClick = onShowDeleteDialog) {
-                DeleteIcon()
+
+                is CoffeeDetailsUiState.HasCoffee -> {
+                    IconButton(
+                        onClick = {
+                            val action = CoffeeDetailsAction.OnFavouriteClicked
+                            onAction(action)
+                        },
+                        enabled = !uiState.isLoading
+                    ) {
+                        if (uiState.coffee.isFavourite) {
+                            FavoriteIcon()
+                        } else {
+                            FavoriteOutlinedIcon()
+                        }
+                    }
+                    IconButton(
+                        onClick = {
+                            val action = CoffeeDetailsAction.OnEditClicked(coffeeId = uiState.coffee.coffeeId)
+                            onAction(action)
+                        },
+                        enabled = !uiState.isLoading
+                    ) {
+                        EditIcon()
+                    }
+                    IconButton(
+                        onClick = {
+                            val action = CoffeeDetailsAction.ShowDeleteDialog
+                            onAction(action)
+                        },
+                        enabled = !uiState.isLoading
+                    ) {
+                        DeleteIcon()
+                    }
+                }
             }
         }
     )

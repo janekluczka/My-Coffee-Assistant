@@ -2,8 +2,9 @@ package com.luczka.mycoffee.ui.screens.recipes
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.luczka.mycoffee.domain.mappers.toUiState
-import com.luczka.mycoffee.domain.repository.FirebaseRepository
+import com.luczka.mycoffee.data.mappers.toUiState
+import com.luczka.mycoffee.domain.repositories.FirebaseRepository
+import com.luczka.mycoffee.ui.models.MethodUiState
 import com.luczka.mycoffee.ui.models.RecipeUiState
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -17,27 +18,27 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 sealed interface RecipesUiState {
-    val methodId: String
-    val title: String
+    val methodUiState: MethodUiState
+    val showInfoButton: Boolean
     val isLoading: Boolean
 
     data class NoRecipes(
-        override val methodId: String,
-        override val title: String,
+        override val methodUiState: MethodUiState,
+        override val showInfoButton: Boolean,
         override val isLoading: Boolean,
         val errorMessage: String,
     ) : RecipesUiState
 
     data class HasRecipes(
-        override val methodId: String,
-        override val title: String,
+        override val methodUiState: MethodUiState,
+        override val showInfoButton: Boolean,
         override val isLoading: Boolean,
         val recipes: List<RecipeUiState>,
     ) : RecipesUiState
 }
 
 private data class RecipesViewModelState(
-    val methodId: String = "",
+    val methodUiState: MethodUiState,
     val isLoading: Boolean = false,
     val errorMessage: String = "",
     val recipes: List<RecipeUiState>? = null,
@@ -45,15 +46,15 @@ private data class RecipesViewModelState(
     fun toRecipesUiState(): RecipesUiState {
         return if (recipes == null) {
             RecipesUiState.NoRecipes(
-                methodId = methodId,
-                title = methodId,
+                methodUiState = methodUiState,
+                showInfoButton = methodUiState.description.isNotBlank(),
                 isLoading = isLoading,
                 errorMessage = errorMessage,
             )
         } else {
             RecipesUiState.HasRecipes(
-                methodId = methodId,
-                title = methodId,
+                methodUiState = methodUiState,
+                showInfoButton = methodUiState.description.isNotBlank(),
                 isLoading = isLoading,
                 recipes = recipes,
             )
@@ -63,18 +64,18 @@ private data class RecipesViewModelState(
 
 @AssistedFactory
 interface RecipesViewModelFactory {
-    fun create(methodId: String): RecipesViewModel
+    fun create(methodUiState: MethodUiState): RecipesViewModel
 }
 
 @HiltViewModel(assistedFactory = RecipesViewModelFactory::class)
 class RecipesViewModel @AssistedInject constructor(
-    @Assisted methodId: String,
+    @Assisted methodUiState: MethodUiState,
     private val firebaseRepository: FirebaseRepository
 ) : ViewModel() {
 
     private val viewModelState = MutableStateFlow(
         RecipesViewModelState(
-            methodId = methodId,
+            methodUiState = methodUiState,
             isLoading = true
         )
     )
@@ -89,7 +90,7 @@ class RecipesViewModel @AssistedInject constructor(
     init {
         viewModelScope.launch {
             firebaseRepository.getRecipes(
-                methodId = methodId,
+                methodId = methodUiState.id,
                 onSuccess = { recipeModels ->
                     val recipes = recipeModels.map { it.toUiState() }
                     viewModelState.update {

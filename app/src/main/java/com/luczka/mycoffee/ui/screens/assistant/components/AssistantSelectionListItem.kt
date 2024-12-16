@@ -1,17 +1,17 @@
 package com.luczka.mycoffee.ui.screens.assistant.components
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.toggleable
+import androidx.compose.material.Surface
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -41,38 +41,39 @@ fun AssistantSelectionListItem(
                 role = Role.Checkbox
             ),
         leadingContent = {
-            Box(
-                modifier = Modifier
-                    .size(56.dp)
-                    .background(MaterialTheme.colorScheme.inverseOnSurface),
-                contentAlignment = Alignment.Center
+            Surface(
+                modifier = Modifier.size(56.dp),
+                color = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp),
             ) {
-                coffeeUiState.imageFile240x240?.let { imageFile ->
-                    val cacheFile = File(context.filesDir, imageFile)
+                coffeeUiState.coffeeImages.firstOrNull()?.filename?.let { filename ->
+                    val file = File(context.filesDir, filename)
                     val model = ImageRequest.Builder(context)
-                        .data(cacheFile)
+                        .data(file)
                         .build()
-                    AsyncImage(model = model, contentDescription = null)
+                    AsyncImage(
+                        modifier = Modifier.fillMaxSize(),
+                        model = model,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop
+                    )
                 }
             }
         },
         headlineContent = {
             Text(
-                text = "${coffeeUiState.name}, ${coffeeUiState.brand}",
+                text = "${coffeeUiState.originOrName}, ${coffeeUiState.roasterOrBrand}",
                 style = MaterialTheme.typography.titleMedium,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
         },
         supportingContent = {
-            coffeeUiState.amount?.let { coffeeAmount ->
-                Text(
-                    text = stringResource(
-                        id = R.string.coffee_parameters_amount_with_unit,
-                        coffeeAmount
-                    )
+            Text(
+                text = stringResource(
+                    id = R.string.format_coffee_amount_grams,
+                    coffeeUiState.amount
                 )
-            }
+            )
         },
         trailingContent = {
             Checkbox(
@@ -110,8 +111,8 @@ fun CoffeeSelectionListItemSelectedDarkPreview() {
 @Composable
 private fun CoffeeSelectionListItemPreview(darkTheme: Boolean, isSelected: Boolean) {
     val coffeeUiState = CoffeeUiState(
-        name = "Kolumbia",
-        brand = "Mała Czarna",
+        originOrName = "Kolumbia",
+        roasterOrBrand = "Mała Czarna",
         amount = "250"
     )
     MyCoffeeTheme(darkTheme = darkTheme) {

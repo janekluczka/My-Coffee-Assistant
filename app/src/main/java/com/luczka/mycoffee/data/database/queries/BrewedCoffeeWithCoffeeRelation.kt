@@ -2,14 +2,15 @@ package com.luczka.mycoffee.data.database.queries
 
 import androidx.room.Embedded
 import androidx.room.Relation
-import com.luczka.mycoffee.data.database.entities.BrewedCoffeeEntity
+import com.luczka.mycoffee.data.database.entities.BrewCoffeeCrossRef
 import com.luczka.mycoffee.data.database.entities.CoffeeEntity
 
 data class BrewedCoffeeWithCoffeeRelation(
-    @Embedded val brewedCoffeeEntity: BrewedCoffeeEntity,
+    @Embedded val brewCoffeeCrossRef: BrewCoffeeCrossRef,
     @Relation(
-        parentColumn = BrewedCoffeeEntity.COFFEE_KEY_COLUMN,
+        parentColumn = BrewCoffeeCrossRef.COFFEE_KEY_COLUMN,
         entityColumn = CoffeeEntity.KEY_COLUMN,
+        entity = CoffeeEntity::class
     )
-    val coffeeEntity: CoffeeEntity
+    val coffeeEntity: CoffeeWithCoffeeImagesRelation
 )

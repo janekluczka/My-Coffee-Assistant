@@ -19,10 +19,12 @@ import com.luczka.mycoffee.ui.models.MethodUiState
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MethodCard(
+    modifier: Modifier = Modifier,
     methodUiState: MethodUiState,
     onClick: () -> Unit
 ) {
     OutlinedCard(
+        modifier = modifier,
         onClick = onClick,
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
     ) {

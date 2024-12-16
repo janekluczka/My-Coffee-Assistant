@@ -1,17 +1,20 @@
 package com.luczka.mycoffee.domain.models
 
+import java.time.LocalDate
+
 data class CoffeeModel(
-    val id: Int,
-    val name: String,
+    val coffeeId: Long,
+    val coffeeImages: List<CoffeeImageModel>,
     val brand: String,
-    val amount: Float?,
-    val scaScore: Float?,
+    val name: String,
+    val amount: Float,
     val roast: RoastModel?,
     val process: ProcessModel?,
+    val plantation: String?,
+    val altitude: Int?,
+    val scaScore: Float?,
+    val additionalInformation: String?,
     val isFavourite: Boolean,
-    val imageFile240x240: String?,
-    val imageFile360x360: String?,
-    val imageFile480x480: String?,
-    val imageFile720x720: String?,
-    val imageFile960x960: String?
+    val updatedOn: LocalDate,
+    val addedOn: LocalDate
 )

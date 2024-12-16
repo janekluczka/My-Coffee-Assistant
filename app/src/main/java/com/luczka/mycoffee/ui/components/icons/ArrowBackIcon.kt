@@ -15,7 +15,7 @@ fun ArrowBackIcon(
 ) {
     Icon(
         modifier = modifier,
-        painter = painterResource(id = R.drawable.arrow_back_24px),
+        painter = painterResource(id = R.drawable.ic_arrow_back_24_fill_0_weight_300_grade_0_opticalsize_24),
         contentDescription = null,
         tint = tint
     )
