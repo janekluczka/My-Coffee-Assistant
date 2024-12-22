@@ -46,6 +46,4 @@ interface MyCoffeeDatabaseRepository {
 
     suspend fun updateCoffeeOld(coffeeModel: CoffeeModel)
 
-    suspend fun deleteCoffeeOld(coffeeModel: CoffeeModel)
-
 }

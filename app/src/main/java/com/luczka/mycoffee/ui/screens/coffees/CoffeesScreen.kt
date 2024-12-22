@@ -28,8 +28,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -39,6 +42,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.luczka.mycoffee.R
 import com.luczka.mycoffee.ui.components.chips.MyCoffeeFilterChip
+import com.luczka.mycoffee.ui.components.dialogs.DeleteCoffeeDialog
 import com.luczka.mycoffee.ui.components.icons.AddIcon
 import com.luczka.mycoffee.ui.components.icons.DeleteIcon
 import com.luczka.mycoffee.ui.components.icons.EditIcon
@@ -46,7 +50,7 @@ import com.luczka.mycoffee.ui.components.icons.FavoriteIcon
 import com.luczka.mycoffee.ui.components.icons.FavoriteOutlinedIcon
 import com.luczka.mycoffee.ui.components.listitem.CoffeesListItem
 import com.luczka.mycoffee.ui.components.listitem.SwipeableListItem
-import com.luczka.mycoffee.ui.models.CoffeeFilterUiState
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -63,38 +67,6 @@ fun CoffeesScreen(
 
     val fabExpanded by remember {
         derivedStateOf { coffeeListState.firstVisibleItemIndex == 0 }
-    }
-
-    when (uiState) {
-        is CoffeesUiState.HasCoffees -> {
-            LaunchedEffect(uiState.selectedFilter) {
-                coroutineScope.launch {
-                    scrollToTopIfNewItemsAppeared(listState = coffeeListState)
-                }
-            }
-
-            BackHandler {
-                if (uiState.selectedFilter != CoffeeFilterUiState.All) {
-                    val action = CoffeesAction.OnSelectedFilterChanged(CoffeeFilterUiState.All)
-                    onAction(action)
-
-                    val currentFilterNotVisible = filterListState.firstVisibleItemIndex != 0
-                    val firstVisibleFilterNotAligned = filterListState.firstVisibleItemScrollOffset != 0
-                    if (currentFilterNotVisible || firstVisibleFilterNotAligned) {
-                        coroutineScope.launch {
-                            filterListState.animateScrollToItem(index = 0)
-                        }
-                    }
-                } else {
-                    val action = CoffeesAction.NavigateUp
-                    onAction(action)
-                }
-            }
-        }
-
-        is CoffeesUiState.NoCoffees -> {
-
-        }
     }
 
     Scaffold(
@@ -132,12 +104,13 @@ fun CoffeesScreen(
     ) { innerPadding ->
         when (uiState) {
             is CoffeesUiState.NoCoffees -> {
-                NoCoffeesScreen(innerPadding = innerPadding)
+                NoCoffeesScreen(modifier = Modifier.padding(innerPadding))
             }
 
             is CoffeesUiState.HasCoffees -> {
                 HasCoffeesScreen(
-                    innerPadding = innerPadding,
+                    coroutineScope = coroutineScope,
+                    modifier = Modifier.padding(innerPadding),
                     filterListState = filterListState,
                     coffeeListState = coffeeListState,
                     uiState = uiState,
@@ -148,20 +121,12 @@ fun CoffeesScreen(
     }
 }
 
-private suspend fun scrollToTopIfNewItemsAppeared(listState: LazyListState) {
-    if (listState.firstVisibleItemIndex != 0) {
-        listState.animateScrollToItem(index = 0)
-    }
-}
-
 @Composable
-private fun NoCoffeesScreen(innerPadding: PaddingValues) {
-    Column {
+private fun NoCoffeesScreen(modifier: Modifier) {
+    Column(modifier = modifier) {
         Divider()
         Box(
-            modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize(),
+            modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
             Column(
@@ -189,13 +154,43 @@ private fun NoCoffeesScreen(innerPadding: PaddingValues) {
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 private fun HasCoffeesScreen(
-    innerPadding: PaddingValues,
+    coroutineScope: CoroutineScope,
+    modifier: Modifier,
     filterListState: LazyListState,
     coffeeListState: LazyListState,
     uiState: CoffeesUiState.HasCoffees,
     onAction: (CoffeesAction) -> Unit
 ) {
-    Column(modifier = Modifier.padding(innerPadding)) {
+    LaunchedEffect(uiState.selectedCoffeeFilter) {
+        coroutineScope.launch {
+            val firstCoffeeNotVisible = coffeeListState.firstVisibleItemIndex != 0
+
+            if (firstCoffeeNotVisible) {
+                coffeeListState.animateScrollToItem(index = 0)
+            }
+        }
+    }
+
+    BackHandler {
+        if (uiState.selectedCoffeeFilter != CoffeeFilterUiState.All) {
+            val action = CoffeesAction.OnSelectedFilterChanged(CoffeeFilterUiState.All)
+            onAction(action)
+
+            val currentFilterNotVisible = filterListState.firstVisibleItemIndex != 0
+            val firstVisibleFilterNotAligned = filterListState.firstVisibleItemScrollOffset != 0
+
+            if (currentFilterNotVisible || firstVisibleFilterNotAligned) {
+                coroutineScope.launch {
+                    filterListState.animateScrollToItem(index = 0)
+                }
+            }
+        } else {
+            val action = CoffeesAction.NavigateUp
+            onAction(action)
+        }
+    }
+
+    Column(modifier = modifier) {
         LazyRow(
             modifier = Modifier.offset(y = (-8).dp),
             state = filterListState,
@@ -203,11 +198,11 @@ private fun HasCoffeesScreen(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(
-                items = uiState.coffeeFilterUiStates,
+                items = uiState.coffeeFilters,
                 key = { it.name }
             ) { coffeeFilterUiState ->
                 MyCoffeeFilterChip(
-                    selected = uiState.selectedFilter == coffeeFilterUiState,
+                    selected = uiState.selectedCoffeeFilter == coffeeFilterUiState,
                     onClick = {
                         val action = CoffeesAction.OnSelectedFilterChanged(coffeeFilterUiState)
                         onAction(action)
@@ -224,19 +219,38 @@ private fun HasCoffeesScreen(
             modifier = Modifier.fillMaxSize()
         ) {
             items(
-                items = uiState.filteredSwipeableCoffeeListItemUiStates,
-                key = { it.coffeeUiState.coffeeId }
+                items = uiState.coffees,
+                key = { it.item.coffeeId }
             ) { swipeableCoffeeListItemUiState ->
+                val coffeeUiState = swipeableCoffeeListItemUiState.item
+                val coffeeId = coffeeUiState.coffeeId
+
+                var openDeleteDialog by rememberSaveable { mutableStateOf(false) }
+
+                if(openDeleteDialog) {
+                    DeleteCoffeeDialog(
+                        coffeeUiState = coffeeUiState,
+                        onNegative = {
+                            openDeleteDialog = false
+                        },
+                        onPositive = {
+                            openDeleteDialog = false
+                            val action = CoffeesAction.OnDeleteItemClicked(coffeeId = coffeeId)
+                            onAction(action)
+                        }
+                    )
+                }
+
                 SwipeableListItem(
                     isRevealed = swipeableCoffeeListItemUiState.isRevealed,
                     actions = {
                         FilledTonalIconButton(
                             onClick = {
-                                val action = CoffeesAction.OnFavouriteClicked
+                                val action = CoffeesAction.OnFavouriteItemClicked(coffeeId = coffeeId)
                                 onAction(action)
                             },
                         ) {
-                            if (swipeableCoffeeListItemUiState.coffeeUiState.isFavourite) {
+                            if (swipeableCoffeeListItemUiState.item.isFavourite) {
                                 FavoriteIcon()
                             } else {
                                 FavoriteOutlinedIcon()
@@ -244,7 +258,7 @@ private fun HasCoffeesScreen(
                         }
                         FilledTonalIconButton(
                             onClick = {
-                                val action = CoffeesAction.OnEditClicked(coffeeId = swipeableCoffeeListItemUiState.coffeeUiState.coffeeId)
+                                val action = CoffeesAction.OnEditClicked(coffeeId = coffeeId)
                                 onAction(action)
                             },
                         ) {
@@ -252,27 +266,26 @@ private fun HasCoffeesScreen(
                         }
                         FilledTonalIconButton(
                             onClick = {
-                                val action = CoffeesAction.ShowDeleteDialog
-                                onAction(action)
+                                openDeleteDialog = true
                             },
                         ) {
                             DeleteIcon()
                         }
                     },
                     onExpanded = {
-                        val action = CoffeesAction.OnItemActionsExpanded(swipeableCoffeeListItemUiState.coffeeUiState.coffeeId)
+                        val action = CoffeesAction.OnItemActionsExpanded(coffeeId = coffeeId)
+                        onAction(action)
+                    },
+                    onCollapsed = {
+                        val action = CoffeesAction.OnItemActionsCollapsed(coffeeId = coffeeId)
                         onAction(action)
                     }
                 ) {
                     CoffeesListItem(
                         modifier = Modifier.animateItem(),
-                        coffeeUiState = swipeableCoffeeListItemUiState.coffeeUiState,
+                        coffeeUiState = swipeableCoffeeListItemUiState.item,
                         onClick = {
-                            val action = if (swipeableCoffeeListItemUiState.isRevealed) {
-                                CoffeesAction.OnCollapseItemActions(swipeableCoffeeListItemUiState.coffeeUiState.coffeeId)
-                            } else {
-                                CoffeesAction.NavigateToCoffeeDetails(swipeableCoffeeListItemUiState.coffeeUiState.coffeeId)
-                            }
+                            val action = CoffeesAction.NavigateToCoffeeDetails(coffeeId = coffeeId)
                             onAction(action)
                         }
                     )
@@ -298,8 +311,8 @@ private fun HasCoffeesScreenPreview() {
     CoffeesScreen(
         widthSizeClass = WindowWidthSizeClass.Compact,
         uiState = CoffeesUiState.HasCoffees(
-            filteredSwipeableCoffeeListItemUiStates = listOf(),
-            selectedFilter = CoffeeFilterUiState.All
+            coffees = listOf(),
+            selectedCoffeeFilter = CoffeeFilterUiState.All
         ),
         onAction = {}
     )

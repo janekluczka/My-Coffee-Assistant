@@ -14,6 +14,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -63,13 +64,16 @@ fun BrewCard(
     OutlinedCard(
         modifier = modifier,
         onClick = onClick,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+        border = BorderStroke(
+            width = 1.dp,
+            color = MaterialTheme.colorScheme.outlineVariant
+        )
     ) {
         Row {
             Box(
                 modifier = Modifier
                     .size(cardHeight)
-                    .background(MaterialTheme.colorScheme.inverseOnSurface),
+                    .background(color = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp)),
                 contentAlignment = Alignment.Center
             ) {
                 if (brewUiState.rating != null) {

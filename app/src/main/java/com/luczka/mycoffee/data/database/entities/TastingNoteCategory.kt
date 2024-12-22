@@ -5,6 +5,7 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "tasting_note_category")
 data class TastingNoteCategory(
-    @PrimaryKey(autoGenerate = true) val categoryId: Long = 0,
+    @PrimaryKey(autoGenerate = true)
+    val categoryId: Long = 0,
     val name: String
 )

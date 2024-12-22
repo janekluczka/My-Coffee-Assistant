@@ -64,7 +64,7 @@ fun HomeScreen(
     val showDivider by remember {
         derivedStateOf { homeListState.firstVisibleItemScrollOffset != 0 }
     }
-
+    
     Scaffold(
         topBar = {
             when (widthSizeClass) {
@@ -73,7 +73,8 @@ fun HomeScreen(
                         navigationIcon = {
                             IconButton(
                                 onClick = {
-
+                                    val action = HomeAction.OnMenuClicked
+                                    onAction(action)
                                 }
                             ) {
                                 MenuIcon()

@@ -32,17 +32,17 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 fun MainRoute(
     widthSizeClass: WindowWidthSizeClass,
     nestedNavController: NavHostController,
-    onAction: (MainNavHostAction) -> Unit,
+    onAction: (MainAction) -> Unit,
 ) {
     val navigationType = when (widthSizeClass) {
-        WindowWidthSizeClass.Compact -> MyCoffeeNavigationType.BOTTOM_NAVIGATION
-        WindowWidthSizeClass.Medium -> MyCoffeeNavigationType.NAVIGATION_RAIL
-        WindowWidthSizeClass.Expanded -> MyCoffeeNavigationType.NAVIGATION_RAIL
-        else -> MyCoffeeNavigationType.BOTTOM_NAVIGATION
+        WindowWidthSizeClass.Compact -> NavigationType.BOTTOM_NAVIGATION
+        WindowWidthSizeClass.Medium -> NavigationType.NAVIGATION_RAIL
+        WindowWidthSizeClass.Expanded -> NavigationType.NAVIGATION_RAIL
+        else -> NavigationType.BOTTOM_NAVIGATION
     }
 
     when (navigationType) {
-        MyCoffeeNavigationType.BOTTOM_NAVIGATION -> {
+        NavigationType.BOTTOM_NAVIGATION -> {
             Scaffold(
                 bottomBar = {
                     MyCoffeeNavigationBar(navController = nestedNavController)
@@ -60,7 +60,7 @@ fun MainRoute(
             }
         }
 
-        MyCoffeeNavigationType.NAVIGATION_RAIL -> {
+        NavigationType.NAVIGATION_RAIL -> {
             Row(modifier = Modifier.fillMaxSize()) {
                 MyCoffeeNavigationRail(navController = nestedNavController)
                 MyCoffeeNestedNavHost(
@@ -81,7 +81,7 @@ private fun MyCoffeeNavigationRail(navController: NavHostController) {
 
     NavigationRail(modifier = Modifier.fillMaxHeight()) {
         Spacer(modifier = Modifier.weight(1f))
-        Routes.Main.topLevelRoutes.forEach { topLevelRoute ->
+        topLevelRoutes.forEach { topLevelRoute ->
             NavigationRailItem(
                 icon = {
                     Icon(
@@ -120,7 +120,7 @@ private fun MyCoffeeNavigationBar(navController: NavHostController) {
     val currentDestination = navBackStackEntry?.destination
 
     NavigationBar(tonalElevation = 0.dp) {
-        Routes.Main.topLevelRoutes.forEach { topLevelRoute ->
+        topLevelRoutes.forEach { topLevelRoute ->
             NavigationBarItem(
                 icon = {
                     Icon(

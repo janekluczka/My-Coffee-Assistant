@@ -188,4 +188,7 @@
     <string name="filter_low">Low amount</string>
     <string name="filter_older">Older</string>
 
+    <string name="filter_latest">Latest</string>
+    <string name="filter_best_rated">Best rated</string>
+
 </resources>

@@ -110,10 +110,6 @@ class MyCoffeeDatabaseRepositoryImpl(
         return myCoffeeDao.update(coffeeModel.toEntity())
     }
 
-    override suspend fun deleteCoffeeOld(coffeeModel: CoffeeModel) {
-        return myCoffeeDao.delete(coffeeModel.toEntity())
-    }
-
     override suspend fun getAllBrewsFlow(): Flow<List<BrewModel>> {
         return myCoffeeDao.getBrewsWithCoffeesFlow()
             .map { brewsWithBrewedCoffees -> brewsWithBrewedCoffees.map { it.toModel() } }
