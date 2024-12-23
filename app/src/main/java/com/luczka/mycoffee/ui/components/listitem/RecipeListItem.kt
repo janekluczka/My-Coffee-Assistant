@@ -21,11 +21,12 @@ import com.luczka.mycoffee.ui.models.RecipeUiState
 
 @Composable
 fun RecipeListItem(
+    modifier: Modifier = Modifier,
     recipeCardUiState: RecipeUiState,
     onClick: () -> Unit,
 ) {
     ListItem(
-        modifier = Modifier.clickable(onClick = onClick),
+        modifier = modifier.clickable(onClick = onClick),
         leadingContent = {
             Box(
                 modifier = Modifier

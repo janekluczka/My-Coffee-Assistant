@@ -18,12 +18,11 @@ interface MyCoffeeDatabaseRepository {
 
     fun getCurrentCoffeesStream(): Flow<List<CoffeeModel>>
 
-    // TODO: Add updateCoffee(coffeeModel: CoffeeModel)
+    suspend fun updateCoffee(coffeeModel: CoffeeModel)
+
+    suspend fun updateCoffeeWithPhotos(oldCoffee: CoffeeModel, updatedCoffee: CoffeeModel)
 
     suspend fun deleteCoffee(coffeeModel: CoffeeModel)
-
-
-    suspend fun insertBrew(brewModel: BrewModel) // TODO: Merge into 1 function with insertBrewAndUpdateCoffeeModels
 
     suspend fun insertBrewAndUpdateCoffeeModels(
         brewModel: BrewModel,
@@ -44,6 +43,5 @@ interface MyCoffeeDatabaseRepository {
 
 
 
-    suspend fun updateCoffeeOld(coffeeModel: CoffeeModel)
 
 }

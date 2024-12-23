@@ -19,5 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "myCoffee"
+rootProject.name = "My Coffee Assistant"
 include(":app")

@@ -3,12 +3,10 @@ package com.luczka.mycoffee.ui.screens.recipedetails
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -16,7 +14,6 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -46,16 +43,19 @@ fun RecipeDetailsScreen(
 ) {
     val context = LocalContext.current
 
-    var openDeleteDialog by rememberSaveable { mutableStateOf(false) }
+    var openLeaveApplicationDialog by rememberSaveable { mutableStateOf(false) }
 
-    if (openDeleteDialog) {
+    if (openLeaveApplicationDialog) {
         RecipeDetailsLeaveApplicationDialog(
             onNegative = {
-                openDeleteDialog = false
+                openLeaveApplicationDialog = false
             },
             onPositive = {
-                openDeleteDialog = false
-                onOpenYouTube(context, uiState)
+                openLeaveApplicationDialog = false
+                onOpenUrl(
+                    context = context,
+                    url = uiState.recipe.videoUrl
+                )
             }
         )
     }
@@ -74,12 +74,8 @@ fun RecipeDetailsScreen(
                     }
                 },
                 title = {
-                    val title = when (uiState) {
-                        is RecipeDetailsUiState.IsLoading -> ""
-                        is RecipeDetailsUiState.HasData -> uiState.recipe.title
-                    }
                     Text(
-                        text = title,
+                        text = uiState.recipe.title,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -87,7 +83,7 @@ fun RecipeDetailsScreen(
                 actions = {
                     IconButton(
                         onClick = {
-                            openDeleteDialog = true
+                            openLeaveApplicationDialog = true
                         }
                     ) {
                         Icon(
@@ -101,50 +97,32 @@ fun RecipeDetailsScreen(
     ) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)) {
             Divider()
-            if (uiState.isLoading) {
-                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-            }
-            Crossfade(
-                targetState = uiState.isLoading,
-                label = ""
-            ) { isLoading ->
-                if (!isLoading) {
-                    when (uiState) {
-                        is RecipeDetailsUiState.IsLoading -> {
-
+            Column {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(bottom = 8.dp)
+                ) {
+                    item {
+                        Column(
+                            modifier = Modifier.padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Text(
+                                text = uiState.recipe.title,
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis,
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                            Text(
+                                text = uiState.recipe.author,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                style = MaterialTheme.typography.bodyMedium
+                            )
                         }
-
-                        is RecipeDetailsUiState.HasData -> {
-                            Column {
-                                LazyColumn(
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentPadding = PaddingValues(bottom = 8.dp)
-                                ) {
-                                    item {
-                                        Column(
-                                            modifier = Modifier.padding(16.dp),
-                                            verticalArrangement = Arrangement.spacedBy(4.dp)
-                                        ) {
-                                            Text(
-                                                text = uiState.recipe.title,
-                                                maxLines = 2,
-                                                overflow = TextOverflow.Ellipsis,
-                                                style = MaterialTheme.typography.titleMedium
-                                            )
-                                            Text(
-                                                text = uiState.recipe.author,
-                                                maxLines = 1,
-                                                overflow = TextOverflow.Ellipsis,
-                                                style = MaterialTheme.typography.bodyMedium
-                                            )
-                                        }
-                                    }
-                                    items(uiState.recipe.steps) { stepUiState ->
-                                        BrewingStepListItem(brewingStepUiState = stepUiState)
-                                    }
-                                }
-                            }
-                        }
+                    }
+                    items(uiState.recipe.steps) { stepUiState ->
+                        BrewingStepListItem(brewingStepUiState = stepUiState)
                     }
                 }
             }
@@ -152,10 +130,8 @@ fun RecipeDetailsScreen(
     }
 }
 
-fun onOpenYouTube(context: Context, uiState: RecipeDetailsUiState) {
-    if (uiState !is RecipeDetailsUiState.HasData) return
-    val youtubeId = uiState.recipe.youtubeId
+fun onOpenUrl(context: Context, url: String) {
     val intent = Intent(Intent.ACTION_VIEW)
-    intent.data = Uri.parse("https://www.youtube.com/watch?v=${youtubeId}}")
+    intent.data = Uri.parse(url)
     startActivity(context, intent, null)
 }

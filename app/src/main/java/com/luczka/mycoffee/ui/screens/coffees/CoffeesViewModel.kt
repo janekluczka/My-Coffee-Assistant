@@ -145,7 +145,7 @@ class CoffeesViewModel @Inject constructor(
         val coffeeUiState = swipeableListItemUiState?.item ?: return
         viewModelScope.launch {
             val updatedCoffeeUiState = coffeeUiState.copy(isFavourite = !coffeeUiState.isFavourite)
-            myCoffeeDatabaseRepository.updateCoffeeOld(coffeeModel = updatedCoffeeUiState.toModel())
+            myCoffeeDatabaseRepository.updateCoffee(coffeeModel = updatedCoffeeUiState.toModel())
         }
     }
 

@@ -53,8 +53,11 @@ interface MyCoffeeDao {
     @Query("SELECT * FROM CoffeeEntity WHERE amount > 0 ORDER BY name, brand, coffeeId ASC")
     fun getCurrentCoffeesWithImagesFlow(): Flow<List<CoffeeWithCoffeeImagesRelation>>
 
+    @Update
+    suspend fun updateCoffee(coffeeEntity: CoffeeEntity)
+
     @Delete
-    suspend fun delete(coffeeEntity: CoffeeEntity)
+    suspend fun deleteCoffee(coffeeEntity: CoffeeEntity)
 
 
     @Transaction
@@ -86,12 +89,6 @@ interface MyCoffeeDao {
     fun getRecentBrewsWithCoffeesFlow(amount: Int): Flow<List<BrewWithBrewedCoffeesRelation>>
 
     @Delete
-    suspend fun delete(brewEntity: BrewEntity)
-
-
-
-
-    @Update
-    suspend fun update(coffeeEntity: CoffeeEntity)
+    suspend fun deleteBrew(brewEntity: BrewEntity)
 
 }

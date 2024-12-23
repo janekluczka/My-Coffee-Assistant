@@ -5,17 +5,8 @@ import com.luczka.mycoffee.domain.models.RecipeModel
 
 interface FirebaseRepository {
 
-    suspend fun getMethods() : Result<List<MethodModel>>
+    suspend fun getMethods(): Result<List<MethodModel>>
 
-    fun getRecipes(
-        methodId: String,
-        onSuccess: (List<RecipeModel>) -> Unit,
-        onError: (String) -> Unit
-    )
-
-    fun getRecipe(
-        youtubeId: String,
-        onSuccess: (RecipeModel) -> Unit
-    )
+    suspend fun getRecipes(methodId: String): Result<List<RecipeModel>>
 
 }

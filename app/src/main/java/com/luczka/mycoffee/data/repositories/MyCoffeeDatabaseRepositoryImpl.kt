@@ -91,23 +91,38 @@ class MyCoffeeDatabaseRepositoryImpl(
             }
     }
 
+    override suspend fun updateCoffee(coffeeModel: CoffeeModel) {
+        return myCoffeeDao.updateCoffee(coffeeModel.toEntity())
+    }
+
+    override suspend fun updateCoffeeWithPhotos(oldCoffee: CoffeeModel, updatedCoffee: CoffeeModel) {
+        TODO("Not yet implemented")
+        // Chceck difference between image files, add new, remove deleted and update those which place changed.
+    }
+
     override suspend fun deleteCoffee(coffeeModel: CoffeeModel) {
         val filesDir = context.filesDir
 
-        val coffeeImageFiles = coffeeModel.coffeeImages.map { File(filesDir, it.filename) }
+        val imageFilesToDelete = coffeeModel.coffeeImages.map { File(filesDir, it.filename) }
 
-        myCoffeeDao.delete(coffeeEntity = coffeeModel.toEntity())
+        myCoffeeDao.deleteCoffee(coffeeEntity = coffeeModel.toEntity())
 
-        coffeeImageFiles.forEach { imageFile ->
+        imageFilesToDelete.forEach { imageFile ->
             if (imageFile.exists()) {
                 imageFile.delete()
             }
         }
-
     }
 
-    override suspend fun updateCoffeeOld(coffeeModel: CoffeeModel) {
-        return myCoffeeDao.update(coffeeModel.toEntity())
+    override suspend fun insertBrewAndUpdateCoffeeModels(
+        brewModel: BrewModel,
+        coffeeModels: List<CoffeeModel>
+    ) {
+        myCoffeeDao.insertBrewWithBrewedCoffees(
+            brewEntity = brewModel.toEntity(),
+            brewCoffeeCrossRefs = brewModel.brewedCoffees.map { it.toEntity() }
+        )
+        // TODO: Update ammounts
     }
 
     override suspend fun getAllBrewsFlow(): Flow<List<BrewModel>> {
@@ -125,27 +140,8 @@ class MyCoffeeDatabaseRepositoryImpl(
             .map { brewWithBrewedCoffees -> brewWithBrewedCoffees.toModel() }
     }
 
-    override suspend fun insertBrew(brewModel: BrewModel) {
-        myCoffeeDao.insertBrewWithBrewedCoffees(
-            brewEntity = brewModel.toEntity(),
-            brewCoffeeCrossRefs = brewModel.brewedCoffees.map { it.toEntity() }
-        )
-        // TODO: Update ammounts
-    }
-
-    override suspend fun insertBrewAndUpdateCoffeeModels(
-        brewModel: BrewModel,
-        coffeeModels: List<CoffeeModel>
-    ) {
-        myCoffeeDao.insertBrewWithBrewedCoffees(
-            brewEntity = brewModel.toEntity(),
-            brewCoffeeCrossRefs = brewModel.brewedCoffees.map { it.toEntity() }
-        )
-        // TODO: Update ammounts
-    }
-
     override suspend fun deleteBrew(brewModel: BrewModel) {
-        return myCoffeeDao.delete(brewModel.toEntity())
+        return myCoffeeDao.deleteBrew(brewModel.toEntity())
     }
 
 }

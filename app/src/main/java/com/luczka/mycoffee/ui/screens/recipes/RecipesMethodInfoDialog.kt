@@ -8,7 +8,7 @@ import androidx.compose.ui.unit.dp
 import com.luczka.mycoffee.ui.models.MethodUiState
 
 @Composable
-fun MethodInfoDialog(
+fun RecipesMethodInfoDialog(
     method: MethodUiState,
     onDismiss: () -> Unit,
 ) {

@@ -18,6 +18,7 @@ fun RecipeModel.toUiState() : RecipeUiState {
         author = author,
         title = title,
         imageUrl = "https://i.ytimg.com/vi/${youtubeId}/mqdefault.jpg",
+        videoUrl = "https://www.youtube.com/watch?v=${youtubeId}",
         steps = steps.map { it.toUiState() },
         youtubeId = youtubeId
     )

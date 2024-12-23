@@ -12,6 +12,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import com.luczka.mycoffee.ui.models.MethodUiState
+import com.luczka.mycoffee.ui.models.RecipeUiState
 import com.luczka.mycoffee.ui.screens.brews.BrewsAction
 import com.luczka.mycoffee.ui.screens.brews.BrewsScreen
 import com.luczka.mycoffee.ui.screens.brews.BrewsViewModel
@@ -137,15 +138,19 @@ fun MyCoffeeNestedNavHost(
                 onAction = { action ->
                     when (action) {
                         is RecipesAction.NavigateUp -> navController.navigateUp()
-                        is RecipesAction.NavigateToRecipeDetails -> navController.navigate(NestedNavHostRoutes.RecipeDetails(action.recipeId))
+                        is RecipesAction.NavigateToRecipeDetails -> navController.navigate(NestedNavHostRoutes.RecipeDetails(action.recipeUiState))
                     }
                 },
             )
         }
-        composable<NestedNavHostRoutes.RecipeDetails> { backStackEntry ->
+        composable<NestedNavHostRoutes.RecipeDetails>(
+            typeMap = mapOf(
+                typeOf<RecipeUiState>() to CustomNavTypes.RecipeUiStateNavType
+            )
+        ) { backStackEntry ->
             val arguments = backStackEntry.toRoute<NestedNavHostRoutes.RecipeDetails>()
             val viewModel = hiltViewModel<RecipeDetailsViewModel, RecipeDetailsViewModelFactory> { factory ->
-                factory.create(arguments.recipeId)
+                factory.create(arguments.recipeUiState)
             }
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
             RecipeDetailsScreen(

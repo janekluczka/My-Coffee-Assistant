@@ -24,13 +24,15 @@ private data class MethodsViewModelState(
         return when {
             isError -> RecipeCategoriesUiState.IsError(
                 isError = true,
-                isLoading = isLoading
+                isLoading = isLoading,
+                methods = methods ?: emptyList()
             )
 
             methods == null -> RecipeCategoriesUiState.NoRecipeCategories(
-                isLoading = isLoading,
                 isError = false,
-                errorMessage = errorMessage
+                isLoading = isLoading,
+                errorMessage = errorMessage,
+                methods = emptyList()
             )
 
             else -> RecipeCategoriesUiState.HasRecipeCategories(
@@ -62,10 +64,9 @@ class RecipeCategoriesViewModel @Inject constructor(
             val result = firebaseRepository.getMethods()
             when {
                 result.isSuccess -> {
-                    val methodUiStateListSorted = result
-                        .getOrDefault(emptyList())
-                        .map { it.toUiState() }
-                        .sortedBy { it.name }
+                    val methodUiStateListSorted = result.getOrNull()?.map { methodModel ->
+                        methodModel.toUiState()
+                    }
                     viewModelState.update {
                         it.copy(
                             isLoading = false,

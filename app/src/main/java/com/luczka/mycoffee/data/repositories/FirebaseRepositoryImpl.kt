@@ -52,45 +52,24 @@ class FirebaseRepositoryImpl(
         }
     }
 
-    override fun getRecipes(
-        methodId: String,
-        onSuccess: (List<RecipeModel>) -> Unit,
-        onError: (String) -> Unit
-    ) {
-        firebaseFirestore
-            .collection(COLLECTION_RECIPES)
-            .whereEqualTo(FIELD_METHOD, methodId)
-            .get()
-            .addOnSuccessListener { querySnapshot ->
-                querySnapshot.documents
-                    .mapNotNull { documentSnapshot -> documentSnapshot.toObject<RecipeDto>() }
-                    .map { recipeDto -> recipeDto.toModel() }
-                    .let(onSuccess)
-            }
-            .addOnFailureListener { exception ->
-                exception.message?.let { Log.d(TAG, it) }
-                onError("Error: " + exception.message.toString())
-            }
-    }
+    override suspend fun getRecipes(methodId: String): Result<List<RecipeModel>> {
+        return try {
+            val recipesQuerySnapshots = firebaseFirestore
+                .collection(COLLECTION_RECIPES)
+                .whereEqualTo(FIELD_METHOD, methodId)
+                .get()
+                .await()
 
-    override fun getRecipe(
-        youtubeId: String,
-        onSuccess: (RecipeModel) -> Unit
-    ) {
-        firebaseFirestore
-            .collection(COLLECTION_RECIPES)
-            .whereEqualTo(FIELD_YOUTUBE_ID, youtubeId)
-            .get()
-            .addOnSuccessListener { querySnapshot ->
-                querySnapshot.documents
-                    .firstOrNull()
-                    ?.toObject<RecipeDto>()
-                    ?.toModel()
-                    ?.let(onSuccess)
+            val recipeDtoList = recipesQuerySnapshots.documents.mapNotNull { documentSnapshot ->
+                documentSnapshot.toObject<RecipeDto>()
             }
-            .addOnFailureListener { exception ->
-                exception.message?.let { Log.d(TAG, it) }
-            }
+            val recipeModelList = recipeDtoList.map { it.toModel() }
+
+            Result.success(recipeModelList)
+        } catch (exception: Exception) {
+            exception.message?.let { Log.d(TAG, it) }
+            Result.failure(exception)
+        }
     }
 
 }

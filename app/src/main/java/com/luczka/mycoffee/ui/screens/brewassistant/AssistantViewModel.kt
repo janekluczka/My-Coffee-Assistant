@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.luczka.mycoffee.R
 import com.luczka.mycoffee.domain.repositories.MyCoffeeDatabaseRepository
-import com.luczka.mycoffee.ui.mappers.toModel
 import com.luczka.mycoffee.ui.mappers.toUiState
 import com.luczka.mycoffee.ui.models.BrewUiState
 import com.luczka.mycoffee.ui.models.BrewedCoffeeUiState
@@ -455,7 +454,7 @@ class AssistantViewModel @Inject constructor(
         viewModelScope.launch {
             val brew = viewModelState.value.toBrewModel()
 
-            myCoffeeDatabaseRepository.insertBrew(brew.toModel())
+//            myCoffeeDatabaseRepository.insertBrew(brew.toModel())
 
             viewModelState.value.selectedCoffees.forEach { (selectedCoffee, amountDoubleVerticalPagerState) ->
                 val selectedCoffeeAmount = selectedCoffee.amount.toFloatOrNull() ?: 0f
@@ -473,7 +472,7 @@ class AssistantViewModel @Inject constructor(
                     selectedCoffee.copy(amount = updatedAmount.toString())
                 }
 
-                myCoffeeDatabaseRepository.updateCoffeeOld(updatedCoffee.toModel())
+//                myCoffeeDatabaseRepository.updateCoffee(updatedCoffee.toModel())
             }
 
             viewModelState.update { it.copy(isFinished = true) }

@@ -17,29 +17,10 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-sealed interface RecipesUiState {
-    val methodUiState: MethodUiState
-    val showInfoButton: Boolean
-    val isLoading: Boolean
-
-    data class NoRecipes(
-        override val methodUiState: MethodUiState,
-        override val showInfoButton: Boolean,
-        override val isLoading: Boolean,
-        val errorMessage: String,
-    ) : RecipesUiState
-
-    data class HasRecipes(
-        override val methodUiState: MethodUiState,
-        override val showInfoButton: Boolean,
-        override val isLoading: Boolean,
-        val recipes: List<RecipeUiState>,
-    ) : RecipesUiState
-}
-
 private data class RecipesViewModelState(
     val methodUiState: MethodUiState,
     val isLoading: Boolean = false,
+    val isError: Boolean = false,
     val errorMessage: String = "",
     val recipes: List<RecipeUiState>? = null,
 ) {
@@ -49,6 +30,7 @@ private data class RecipesViewModelState(
                 methodUiState = methodUiState,
                 showInfoButton = methodUiState.description.isNotBlank(),
                 isLoading = isLoading,
+                isError = isError,
                 errorMessage = errorMessage,
             )
         } else {
@@ -56,6 +38,7 @@ private data class RecipesViewModelState(
                 methodUiState = methodUiState,
                 showInfoButton = methodUiState.description.isNotBlank(),
                 isLoading = isLoading,
+                isError = isError,
                 recipes = recipes,
             )
         }
@@ -89,26 +72,29 @@ class RecipesViewModel @AssistedInject constructor(
 
     init {
         viewModelScope.launch {
-            firebaseRepository.getRecipes(
-                methodId = methodUiState.id,
-                onSuccess = { recipeModels ->
-                    val recipes = recipeModels.map { it.toUiState() }
+            val result = firebaseRepository.getRecipes(methodId = methodUiState.id)
+            when {
+                result.isSuccess -> {
+                    val recipes = result.getOrNull()?.map { recipeModel ->
+                        recipeModel.toUiState()
+                    }
                     viewModelState.update {
                         it.copy(
                             isLoading = false,
                             recipes = recipes,
                         )
                     }
-                },
-                onError = { errorMessage ->
+                }
+
+                result.isFailure -> {
                     viewModelState.update {
                         it.copy(
                             isLoading = false,
-                            errorMessage = errorMessage
+                            isError = true
                         )
                     }
                 }
-            )
+            }
         }
     }
 

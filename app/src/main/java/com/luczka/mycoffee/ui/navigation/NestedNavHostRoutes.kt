@@ -1,6 +1,7 @@
 package com.luczka.mycoffee.ui.navigation
 
 import com.luczka.mycoffee.ui.models.MethodUiState
+import com.luczka.mycoffee.ui.models.RecipeUiState
 import kotlinx.serialization.Serializable
 
 data object NestedNavHostRoutes {
@@ -23,5 +24,5 @@ data object NestedNavHostRoutes {
     data class Recipes(val methodUiState: MethodUiState)
 
     @Serializable
-    data class RecipeDetails(val recipeId: String)
+    data class RecipeDetails(val recipeUiState: RecipeUiState)
 }

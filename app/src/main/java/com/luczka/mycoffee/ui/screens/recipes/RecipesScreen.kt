@@ -1,6 +1,5 @@
 package com.luczka.mycoffee.ui.screens.recipes
 
-import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -40,7 +39,7 @@ fun RecipesScreen(
     var openMethodInfoDialog by rememberSaveable { mutableStateOf(false) }
 
     if (openMethodInfoDialog) {
-        MethodInfoDialog(
+        RecipesMethodInfoDialog(
             method = uiState.methodUiState,
             onDismiss = {
                 openMethodInfoDialog = false
@@ -82,54 +81,43 @@ fun RecipesScreen(
             )
         }
     ) { innerPadding ->
-        Column(modifier = Modifier.padding(innerPadding)) {
-            Divider()
-            if (uiState.isLoading) {
-                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-            }
-            Crossfade(
-                targetState = uiState.isLoading,
-                label = ""
-            ) { isLoading ->
-                if (!isLoading) {
-                    when (uiState) {
-                        is RecipesUiState.HasRecipes -> {
-                            if (uiState.recipes.isEmpty()) {
-                                Box(
-                                    modifier = Modifier
-                                        .padding(16.dp)
-                                        .fillMaxSize(),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(
-                                        text = "No recipes at the moment",
-                                        style = MaterialTheme.typography.headlineSmall,
-                                        fontWeight = FontWeight.Medium
-                                    )
+        Box(modifier = Modifier.padding(innerPadding)) {
+            Column {
+                Divider()
+                Box {
+                    LazyColumn(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                        items(
+                            items = uiState.recipes,
+                            key = { it.youtubeId }
+                        ) { recipeCardUiState ->
+                            RecipeListItem(
+                                modifier = Modifier.animateItem(),
+                                recipeCardUiState = recipeCardUiState,
+                                onClick = {
+                                    val action = RecipesAction.NavigateToRecipeDetails(recipeUiState = recipeCardUiState)
+                                    onAction(action)
                                 }
-                            } else {
-                                LazyColumn(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                                    items(
-                                        items = uiState.recipes,
-                                        key = { it.youtubeId }
-                                    ) { recipeCardUiState ->
-                                        RecipeListItem(
-                                            recipeCardUiState = recipeCardUiState,
-                                            onClick = {
-                                                val action = RecipesAction.NavigateToRecipeDetails(recipeCardUiState.youtubeId)
-                                                onAction(action)
-                                            }
-                                        )
-                                    }
-                                }
-                            }
+                            )
                         }
-
-                        is RecipesUiState.NoRecipes -> {
-
+                    }
+                    if (!uiState.isLoading && uiState.recipes.isEmpty()) {
+                        Box(
+                            modifier = Modifier
+                                .padding(16.dp)
+                                .fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "No recipes at the moment",
+                                style = MaterialTheme.typography.headlineSmall,
+                                fontWeight = FontWeight.Medium
+                            )
                         }
                     }
                 }
+            }
+            if (uiState.isLoading) {
+                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
             }
         }
     }

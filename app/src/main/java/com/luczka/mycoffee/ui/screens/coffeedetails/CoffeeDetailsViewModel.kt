@@ -80,7 +80,7 @@ class CoffeeDetailsViewModel @AssistedInject constructor(
         val coffeeUiState = viewModelState.value.coffeeUiState ?: return
         viewModelScope.launch {
             val updatedCoffeeUiState = coffeeUiState.copy(isFavourite = !coffeeUiState.isFavourite)
-            myCoffeeDatabaseRepository.updateCoffeeOld(coffeeModel = updatedCoffeeUiState.toModel())
+            myCoffeeDatabaseRepository.updateCoffee(coffeeModel = updatedCoffeeUiState.toModel())
         }
     }
 
