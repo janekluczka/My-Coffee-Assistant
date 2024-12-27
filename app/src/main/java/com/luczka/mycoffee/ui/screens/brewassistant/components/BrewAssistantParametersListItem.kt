@@ -17,7 +17,7 @@ import androidx.compose.ui.unit.dp
 import com.luczka.mycoffee.ui.theme.MyCoffeeTypography
 
 @Composable
-fun AssistantParametersListItem(
+fun BrewAssistantParametersListItem(
     modifier: Modifier = Modifier,
     index: Int,
     overlineText: String,

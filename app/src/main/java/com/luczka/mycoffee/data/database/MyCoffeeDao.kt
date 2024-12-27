@@ -64,10 +64,11 @@ interface MyCoffeeDao {
     suspend fun insertBrewWithBrewedCoffees(
         brewEntity: BrewEntity,
         brewCoffeeCrossRefs: List<BrewCoffeeCrossRef>
-    ) {
+    ): Long {
         val brewId = insertBrew(brewEntity)
         val brewCoffeeCrossRefsWithBrewId = brewCoffeeCrossRefs.map { it.copy(brewId = brewId) }
         insertBrewedCoffees(brewCoffeeCrossRefsWithBrewId)
+        return brewId
     }
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

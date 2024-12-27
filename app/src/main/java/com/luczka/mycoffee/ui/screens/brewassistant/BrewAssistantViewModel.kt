@@ -3,13 +3,16 @@ package com.luczka.mycoffee.ui.screens.brewassistant
 import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.navOptions
 import com.luczka.mycoffee.R
 import com.luczka.mycoffee.domain.repositories.MyCoffeeDatabaseRepository
 import com.luczka.mycoffee.ui.mappers.toUiState
 import com.luczka.mycoffee.ui.models.BrewUiState
 import com.luczka.mycoffee.ui.models.BrewedCoffeeUiState
 import com.luczka.mycoffee.ui.models.CoffeeUiState
-import com.luczka.mycoffee.ui.screens.brewassistant.components.DoubleVerticalPagerState
+import com.luczka.mycoffee.ui.navigation.MainNavHostRoute
+import com.luczka.mycoffee.ui.navigation.MainNavigator
+import com.luczka.mycoffee.ui.components.custom.doubleverticalpager.DoubleVerticalPagerState
 import com.luczka.mycoffee.ui.util.TimeFormatter
 import com.luczka.mycoffee.ui.util.toStringWithOneDecimalPoint
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -37,7 +40,12 @@ data class AssistantRecipeUiState(
     val waterAmount: String,
 )
 
-private data class AssistantViewModelState(
+private data class BrewAssistantViewModelState(
+    val pages: List<BrewAssistantPage> = BrewAssistantPage.entries,
+    val currentPage: Int = 0,
+    val showAbortDialog: Boolean = false,
+    val showFinishDialog: Boolean = false,
+    val showBottomSheet: Boolean = false,
     val currentCoffees: List<CoffeeUiState> = emptyList(),
     val selectedCoffees: Map<CoffeeUiState, DoubleVerticalPagerState> = mapOf(),
     val assistantRecipeCategoryUiStates: List<AssistantRecipeCategoryUiState> = emptyList(),
@@ -58,9 +66,8 @@ private data class AssistantViewModelState(
     ),
     val isTimerRunning: Boolean = false,
     val timeInSeconds: Int? = null,
-    val isFinished: Boolean = false,
 ) {
-    fun toAssistantUiState(): AssistantUiState {
+    fun toAssistantUiState(): BrewAssistantUiState {
         val selectedAmountsSum = sumSelectedAmounts()
 
         val selectedCoffeeRatio = ratioDoubleVerticalPagerState.currentLeftPagerItem()
@@ -72,9 +79,15 @@ private data class AssistantViewModelState(
         val waterAmountFormatted = waterAmount.toStringWithOneDecimalPoint()
 
         return if (selectedCoffees.isEmpty()) {
-            AssistantUiState.NoneSelected(
+            BrewAssistantUiState.NoneSelected(
+                pages = pages,
+                currentPage = currentPage,
+                isFirstPage = currentPage == 0,
+                isLastPage = currentPage == pages.lastIndex,
+                showAbortDialog = showAbortDialog,
+                showFinishDialog = showFinishDialog,
+                showBottomSheet = showBottomSheet,
                 currentCoffees = currentCoffees,
-                isFinished = isFinished,
                 selectedAmountsSum = selectedAmountsSumFormatted,
                 waterAmount = waterAmountFormatted,
                 defaultAmountDoubleVerticalPagerState = defaultAmountDoubleVerticalPagerState,
@@ -83,10 +96,16 @@ private data class AssistantViewModelState(
                 formattedTime = TimeFormatter.formatTime(timeInSeconds)
             )
         } else {
-            AssistantUiState.CoffeeSelected(
+            BrewAssistantUiState.CoffeeSelected(
+                pages = pages,
+                currentPage = currentPage,
+                isFirstPage = currentPage == 0,
+                isLastPage = currentPage == pages.lastIndex,
+                showAbortDialog = showAbortDialog,
+                showFinishDialog = showFinishDialog,
+                showBottomSheet = showBottomSheet,
                 currentCoffees = currentCoffees,
                 selectedCoffees = selectedCoffees,
-                isFinished = isFinished,
                 selectedAmountsSum = selectedAmountsSumFormatted,
                 waterAmount = waterAmountFormatted,
                 ratioSelectionUiState = ratioDoubleVerticalPagerState,
@@ -96,7 +115,7 @@ private data class AssistantViewModelState(
         }
     }
 
-    fun toBrewModel(): BrewUiState {
+    fun toBrewUiState(): BrewUiState {
         val selectedAmountsSum = sumSelectedAmounts()
 
         val selectedCoffeeRatio = ratioDoubleVerticalPagerState.currentLeftPagerItem()
@@ -107,7 +126,9 @@ private data class AssistantViewModelState(
         val brewedCoffees = selectedCoffees.map { (coffeeUiState, amountDoubleVerticalPagerState) ->
             val integerPart = amountDoubleVerticalPagerState.currentLeftPagerItem()
             val fractionalPart = amountDoubleVerticalPagerState.currentRightPagerItem()
+
             val coffeeAmount = "$integerPart.$fractionalPart".toFloatOrNull() ?: 0f
+
             BrewedCoffeeUiState(
                 coffeeAmount = coffeeAmount,
                 coffee = coffeeUiState,
@@ -122,6 +143,21 @@ private data class AssistantViewModelState(
             waterRatio = selectedWaterRatio,
             brewedCoffees = brewedCoffees
         )
+    }
+
+    fun toCoffeeUiStateListToUpdate(): List<CoffeeUiState> {
+        return selectedCoffees.map { (coffeeUiState, amountDoubleVerticalPagerState) ->
+            val selectedCoffeeAmount = coffeeUiState.amount.toFloatOrNull() ?: 0f
+
+            val integerPart = amountDoubleVerticalPagerState.currentLeftPagerItem()
+            val fractionalPart = amountDoubleVerticalPagerState.currentRightPagerItem()
+
+            val selectedAmount = "$integerPart.$fractionalPart".toFloatOrNull() ?: 0f
+            val updatedAmount = selectedCoffeeAmount - selectedAmount
+            val adjustedUpdatedAmount = if (updatedAmount <= 0) 0f else updatedAmount
+
+            coffeeUiState.copy(amount = adjustedUpdatedAmount.toString())
+        }
     }
 
     private fun sumSelectedAmounts(): Float {
@@ -142,13 +178,14 @@ private data class AssistantViewModelState(
 }
 
 @HiltViewModel
-class AssistantViewModel @Inject constructor(
-    private val myCoffeeDatabaseRepository: MyCoffeeDatabaseRepository
+class BrewAssistantViewModel @Inject constructor(
+    private val myCoffeeDatabaseRepository: MyCoffeeDatabaseRepository,
+    private val mainNavigator: MainNavigator
 ) : ViewModel() {
 
-    private val viewModelState = MutableStateFlow(AssistantViewModelState())
+    private val viewModelState = MutableStateFlow(BrewAssistantViewModelState())
     val uiState = viewModelState
-        .map(AssistantViewModelState::toAssistantUiState)
+        .map(BrewAssistantViewModelState::toAssistantUiState)
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.Eagerly,
@@ -173,17 +210,21 @@ class AssistantViewModel @Inject constructor(
         }
     }
 
-    fun onAction(action: AssistantAction) {
+    fun onAction(action: BrewAssistantAction) {
         when (action) {
-            is AssistantAction.NavigateUp -> {}
-            is AssistantAction.NavigateToAssistantRating -> {}
+            is BrewAssistantAction.OnAbort -> abort()
+            is BrewAssistantAction.OnBack -> back()
+            is BrewAssistantAction.OnPrevious -> previous()
+            is BrewAssistantAction.OnNext -> next()
 
-            is AssistantAction.OnShowAbortDialog -> {}
-            is AssistantAction.OnSelectRecipeClicked -> {}
-            is AssistantAction.OnShowFinishDialog -> {}
+            BrewAssistantAction.OnHideBottomSheet -> hideBottomSheet()
+            BrewAssistantAction.OnHideAbortDialog -> hideAbortDialog()
+            BrewAssistantAction.OnHideFinishDialog -> hideFinishDialog()
 
-            is AssistantAction.OnSelectedCoffeeChanged -> selectCoffee(action.coffeeUiState)
-            is AssistantAction.OnAmountSelectionIntegerPartIndexChanged -> {
+            is BrewAssistantAction.OnSelectRecipeClicked -> {}
+
+            is BrewAssistantAction.OnSelectedCoffeeChanged -> selectCoffee(action.coffeeUiState)
+            is BrewAssistantAction.OnAmountSelectionIntegerPartIndexChanged -> {
                 if (action.key == null) {
                     updateAmountLeftPagerIndex(leftPagerPageIndex = action.leftPagerPageIndex)
                 } else {
@@ -191,7 +232,7 @@ class AssistantViewModel @Inject constructor(
                 }
             }
 
-            is AssistantAction.OnAmountSelectionFractionalPartIndexChanged -> {
+            is BrewAssistantAction.OnAmountSelectionFractionalPartIndexChanged -> {
                 if (action.key == null) {
                     updateAmountRightPagerIndex(rightPagerPageIndex = action.rightPagerPageIndex)
                 } else {
@@ -199,7 +240,7 @@ class AssistantViewModel @Inject constructor(
                 }
             }
 
-            is AssistantAction.OnAmountSelectionIntegerAndFractionalPartsValueChanged -> {
+            is BrewAssistantAction.OnAmountSelectionIntegerAndFractionalPartsValueChanged -> {
                 if (action.key == null) {
                     updateAmountSelectionValue(action.leftInputValue, action.rightInputValue)
                 } else {
@@ -207,14 +248,95 @@ class AssistantViewModel @Inject constructor(
                 }
             }
 
-            is AssistantAction.OnRatioSelectionCoffeeIndexChanged -> updateCoffeeRatioIndex(action.leftPagerPageIndex)
-            is AssistantAction.OnRatioSelectionWaterIndexChanged -> updateWaterRatioIndex(action.rightPagerPageIndex)
-            is AssistantAction.OnRatioSelectionCoffeeAndWaterValueChanged -> updateRatioValues(action.leftInputValue, action.rightInputValue)
-            is AssistantAction.OnResetTimerClicked -> resetTimer()
-            is AssistantAction.OnStartStopTimerClicked -> startStopTimerTimer()
-//            is AssistantAction.OnFinishButtonClicked -> finishBrew()
-            is AssistantAction.OnFinishButtonClicked -> tempFinishBrew()
+            is BrewAssistantAction.OnRatioSelectionCoffeeIndexChanged -> updateCoffeeRatioIndex(action.leftPagerPageIndex)
+            is BrewAssistantAction.OnRatioSelectionWaterIndexChanged -> updateWaterRatioIndex(action.rightPagerPageIndex)
+            is BrewAssistantAction.OnRatioSelectionCoffeeAndWaterValueChanged -> updateRatioValues(action.leftInputValue, action.rightInputValue)
+            is BrewAssistantAction.OnResetTimerClicked -> resetTimer()
+            is BrewAssistantAction.OnStartStopTimerClicked -> startStopTimerTimer()
+            is BrewAssistantAction.OnFinishBrewClicked -> finishBrew()
+        }
+    }
 
+    private fun abort() {
+        if (viewModelState.value.selectedCoffees.isEmpty()) {
+            viewModelScope.launch {
+                mainNavigator.navigateUp()
+            }
+        } else {
+            viewModelState.update {
+                it.copy(showAbortDialog = true)
+            }
+        }
+    }
+
+    private fun back() {
+        viewModelScope.launch {
+            viewModelState.update {
+                it.copy(
+                    showAbortDialog = false,
+                    showFinishDialog = false,
+                    showBottomSheet = false
+                )
+            }
+            mainNavigator.navigateUp()
+        }
+    }
+
+    private fun previous() {
+        val viewModelStateValue = viewModelState.value
+
+        val currentPage = viewModelStateValue.currentPage
+        val selectedCoffees = viewModelStateValue.selectedCoffees
+
+        if (currentPage == 0) {
+            if (selectedCoffees.isEmpty()) {
+                viewModelScope.launch {
+                    mainNavigator.navigateUp()
+                }
+            } else {
+                viewModelState.update {
+                    it.copy(showAbortDialog = true)
+                }
+            }
+        } else {
+            viewModelState.update {
+                it.copy(currentPage = currentPage - 1)
+            }
+        }
+    }
+
+    private fun next() {
+        val viewModelStateValue = viewModelState.value
+
+        val currentPage = viewModelStateValue.currentPage
+        val pages = viewModelStateValue.pages
+
+        if (currentPage == pages.lastIndex) {
+            viewModelState.update {
+                it.copy(showFinishDialog = true)
+            }
+        } else {
+            viewModelState.update {
+                it.copy(currentPage = currentPage + 1)
+            }
+        }
+    }
+
+    private fun hideBottomSheet() {
+        viewModelState.update {
+            it.copy(showBottomSheet = false)
+        }
+    }
+
+    private fun hideAbortDialog() {
+        viewModelState.update {
+            it.copy(showAbortDialog = false)
+        }
+    }
+
+    private fun hideFinishDialog() {
+        viewModelState.update {
+            it.copy(showFinishDialog = false)
         }
     }
 
@@ -444,38 +566,27 @@ class AssistantViewModel @Inject constructor(
         timerJob = null
     }
 
-
-    private fun tempFinishBrew() {
-        viewModelState.update { it.copy(isFinished = true) }
-    }
-
-
     private fun finishBrew() {
         viewModelScope.launch {
-            val brew = viewModelState.value.toBrewModel()
+            val brewUiState = viewModelState.value.toBrewUiState()
+            val coffeeUiStateListToUpdate = viewModelState.value.toCoffeeUiStateListToUpdate()
 
-//            myCoffeeDatabaseRepository.insertBrew(brew.toModel())
+//            val brewId = myCoffeeDatabaseRepository.insertBrewAndUpdateCoffeeModels(
+//                brewModel = brewUiState.toModel(),
+//                coffeeModels = coffeeUiStateListToUpdate.map { it.toModel() }
+//            )
+//
+//            mainNavigator.navigate(MainNavHostRoute.BrewRating(brewId = brewId)) {
+//                navOptions {
+//                    popUpTo(MainNavHostRoute.BrewAssistant) { inclusive = true }
+//                }
+//            }
 
-            viewModelState.value.selectedCoffees.forEach { (selectedCoffee, amountDoubleVerticalPagerState) ->
-                val selectedCoffeeAmount = selectedCoffee.amount.toFloatOrNull() ?: 0f
-
-                val integerPart = amountDoubleVerticalPagerState.currentLeftPagerItem()
-                val fractionalPart = amountDoubleVerticalPagerState.currentRightPagerItem()
-
-                val selectedAmount = "$integerPart.$fractionalPart".toFloatOrNull() ?: 0f
-
-                val updatedAmount = selectedCoffeeAmount - selectedAmount
-
-                val updatedCoffee = if (updatedAmount <= 0) {
-                    selectedCoffee.copy(amount = 0.0f.toString())
-                } else {
-                    selectedCoffee.copy(amount = updatedAmount.toString())
+            mainNavigator.navigate(MainNavHostRoute.BrewRating(brewId = 0L)) {
+                navOptions {
+                    popUpTo(MainNavHostRoute.BrewAssistant) { inclusive = true }
                 }
-
-//                myCoffeeDatabaseRepository.updateCoffee(updatedCoffee.toModel())
             }
-
-            viewModelState.update { it.copy(isFinished = true) }
         }
     }
 

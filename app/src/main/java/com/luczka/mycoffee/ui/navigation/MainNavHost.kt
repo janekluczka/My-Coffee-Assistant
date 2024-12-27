@@ -28,6 +28,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -40,17 +41,16 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.navOptions
 import androidx.navigation.toRoute
 import com.luczka.mycoffee.R
-import com.luczka.mycoffee.ui.screens.assistantrating.AssistantRatingScreen
-import com.luczka.mycoffee.ui.screens.brewassistant.AssistantAction
-import com.luczka.mycoffee.ui.screens.brewassistant.AssistantViewModel
-import com.luczka.mycoffee.ui.screens.brewassistant.screens.AssistantMainScreen
+import com.luczka.mycoffee.di.MainNavigatorEntryPoint
+import com.luczka.mycoffee.ui.screens.brewassistant.BrewAssistantViewModel
+import com.luczka.mycoffee.ui.screens.brewassistant.screens.BrewAssistantMainScreen
 import com.luczka.mycoffee.ui.screens.brewdetails.BrewDetailsAction
 import com.luczka.mycoffee.ui.screens.brewdetails.BrewDetailsScreen
 import com.luczka.mycoffee.ui.screens.brewdetails.BrewDetailsViewModel
 import com.luczka.mycoffee.ui.screens.brewdetails.BrewDetailsViewModelFactory
+import com.luczka.mycoffee.ui.screens.brewrating.AssistantRatingScreen
 import com.luczka.mycoffee.ui.screens.coffeedetails.CoffeeDetailsAction
 import com.luczka.mycoffee.ui.screens.coffeedetails.CoffeeDetailsScreen
 import com.luczka.mycoffee.ui.screens.coffeedetails.CoffeeDetailsViewModel
@@ -61,6 +61,8 @@ import com.luczka.mycoffee.ui.screens.coffeeinput.CoffeeInputViewModel
 import com.luczka.mycoffee.ui.screens.coffeeinput.CoffeeInputViewModelFactory
 import com.luczka.mycoffee.ui.screens.equipmentinput.EquipmentInputAction
 import com.luczka.mycoffee.ui.screens.equipmentinput.EquipmentInputScreen
+import com.luczka.mycoffee.ui.util.ObserveAsEvents
+import dagger.hilt.android.EntryPointAccessors
 import kotlinx.coroutines.launch
 
 sealed class MainAction {
@@ -94,7 +96,7 @@ val topLevelRoutes = listOf(
 //                drawableRes = R.drawable.ic_coffee_maker_24_fill_0_weight_300_grade_0_opticalsize_24
 //            ),
     TopLevelRoute(
-        route = NestedNavHostRoutes.Methods,
+        route = NestedNavHostRoutes.RecipeCategories,
         stringRes = R.string.tab_recipes,
         drawableRes = R.drawable.ic_list_alt_24_fill_0_weight_300_grade_0_opticalsize_24
     )
@@ -122,7 +124,7 @@ val drawerRoutes = listOf(
 //                drawableRes = R.drawable.ic_coffee_maker_24_fill_0_weight_300_grade_0_opticalsize_24
 //            ),
     TopLevelRoute(
-        route = NestedNavHostRoutes.Methods,
+        route = NestedNavHostRoutes.RecipeCategories,
         stringRes = R.string.tab_recipes,
         drawableRes = R.drawable.ic_list_alt_24_fill_0_weight_300_grade_0_opticalsize_24
     )
@@ -134,6 +136,8 @@ fun MyCoffeeMainNavHost(
     mainNavController: NavHostController,
     nestedNavController: NavHostController
 ) {
+    val context = LocalContext.current
+
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
 
     val coroutineScope = rememberCoroutineScope()
@@ -141,10 +145,27 @@ fun MyCoffeeMainNavHost(
     val mainNavBackStackEntry by mainNavController.currentBackStackEntryAsState()
     val nestedNavBackStackEntry by nestedNavController.currentBackStackEntryAsState()
 
+    val entryPoint = EntryPointAccessors.fromApplication(
+        context = context,
+        entryPoint = MainNavigatorEntryPoint::class.java
+    )
+    val mainNavigator = entryPoint.getMainNavigator()
+
+    ObserveAsEvents(flow = mainNavigator.mainNavigationActions) {action ->
+        when(action) {
+            is MainNavigationAction.NavigateUp -> mainNavController.navigateUp()
+            is MainNavigationAction.Navigate -> {
+                mainNavController.navigate(route = action.route) {
+                    action.navOptions(this)
+                }
+            }
+        }
+    }
+
     val currentMainDestination = mainNavBackStackEntry?.destination
     val currentNestedDestination = nestedNavBackStackEntry?.destination
 
-    val isMainRouteCurrentMainDestination = currentMainDestination?.hasRoute(MainNavHostRoutes.Main::class) ?: false
+    val isMainRouteCurrentMainDestination = currentMainDestination?.hasRoute(MainNavHostRoute.Main::class) ?: false
 
     BackHandler(enabled = drawerState.isOpen) {
         coroutineScope.launch {
@@ -199,9 +220,9 @@ fun MyCoffeeMainNavHost(
         NavHost(
             modifier = Modifier.fillMaxSize(),
             navController = mainNavController,
-            startDestination = MainNavHostRoutes.Main,
+            startDestination = MainNavHostRoute.Main,
         ) {
-            composable<MainNavHostRoutes.Main> {
+            composable<MainNavHostRoute.Main> {
                 MainRoute(
                     widthSizeClass = widthSizeClass,
                     nestedNavController = nestedNavController,
@@ -213,16 +234,16 @@ fun MyCoffeeMainNavHost(
                                 }
                             }
 
-                            is MainAction.NavigateToAssistant -> mainNavController.navigate(MainNavHostRoutes.Assistant)
-                            is MainAction.NavigateToBrewDetails -> mainNavController.navigate(MainNavHostRoutes.BrewDetails(action.brewId))
-                            is MainAction.NavigateToCoffeeDetails -> mainNavController.navigate(MainNavHostRoutes.CoffeeDetails(action.coffeeId))
-                            is MainAction.NavigateToCoffeeInput -> mainNavController.navigate(MainNavHostRoutes.CoffeeInput(action.coffeeId))
-                            is MainAction.NavigateToEquipmentInput -> mainNavController.navigate(MainNavHostRoutes.EquipmentInput(action.equipmentId))
+                            is MainAction.NavigateToAssistant -> mainNavController.navigate(MainNavHostRoute.BrewAssistant)
+                            is MainAction.NavigateToBrewDetails -> mainNavController.navigate(MainNavHostRoute.BrewDetails(action.brewId))
+                            is MainAction.NavigateToCoffeeDetails -> mainNavController.navigate(MainNavHostRoute.CoffeeDetails(action.coffeeId))
+                            is MainAction.NavigateToCoffeeInput -> mainNavController.navigate(MainNavHostRoute.CoffeeInput(action.coffeeId))
+                            is MainAction.NavigateToEquipmentInput -> mainNavController.navigate(MainNavHostRoute.EquipmentInput(action.equipmentId))
                         }
                     }
                 )
             }
-            composable<MainNavHostRoutes.BrewDetails>(
+            composable<MainNavHostRoute.BrewDetails>(
                 enterTransition = {
                     fadeIn(
                         animationSpec = tween(durationMillis = 300, easing = LinearEasing)
@@ -240,7 +261,7 @@ fun MyCoffeeMainNavHost(
                     )
                 }
             ) { backStackEntry ->
-                val arguments = backStackEntry.toRoute<MainNavHostRoutes.BrewDetails>()
+                val arguments = backStackEntry.toRoute<MainNavHostRoute.BrewDetails>()
                 val viewModel = hiltViewModel<BrewDetailsViewModel, BrewDetailsViewModelFactory> { factory ->
                     factory.create(arguments.brewId)
                 }
@@ -256,7 +277,7 @@ fun MyCoffeeMainNavHost(
                     }
                 )
             }
-            composable<MainNavHostRoutes.Assistant>(
+            composable<MainNavHostRoute.BrewAssistant>(
                 enterTransition = {
                     fadeIn(
                         animationSpec = tween(durationMillis = 300, easing = LinearEasing)
@@ -274,29 +295,14 @@ fun MyCoffeeMainNavHost(
                     )
                 }
             ) {
-                val viewModel = hiltViewModel<AssistantViewModel>()
+                val viewModel = hiltViewModel<BrewAssistantViewModel>()
                 val uiState by viewModel.uiState.collectAsState()
-                AssistantMainScreen(
+                BrewAssistantMainScreen(
                     uiState = uiState,
-                    onAction = { action ->
-                        when (action) {
-                            is AssistantAction.NavigateUp -> mainNavController.navigateUp()
-                            is AssistantAction.NavigateToAssistantRating -> {
-                                mainNavController.navigate(
-                                    route = MainNavHostRoutes.AssistantRating(action.brewId),
-                                    navOptions = navOptions {
-                                        popUpTo(MainNavHostRoutes.Assistant) { inclusive = true }
-                                    }
-                                )
-                            }
-
-                            else -> {}
-                        }
-                        viewModel.onAction(action)
-                    }
+                    onAction = viewModel::onAction
                 )
             }
-            composable<MainNavHostRoutes.AssistantRating>(
+            composable<MainNavHostRoute.BrewRating>(
                 enterTransition = {
                     fadeIn(
                         animationSpec = tween(durationMillis = 300, easing = LinearEasing)
@@ -314,10 +320,10 @@ fun MyCoffeeMainNavHost(
                     )
                 }
             ) { backStackEntry ->
-                val arguments = backStackEntry.toRoute<MainNavHostRoutes.AssistantRating>()
+                val arguments = backStackEntry.toRoute<MainNavHostRoute.BrewRating>()
                 AssistantRatingScreen()
             }
-            composable<MainNavHostRoutes.CoffeeDetails>(
+            composable<MainNavHostRoute.CoffeeDetails>(
                 enterTransition = {
                     fadeIn(
                         animationSpec = tween(durationMillis = 300, easing = LinearEasing)
@@ -335,7 +341,7 @@ fun MyCoffeeMainNavHost(
                     )
                 }
             ) { backStackEntry ->
-                val arguments = backStackEntry.toRoute<MainNavHostRoutes.CoffeeDetails>()
+                val arguments = backStackEntry.toRoute<MainNavHostRoute.CoffeeDetails>()
                 val viewModel = hiltViewModel<CoffeeDetailsViewModel, CoffeeDetailsViewModelFactory> { factory ->
                     factory.create(arguments.coffeeId)
                 }
@@ -346,14 +352,14 @@ fun MyCoffeeMainNavHost(
                     onAction = { action ->
                         when (action) {
                             is CoffeeDetailsAction.NavigateUp -> mainNavController.navigateUp()
-                            is CoffeeDetailsAction.OnEditClicked -> mainNavController.navigate(MainNavHostRoutes.CoffeeInput(action.coffeeId))
+                            is CoffeeDetailsAction.OnEditClicked -> mainNavController.navigate(MainNavHostRoute.CoffeeInput(action.coffeeId))
                             else -> {}
                         }
                         viewModel.onAction(action)
                     }
                 )
             }
-            composable<MainNavHostRoutes.CoffeeInput>(
+            composable<MainNavHostRoute.CoffeeInput>(
                 enterTransition = {
                     fadeIn(
                         animationSpec = tween(durationMillis = 300, easing = LinearEasing)
@@ -371,7 +377,7 @@ fun MyCoffeeMainNavHost(
                     )
                 }
             ) { backStackEntry ->
-                val arguments = backStackEntry.toRoute<MainNavHostRoutes.CoffeeInput>()
+                val arguments = backStackEntry.toRoute<MainNavHostRoute.CoffeeInput>()
                 val viewModel = hiltViewModel<CoffeeInputViewModel, CoffeeInputViewModelFactory> { factory ->
                     factory.create(arguments.coffeeId)
                 }
@@ -387,7 +393,7 @@ fun MyCoffeeMainNavHost(
                     }
                 )
             }
-            composable<MainNavHostRoutes.EquipmentInput>(
+            composable<MainNavHostRoute.EquipmentInput>(
                 enterTransition = {
                     fadeIn(
                         animationSpec = tween(durationMillis = 300, easing = LinearEasing)

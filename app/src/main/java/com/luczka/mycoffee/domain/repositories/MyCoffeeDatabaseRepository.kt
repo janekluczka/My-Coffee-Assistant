@@ -27,7 +27,7 @@ interface MyCoffeeDatabaseRepository {
     suspend fun insertBrewAndUpdateCoffeeModels(
         brewModel: BrewModel,
         coffeeModels: List<CoffeeModel>
-    )
+    ) : Long
 
     // TODO: Add suspend fun getBrew(brewId: Long): BrewModel?
 
@@ -40,8 +40,5 @@ interface MyCoffeeDatabaseRepository {
     // TODO: Add updateBrew(brewModel: BrewModel)
 
     suspend fun deleteBrew(brewModel: BrewModel)
-
-
-
 
 }

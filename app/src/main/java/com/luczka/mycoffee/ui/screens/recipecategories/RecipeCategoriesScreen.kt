@@ -34,7 +34,7 @@ import com.luczka.mycoffee.ui.components.cards.MethodCard
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MethodsScreen(
+fun RecipeCategoriesScreen(
     widthSizeClass: WindowWidthSizeClass,
     uiState: RecipeCategoriesUiState,
     onAction: (RecipeCategoriesAction) -> Unit,
@@ -118,9 +118,9 @@ fun MethodsScreen(
                     }
                 }
             }
-        }
-        if (uiState.isLoading) {
-            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+            if (uiState.isLoading) {
+                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+            }
         }
     }
 }

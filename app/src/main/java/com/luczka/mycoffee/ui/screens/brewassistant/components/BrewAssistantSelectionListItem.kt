@@ -26,7 +26,7 @@ import com.luczka.mycoffee.ui.theme.MyCoffeeTheme
 import java.io.File
 
 @Composable
-fun AssistantSelectionListItem(
+fun BrewAssistantSelectionListItem(
     coffeeUiState: CoffeeUiState,
     isSelected: Boolean,
     onClick: (CoffeeUiState) -> Unit
@@ -116,7 +116,7 @@ private fun CoffeeSelectionListItemPreview(darkTheme: Boolean, isSelected: Boole
         amount = "250"
     )
     MyCoffeeTheme(darkTheme = darkTheme) {
-        AssistantSelectionListItem(
+        BrewAssistantSelectionListItem(
             coffeeUiState = coffeeUiState,
             isSelected = isSelected,
             onClick = {},

@@ -14,6 +14,8 @@ import com.luczka.mycoffee.data.database.entities.CoffeeEntity
 import com.luczka.mycoffee.data.database.entities.CoffeeImageEntity
 import com.luczka.mycoffee.data.database.entities.EquipmentEntity
 import com.luczka.mycoffee.data.database.entities.ReceiptEntity
+import com.luczka.mycoffee.data.database.entities.TastingNote
+import com.luczka.mycoffee.data.database.entities.TastingNoteCategory
 
 @Database(
     entities = [
@@ -23,9 +25,11 @@ import com.luczka.mycoffee.data.database.entities.ReceiptEntity
         CoffeeImageEntity::class,
         EquipmentEntity.CoffeeMachineEntity::class,
         EquipmentEntity.GrinderEntity::class,
-        ReceiptEntity::class
+        ReceiptEntity::class,
+        TastingNoteCategory::class,
+        TastingNote::class
     ],
-    version = 34,
+    version = 36,
     exportSchema = false
 )
 @TypeConverters(

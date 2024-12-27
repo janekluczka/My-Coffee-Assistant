@@ -2,24 +2,34 @@ package com.luczka.mycoffee.ui.screens.brewassistant
 
 import com.luczka.mycoffee.R
 import com.luczka.mycoffee.ui.models.CoffeeUiState
-import com.luczka.mycoffee.ui.screens.brewassistant.components.DoubleVerticalPagerState
-import com.luczka.mycoffee.ui.screens.brewassistant.screens.AssistantPage
+import com.luczka.mycoffee.ui.components.custom.doubleverticalpager.DoubleVerticalPagerState
 
-sealed interface AssistantUiState {
-    val pages: List<AssistantPage>
-    val initialPage: Int
+sealed interface BrewAssistantUiState {
+    val pages: List<BrewAssistantPage>
+    val currentPage: Int
+    val isFirstPage: Boolean
+    val isLastPage: Boolean
+    val showAbortDialog: Boolean
+    val showFinishDialog: Boolean
+    val showBottomSheet: Boolean
     val currentCoffees: List<CoffeeUiState>
+    val recipeCategories: List<AssistantRecipeCategoryUiState>
     val selectedAmountsSum: String
     val waterAmount: String
     val ratioSelectionUiState: DoubleVerticalPagerState
     val isTimerRunning: Boolean
     val formattedTime: String
-    val isFinished: Boolean
 
     data class NoneSelected(
-        override val pages: List<AssistantPage> = AssistantPage.entries,
-        override val initialPage: Int = 0,
+        override val pages: List<BrewAssistantPage> = BrewAssistantPage.entries,
+        override val currentPage: Int = 0,
+        override val isFirstPage: Boolean = true,
+        override val isLastPage: Boolean = false,
+        override val showAbortDialog: Boolean = false,
+        override val showFinishDialog: Boolean = false,
+        override val showBottomSheet: Boolean = false,
         override val currentCoffees: List<CoffeeUiState> = emptyList(),
+        override val recipeCategories: List<AssistantRecipeCategoryUiState> = emptyList(),
         val defaultAmountDoubleVerticalPagerState: DoubleVerticalPagerState = DoubleVerticalPagerState(
             leftPagerItems = (1..100).toList(),
             rightPagerItems = (1..9).toList(),
@@ -37,14 +47,19 @@ sealed interface AssistantUiState {
         ),
         override val waterAmount: String = "0.0",
         override val isTimerRunning: Boolean = false,
-        override val formattedTime: String = "--:--",
-        override val isFinished: Boolean = false,
-    ) : AssistantUiState
+        override val formattedTime: String = "--:--"
+    ) : BrewAssistantUiState
 
     data class CoffeeSelected(
-        override val pages: List<AssistantPage> = AssistantPage.entries,
-        override val initialPage: Int = 0,
+        override val pages: List<BrewAssistantPage> = BrewAssistantPage.entries,
+        override val currentPage: Int = 0,
+        override val isFirstPage: Boolean = true,
+        override val isLastPage: Boolean = false,
+        override val showAbortDialog: Boolean = false,
+        override val showFinishDialog: Boolean = false,
+        override val showBottomSheet: Boolean = false,
         override val currentCoffees: List<CoffeeUiState> = emptyList(),
+        override val recipeCategories: List<AssistantRecipeCategoryUiState> = emptyList(),
         val selectedCoffees: Map<CoffeeUiState, DoubleVerticalPagerState> = emptyMap(),
         override val selectedAmountsSum: String = "0.0",
         override val ratioSelectionUiState: DoubleVerticalPagerState = DoubleVerticalPagerState(
@@ -56,7 +71,6 @@ sealed interface AssistantUiState {
         ),
         override val waterAmount: String = "0.0",
         override val isTimerRunning: Boolean = false,
-        override val formattedTime: String = "--:--",
-        override val isFinished: Boolean = false
-    ) : AssistantUiState
+        override val formattedTime: String = "--:--"
+    ) : BrewAssistantUiState
 }

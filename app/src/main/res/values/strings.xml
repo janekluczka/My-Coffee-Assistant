@@ -191,4 +191,13 @@
     <string name="filter_latest">Latest</string>
     <string name="filter_best_rated">Best rated</string>
 
+
+    <string name="method_aeropress">Aeropress</string>
+    <string name="method_chemex">Chemex</string>
+    <string name="method_espresso">Espresso</string>
+    <string name="method_v60">V60</string>
+    <string name="method_french_press">French press</string>
+    <string name="method_moka_pot">Moka pot</string>
+
+
 </resources>

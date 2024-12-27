@@ -11,6 +11,9 @@ import com.luczka.mycoffee.data.repositories.FirebaseRepositoryImpl
 import com.luczka.mycoffee.data.repositories.MyCoffeeDatabaseRepositoryImpl
 import com.luczka.mycoffee.domain.repositories.FirebaseRepository
 import com.luczka.mycoffee.domain.repositories.MyCoffeeDatabaseRepository
+import com.luczka.mycoffee.ui.navigation.DefaultMainNavigator
+import com.luczka.mycoffee.ui.navigation.MainNavHostRoute
+import com.luczka.mycoffee.ui.navigation.MainNavigator
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -61,6 +64,12 @@ object AppModule {
         firebaseFirestore: FirebaseFirestore
     ) : FirebaseRepository {
         return FirebaseRepositoryImpl(context, firebaseFirestore)
+    }
+
+    @Provides
+    @Singleton
+    fun providesMainNavigator(): MainNavigator {
+        return DefaultMainNavigator(MainNavHostRoute.Main)
     }
 
 }

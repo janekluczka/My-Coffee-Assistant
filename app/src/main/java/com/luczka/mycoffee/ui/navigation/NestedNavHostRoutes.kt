@@ -18,7 +18,7 @@ data object NestedNavHostRoutes {
     data object Equipment
 
     @Serializable
-    data object Methods
+    data object RecipeCategories
 
     @Serializable
     data class Recipes(val methodUiState: MethodUiState)

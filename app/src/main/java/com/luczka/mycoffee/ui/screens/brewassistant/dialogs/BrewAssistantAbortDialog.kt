@@ -11,7 +11,7 @@ import com.luczka.mycoffee.R
 import com.luczka.mycoffee.ui.theme.MyCoffeeTheme
 
 @Composable
-fun AssistantAbortDialog(
+fun BrewAssistantAbortDialog(
     onNegative: () -> Unit,
     onPositive: () -> Unit
 ) {
@@ -37,6 +37,6 @@ fun AssistantAbortDialog(
 @Composable
 private fun AssistantAbortDialogPreview() {
     MyCoffeeTheme {
-        AssistantAbortDialog(onNegative = {}, onPositive = {})
+        BrewAssistantAbortDialog(onNegative = {}, onPositive = {})
     }
 }

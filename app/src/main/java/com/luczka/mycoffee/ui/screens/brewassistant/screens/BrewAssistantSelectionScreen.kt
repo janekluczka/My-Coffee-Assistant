@@ -18,14 +18,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.luczka.mycoffee.R
-import com.luczka.mycoffee.ui.screens.brewassistant.AssistantAction
-import com.luczka.mycoffee.ui.screens.brewassistant.AssistantUiState
-import com.luczka.mycoffee.ui.screens.brewassistant.components.AssistantSelectionListItem
+import com.luczka.mycoffee.ui.screens.brewassistant.BrewAssistantAction
+import com.luczka.mycoffee.ui.screens.brewassistant.BrewAssistantUiState
+import com.luczka.mycoffee.ui.screens.brewassistant.components.BrewAssistantSelectionListItem
 
 @Composable
 fun AssistantSelectionScreen(
-    uiState: AssistantUiState,
-    onAction: (AssistantAction) -> Unit
+    uiState: BrewAssistantUiState,
+    onAction: (BrewAssistantAction) -> Unit
 ) {
     when (uiState.currentCoffees.size) {
         0 -> {
@@ -86,14 +86,14 @@ fun AssistantSelectionScreen(
                     items = uiState.currentCoffees,
                     key = { it.coffeeId }
                 ) { coffeeUiState ->
-                    AssistantSelectionListItem(
+                    BrewAssistantSelectionListItem(
                         coffeeUiState = coffeeUiState,
                         isSelected = when (uiState) {
-                            is AssistantUiState.NoneSelected -> false
-                            is AssistantUiState.CoffeeSelected -> uiState.selectedCoffees.containsKey(coffeeUiState)
+                            is BrewAssistantUiState.NoneSelected -> false
+                            is BrewAssistantUiState.CoffeeSelected -> uiState.selectedCoffees.containsKey(coffeeUiState)
                         },
                         onClick = {
-                            onAction(AssistantAction.OnSelectedCoffeeChanged(it))
+                            onAction(BrewAssistantAction.OnSelectedCoffeeChanged(it))
                         }
                     )
                 }

@@ -31,11 +31,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
@@ -45,110 +41,64 @@ import androidx.compose.ui.unit.dp
 import androidx.core.text.buildSpannedString
 import com.luczka.mycoffee.R
 import com.luczka.mycoffee.ui.components.icons.CloseIcon
-import com.luczka.mycoffee.ui.screens.brewassistant.AssistantAction
-import com.luczka.mycoffee.ui.screens.brewassistant.AssistantUiState
-import com.luczka.mycoffee.ui.screens.brewassistant.dialogs.AssistantAbortDialog
-import com.luczka.mycoffee.ui.screens.brewassistant.dialogs.AssistantSaveDialog
-import kotlinx.coroutines.CoroutineScope
+import com.luczka.mycoffee.ui.screens.brewassistant.BrewAssistantAction
+import com.luczka.mycoffee.ui.screens.brewassistant.BrewAssistantPage
+import com.luczka.mycoffee.ui.screens.brewassistant.BrewAssistantUiState
+import com.luczka.mycoffee.ui.screens.brewassistant.dialogs.BrewAssistantAbortDialog
+import com.luczka.mycoffee.ui.screens.brewassistant.dialogs.BrewAssistantSaveDialog
 import kotlinx.coroutines.launch
-
-enum class AssistantPage {
-    SELECTION,
-    PARAMETERS,
-    SUMMARY
-}
-
-data class AssistantRecipeCategoryUiState(
-    val name: String = "Aeropress",
-    val recipes: List<AssistantRecipeUiState> = (1..10).map { AssistantRecipeUiState() }
-)
-
-data class AssistantRecipeUiState(
-    val name: String = "Aeropress (Original)",
-    val coffeeAmountIntegerPart: Int = 15,
-    val coffeeAmountFractionalPart: Int = 0,
-    val coffeeRatio: Int = 1,
-    val waterRatio: Int = 10,
-    val waterAmount: String = "150"
-)
-
-val categories = (1..3).map { AssistantRecipeCategoryUiState() }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AssistantMainScreen(
-    uiState: AssistantUiState,
-    onAction: (AssistantAction) -> Unit
+fun BrewAssistantMainScreen(
+    uiState: BrewAssistantUiState,
+    onAction: (BrewAssistantAction) -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
 
     val pagerState = rememberPagerState(
-        initialPage = uiState.initialPage,
+        initialPage = uiState.currentPage,
         pageCount = { uiState.pages.size }
     )
 
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    var showBottomSheet by rememberSaveable { mutableStateOf(false) }
-
-    var showAbortDialog by rememberSaveable { mutableStateOf(false) }
-    var showFinishDialog by rememberSaveable { mutableStateOf(false) }
-
-    LaunchedEffect(uiState.isFinished) {
-        if (uiState.isFinished) {
-            val action = AssistantAction.NavigateToAssistantRating(brewId = 0L) // TODO: Change to actual value
-            onAction(action)
-        }
-    }
+    val sheetState = rememberModalBottomSheetState()
 
     BackHandler {
-        if (pagerState.currentPage == 0) {
-            when (uiState) {
-                is AssistantUiState.NoneSelected -> {
-                    val action = AssistantAction.NavigateUp
-                    onAction(action)
-                }
+        val action = BrewAssistantAction.OnPrevious
+        onAction(action)
+    }
 
-                is AssistantUiState.CoffeeSelected -> {
-                    if (uiState.selectedCoffees.isEmpty()) {
-                        val action = AssistantAction.NavigateUp
-                        onAction(action)
-                    } else {
-                        showAbortDialog = true
-                    }
-                }
-            }
-        } else {
-            coroutineScope.launch {
-                pagerState.animateScrollToPage(
-                    page = pagerState.currentPage - 1,
-                    animationSpec = tween(500)
-                )
-            }
+    LaunchedEffect(uiState.currentPage) {
+        coroutineScope.launch {
+            pagerState.animateScrollToPage(
+                page = uiState.currentPage,
+                animationSpec = tween(500)
+            )
         }
     }
 
-    if (showAbortDialog) {
-        AssistantAbortDialog(
+    if (uiState.showAbortDialog) {
+        BrewAssistantAbortDialog(
             onNegative = {
-                showAbortDialog = false
+                val action = BrewAssistantAction.OnHideAbortDialog
+                onAction(action)
             },
             onPositive = {
-                showAbortDialog = false
-                val action = AssistantAction.NavigateUp
+                val action = BrewAssistantAction.OnBack
                 onAction(action)
             }
         )
     }
 
-    if (showFinishDialog) {
-        AssistantSaveDialog(
+    if (uiState.showFinishDialog) {
+        BrewAssistantSaveDialog(
             uiState = uiState,
             onNegative = {
-                showFinishDialog = false
+                val action = BrewAssistantAction.OnHideFinishDialog
+                onAction(action)
             },
             onPositive = {
-                showFinishDialog = false
-                val action = AssistantAction.OnFinishButtonClicked
+                val action = BrewAssistantAction.OnFinishBrewClicked
                 onAction(action)
             }
         )
@@ -156,34 +106,16 @@ fun AssistantMainScreen(
 
     Scaffold(
         topBar = {
-            AssistantTopBar(
-                pagerState = pagerState,
-                uiState = uiState,
-                onAction = { action ->
-                    when(action) {
-                        is AssistantAction.OnShowAbortDialog -> showAbortDialog = true
-                        else -> {}
-                    }
-                    onAction(action)
-                }
-            )
+            BrewAssistantTopBar(onAction = onAction)
         },
         bottomBar = {
             AssistantBottomBar(
-                pagerState = pagerState,
-                coroutineScope = coroutineScope,
                 uiState = uiState,
-                onAction = { action ->
-                    when(action) {
-                        is AssistantAction.OnShowFinishDialog -> showFinishDialog = true
-                        else -> {}
-                    }
-                    onAction(action)
-                }
+                onAction = onAction
             )
         }
     ) { innerPadding ->
-        if (showBottomSheet) {
+        if (uiState.showBottomSheet) {
             val bottomSystemBarHeight = with(LocalDensity.current) {
                 WindowInsets.systemBars.getBottom(this).toDp()
             }
@@ -191,12 +123,13 @@ fun AssistantMainScreen(
             ModalBottomSheet(
                 sheetState = sheetState,
                 onDismissRequest = {
-                    showBottomSheet = false
+                    val action = BrewAssistantAction.OnHideBottomSheet
+                    onAction(action)
                 },
                 tonalElevation = 0.dp
             ) {
                 LazyColumn(contentPadding = PaddingValues(bottom = bottomSystemBarHeight)) {
-                    categories.forEachIndexed { index, categoryUiState ->
+                    uiState.recipeCategories.forEachIndexed { index, categoryUiState ->
                         item {
                             val paddingTop = if (index == 0) 0.dp else 24.dp
                             Text(
@@ -206,14 +139,14 @@ fun AssistantMainScreen(
                                     end = 16.dp,
                                     bottom = 8.dp
                                 ),
-                                text = categoryUiState.name,
+                                text = stringResource(categoryUiState.nameRes),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
                         items(categoryUiState.recipes) {
                             val supportingText = buildSpannedString {
-                                append("${it.coffeeAmountIntegerPart}.${it.coffeeAmountFractionalPart} g of coffee")
+                                append("g of coffee")
                                 append(" • ")
                                 append("${it.coffeeRatio}:${it.waterRatio} ratio")
                                 append(" • ")
@@ -225,7 +158,7 @@ fun AssistantMainScreen(
 
                                 },
                                 headlineContent = {
-                                    Text(text = it.name)
+                                    Text(text = stringResource(it.nameRes))
                                 },
                                 supportingContent = {
                                     Text(text = supportingText)
@@ -233,55 +166,27 @@ fun AssistantMainScreen(
                             )
                         }
                     }
-
                 }
             }
         }
-        AssistantContent(
+        BrewAssistantContent(
             innerPadding = innerPadding,
             pagerState = pagerState,
             uiState = uiState,
-            onAction = { action ->
-                when (action) {
-                    is AssistantAction.OnSelectRecipeClicked -> showBottomSheet = true
-                    else -> {}
-                }
-                onAction(action)
-            }
+            onAction = onAction
         )
     }
 }
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-private fun AssistantTopBar(
-    pagerState: PagerState,
-    uiState: AssistantUiState,
-    onAction: (AssistantAction) -> Unit
-) {
+private fun BrewAssistantTopBar(onAction: (BrewAssistantAction) -> Unit) {
     TopAppBar(
         navigationIcon = {
             IconButton(
                 onClick = {
-                    when (uiState) {
-                        is AssistantUiState.NoneSelected -> {
-                            val action = if (pagerState.currentPage == 0) {
-                                AssistantAction.NavigateUp
-                            } else {
-                                AssistantAction.OnShowAbortDialog
-                            }
-                            onAction(action)
-                        }
-
-                        is AssistantUiState.CoffeeSelected -> {
-                            val action = if (uiState.selectedCoffees.isEmpty()) {
-                                AssistantAction.NavigateUp
-                            } else {
-                                AssistantAction.OnShowAbortDialog
-                            }
-                            onAction(action)
-                        }
-                    }
+                    val action = BrewAssistantAction.OnAbort
+                    onAction(action)
                 }
             ) {
                 CloseIcon()
@@ -298,11 +203,11 @@ private fun AssistantTopBar(
 }
 
 @Composable
-private fun AssistantContent(
+private fun BrewAssistantContent(
     innerPadding: PaddingValues,
     pagerState: PagerState,
-    uiState: AssistantUiState,
-    onAction: (AssistantAction) -> Unit
+    uiState: BrewAssistantUiState,
+    onAction: (BrewAssistantAction) -> Unit
 ) {
     Column(modifier = Modifier.padding(innerPadding)) {
         Divider(modifier = Modifier.fillMaxWidth())
@@ -315,17 +220,17 @@ private fun AssistantContent(
             userScrollEnabled = false
         ) { pageIndex ->
             when (uiState.pages[pageIndex]) {
-                AssistantPage.SELECTION -> AssistantSelectionScreen(
+                BrewAssistantPage.SELECTION -> AssistantSelectionScreen(
                     uiState = uiState,
                     onAction = onAction
                 )
 
-                AssistantPage.PARAMETERS -> AssistantParametersScreen(
+                BrewAssistantPage.PARAMETERS -> BrewAssistantParametersScreen(
                     uiState = uiState,
                     onAction = onAction
                 )
 
-                AssistantPage.SUMMARY -> AssistantSummaryScreen(
+                BrewAssistantPage.SUMMARY -> BrewAssistantSummaryScreen(
                     uiState = uiState,
                     onAction = onAction
                 )
@@ -337,10 +242,8 @@ private fun AssistantContent(
 
 @Composable
 private fun AssistantBottomBar(
-    coroutineScope: CoroutineScope,
-    pagerState: PagerState,
-    uiState: AssistantUiState,
-    onAction: (AssistantAction) -> Unit
+    uiState: BrewAssistantUiState,
+    onAction: (BrewAssistantAction) -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -349,27 +252,14 @@ private fun AssistantBottomBar(
         verticalAlignment = Alignment.Top,
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        val isFirstPage = pagerState.currentPage == 0
-        val isLastPage = pagerState.currentPage ==uiState.pages.lastIndex
-
-        val text = if (isLastPage) {
-            stringResource(id = R.string.button_save)
-        } else {
-            stringResource(id = R.string.button_next)
-        }
-
         Button(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f),
-            enabled = !isFirstPage,
+            enabled = !uiState.isFirstPage,
             onClick = {
-                coroutineScope.launch {
-                    pagerState.animateScrollToPage(
-                        page = pagerState.currentPage - 1,
-                        animationSpec = tween(500)
-                    )
-                }
+                val action = BrewAssistantAction.OnPrevious
+                onAction(action)
             }
         ) {
             Text(
@@ -383,21 +273,16 @@ private fun AssistantBottomBar(
                 .fillMaxWidth()
                 .weight(1f),
             onClick = {
-                if (isLastPage) {
-                    val action = AssistantAction.OnShowFinishDialog
-                    onAction(action)
-                } else {
-                    coroutineScope.launch {
-                        pagerState.animateScrollToPage(
-                            page = pagerState.currentPage + 1,
-                            animationSpec = tween(500)
-                        )
-                    }
-                }
+                val action = BrewAssistantAction.OnNext
+                onAction(action)
             }
         ) {
             Text(
-                text = text,
+                text = if (uiState.isLastPage) {
+                    stringResource(id = R.string.button_save)
+                } else {
+                    stringResource(id = R.string.button_next)
+                },
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )

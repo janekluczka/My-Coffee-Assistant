@@ -14,15 +14,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.luczka.mycoffee.R
-import com.luczka.mycoffee.ui.screens.brewassistant.AssistantAction
-import com.luczka.mycoffee.ui.screens.brewassistant.AssistantUiState
+import com.luczka.mycoffee.ui.screens.brewassistant.BrewAssistantAction
+import com.luczka.mycoffee.ui.screens.brewassistant.BrewAssistantUiState
 import com.luczka.mycoffee.ui.screens.brewassistant.components.AssistantSummaryCoffeeListItem
-import com.luczka.mycoffee.ui.screens.brewassistant.components.AssistantSummaryParametersListItem
+import com.luczka.mycoffee.ui.screens.brewassistant.components.BrewAssistantSummaryParametersListItem
 
 @Composable
-fun AssistantSummaryScreen(
-    uiState: AssistantUiState,
-    onAction: (AssistantAction) -> Unit,
+fun BrewAssistantSummaryScreen(
+    uiState: BrewAssistantUiState,
+    onAction: (BrewAssistantAction) -> Unit,
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -38,11 +38,11 @@ fun AssistantSummaryScreen(
             )
         }
         when (uiState) {
-            is AssistantUiState.NoneSelected -> {
+            is BrewAssistantUiState.NoneSelected -> {
                 /* No coffees selected to be displayed */
             }
 
-            is AssistantUiState.CoffeeSelected -> {
+            is BrewAssistantUiState.CoffeeSelected -> {
                 item {
                     Text(
                         modifier = Modifier.padding(
@@ -95,7 +95,7 @@ fun AssistantSummaryScreen(
         }
         item {
             Column {
-                AssistantSummaryParametersListItem(
+                BrewAssistantSummaryParametersListItem(
                     index = 0,
                     headlineText = stringResource(id = R.string.assistant_ratio),
                     trailingText = stringResource(
@@ -104,7 +104,7 @@ fun AssistantSummaryScreen(
                         uiState.ratioSelectionUiState.currentRightPagerItem()
                     )
                 )
-                AssistantSummaryParametersListItem(
+                BrewAssistantSummaryParametersListItem(
                     index = 1,
                     headlineText = stringResource(id = R.string.assistant_coffee),
                     trailingText = stringResource(
@@ -112,7 +112,7 @@ fun AssistantSummaryScreen(
                         uiState.selectedAmountsSum
                     )
                 )
-                AssistantSummaryParametersListItem(
+                BrewAssistantSummaryParametersListItem(
                     index = 2,
                     headlineText = stringResource(id = R.string.assistant_water),
                     trailingText = stringResource(
@@ -124,30 +124,3 @@ fun AssistantSummaryScreen(
         }
     }
 }
-
-//@Preview
-//@Composable
-//fun AssistantSummaryScreenPreview() {
-//    val firstSelectedCoffee = CoffeeUiState(
-//        name = "ethiopia sami",
-//        brand = "monko.",
-//        amount = "250.0"
-//    )
-//    val secondSelectedCoffee = CoffeeUiState(
-//        name = "Kolumbia",
-//        brand = "Mała Czarna",
-//        amount = "200.0"
-//    )
-//    val uiState = AssistantUiState.CoffeeSelected(
-//        selectedCoffees = mapOf(
-//            Pair(firstSelectedCoffee, AmountSelectionUiState()),
-//            Pair(secondSelectedCoffee, AmountSelectionUiState(selectedAmount = "1.2"))
-//        )
-//    )
-//    MyCoffeeTheme {
-//        AssistantSummaryScreen(
-//            uiState = uiState,
-//            onAction = {}
-//        )
-//    }
-//}

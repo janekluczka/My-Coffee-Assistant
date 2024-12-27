@@ -64,7 +64,7 @@ fun HomeScreen(
     val showDivider by remember {
         derivedStateOf { homeListState.firstVisibleItemScrollOffset != 0 }
     }
-    
+
     Scaffold(
         topBar = {
             when (widthSizeClass) {
@@ -100,13 +100,6 @@ fun HomeScreen(
                 verticalArrangement = Arrangement.spacedBy(32.dp),
                 contentPadding = PaddingValues(vertical = 16.dp)
             ) {
-//            item {
-//                Text(
-//                    modifier = Modifier.padding(horizontal = 16.dp),
-//                    text = getUserGreeting(),
-//                    style = MaterialTheme.typography.headlineLarge
-//                )
-//            }
                 item {
                     OutlinedCard(
                         onClick = { },
@@ -131,7 +124,7 @@ fun HomeScreen(
                             ) {
                                 Button(
                                     onClick = {
-                                        val action = HomeAction.NavigateToAssistant
+                                        val action = HomeAction.NavigateToBrewAssistant
                                         onAction(action)
                                     }
                                 ) {

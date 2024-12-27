@@ -2,10 +2,12 @@ package com.luczka.mycoffee.ui.screens.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.luczka.mycoffee.ui.mappers.toUiState
 import com.luczka.mycoffee.domain.repositories.MyCoffeeDatabaseRepository
+import com.luczka.mycoffee.ui.mappers.toUiState
 import com.luczka.mycoffee.ui.models.BrewUiState
 import com.luczka.mycoffee.ui.models.CoffeeUiState
+import com.luczka.mycoffee.ui.navigation.MainNavHostRoute
+import com.luczka.mycoffee.ui.navigation.MainNavigator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -29,7 +31,8 @@ private data class HomeViewModelState(
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val myCoffeeDatabaseRepository: MyCoffeeDatabaseRepository
+    private val myCoffeeDatabaseRepository: MyCoffeeDatabaseRepository,
+    private val mainNavigator: MainNavigator
 ) : ViewModel() {
 
     private val viewModelState = MutableStateFlow(HomeViewModelState())
@@ -59,4 +62,32 @@ class HomeViewModel @Inject constructor(
             }
         }
     }
+
+    fun onAction(action: HomeAction) {
+        when(action) {
+            is HomeAction.OnMenuClicked -> {}
+            is HomeAction.NavigateToBrewAssistant -> navigateToAssistant()
+            is HomeAction.NavigateToBrewDetails -> navigateToBrewDetails(action.brewId)
+            is HomeAction.NavigateToCoffeeDetails -> navigateToCoffeeDetails(action.coffeeId)
+        }
+    }
+
+    private fun navigateToAssistant() {
+        viewModelScope.launch {
+            mainNavigator.navigate(MainNavHostRoute.BrewAssistant)
+        }
+    }
+
+    private fun navigateToBrewDetails(brewId: Long) {
+        viewModelScope.launch {
+            mainNavigator.navigate(MainNavHostRoute.BrewDetails(brewId))
+        }
+    }
+
+    private fun navigateToCoffeeDetails(coffeeId: Long) {
+        viewModelScope.launch {
+            mainNavigator.navigate(MainNavHostRoute.CoffeeDetails(coffeeId))
+        }
+    }
+
 }

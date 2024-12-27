@@ -21,11 +21,10 @@ import com.luczka.mycoffee.ui.screens.coffees.CoffeesScreen
 import com.luczka.mycoffee.ui.screens.coffees.CoffeesViewModel
 import com.luczka.mycoffee.ui.screens.equipments.EquipmentsAction
 import com.luczka.mycoffee.ui.screens.equipments.EquipmentsScreen
-import com.luczka.mycoffee.ui.screens.home.HomeAction
 import com.luczka.mycoffee.ui.screens.home.HomeScreen
 import com.luczka.mycoffee.ui.screens.home.HomeViewModel
-import com.luczka.mycoffee.ui.screens.recipecategories.MethodsScreen
 import com.luczka.mycoffee.ui.screens.recipecategories.RecipeCategoriesAction
+import com.luczka.mycoffee.ui.screens.recipecategories.RecipeCategoriesScreen
 import com.luczka.mycoffee.ui.screens.recipecategories.RecipeCategoriesViewModel
 import com.luczka.mycoffee.ui.screens.recipedetails.RecipeDetailsAction
 import com.luczka.mycoffee.ui.screens.recipedetails.RecipeDetailsScreen
@@ -55,14 +54,7 @@ fun MyCoffeeNestedNavHost(
             HomeScreen(
                 widthSizeClass = widthSizeClass,
                 uiState = uiState,
-                onAction = { action ->
-                    when (action) {
-                        is HomeAction.OnMenuClicked -> onAction(MainAction.OnMenuClicked)
-                        is HomeAction.NavigateToAssistant -> onAction(MainAction.NavigateToAssistant)
-                        is HomeAction.NavigateToBrewDetails -> onAction(MainAction.NavigateToBrewDetails(brewId = action.brewId))
-                        is HomeAction.NavigateToCoffeeDetails -> onAction(MainAction.NavigateToCoffeeDetails(coffeeId = action.coffeeId))
-                    }
-                }
+                onAction = viewModel::onAction
             )
         }
         composable<NestedNavHostRoutes.Brews> {
@@ -110,10 +102,10 @@ fun MyCoffeeNestedNavHost(
                 }
             )
         }
-        composable<NestedNavHostRoutes.Methods> {
+        composable<NestedNavHostRoutes.RecipeCategories> {
             val viewModel = hiltViewModel<RecipeCategoriesViewModel>()
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-            MethodsScreen(
+            RecipeCategoriesScreen(
                 widthSizeClass = widthSizeClass,
                 uiState = uiState,
                 onAction = { action ->

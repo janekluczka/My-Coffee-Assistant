@@ -13,7 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun AssistantSummaryParametersListItem(
+fun BrewAssistantSummaryParametersListItem(
     index: Int,
     headlineText: String,
     trailingText: String

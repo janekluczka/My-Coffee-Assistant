@@ -1,4 +1,4 @@
-package com.luczka.mycoffee.ui.screens.brewassistant.dialogs
+package com.luczka.mycoffee.ui.components.custom.doubleverticalpager
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -31,7 +31,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.luczka.mycoffee.R
 import com.luczka.mycoffee.ui.components.textfields.FilteredMyCoffeeOutlinedTextField
-import com.luczka.mycoffee.ui.screens.brewassistant.components.DoubleVerticalPagerState
 
 @Composable
 fun DoubleVerticalPagerInputDialog(

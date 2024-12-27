@@ -11,12 +11,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.luczka.mycoffee.R
-import com.luczka.mycoffee.ui.screens.brewassistant.AssistantUiState
+import com.luczka.mycoffee.ui.screens.brewassistant.BrewAssistantUiState
 
 @Composable
-fun AssistantSaveDialog(
+fun BrewAssistantSaveDialog(
     modifier: Modifier = Modifier,
-    uiState: AssistantUiState,
+    uiState: BrewAssistantUiState,
     onNegative: () -> Unit,
     onPositive: () -> Unit,
 ) {
@@ -44,13 +44,13 @@ fun AssistantSaveDialog(
 }
 
 @Composable
-private fun AssistantSaveDialogText(uiState: AssistantUiState) {
+private fun AssistantSaveDialogText(uiState: BrewAssistantUiState) {
     when (uiState) {
-        is AssistantUiState.NoneSelected -> {
+        is BrewAssistantUiState.NoneSelected -> {
 
         }
 
-        is AssistantUiState.CoffeeSelected -> {
+        is BrewAssistantUiState.CoffeeSelected -> {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 uiState.selectedCoffees.keys.forEachIndexed { index, selectedCoffee ->
                     val amountSelectionUiState = uiState.selectedCoffees[selectedCoffee]!!

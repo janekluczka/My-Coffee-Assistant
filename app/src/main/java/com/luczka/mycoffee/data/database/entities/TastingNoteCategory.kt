@@ -3,9 +3,13 @@ package com.luczka.mycoffee.data.database.entities
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "tasting_note_category")
+@Entity
 data class TastingNoteCategory(
     @PrimaryKey(autoGenerate = true)
     val categoryId: Long = 0,
-    val name: String
-)
+    val name: Int
+) {
+    companion object {
+        const val KEY_COLUMN = "categoryId"
+    }
+}

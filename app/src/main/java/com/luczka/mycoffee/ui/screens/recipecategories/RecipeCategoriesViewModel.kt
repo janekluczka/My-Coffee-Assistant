@@ -59,7 +59,9 @@ class RecipeCategoriesViewModel @Inject constructor(
         )
 
     init {
-        viewModelState.update { it.copy(isLoading = true) }
+        viewModelState.update {
+            it.copy(isLoading = true)
+        }
         viewModelScope.launch {
             val result = firebaseRepository.getMethods()
             when {

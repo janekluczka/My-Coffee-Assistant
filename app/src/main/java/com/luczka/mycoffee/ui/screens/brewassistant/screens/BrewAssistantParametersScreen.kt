@@ -27,18 +27,18 @@ import com.luczka.mycoffee.ui.components.icons.PauseCircleIcon
 import com.luczka.mycoffee.ui.components.icons.PlayCircleIcon
 import com.luczka.mycoffee.ui.components.icons.StopCircleIcon
 import com.luczka.mycoffee.ui.models.CoffeeUiState
-import com.luczka.mycoffee.ui.screens.brewassistant.AssistantAction
-import com.luczka.mycoffee.ui.screens.brewassistant.AssistantUiState
-import com.luczka.mycoffee.ui.screens.brewassistant.components.AssistantParametersExpandableListItem
-import com.luczka.mycoffee.ui.screens.brewassistant.components.AssistantParametersListItem
-import com.luczka.mycoffee.ui.screens.brewassistant.components.DoubleVerticalPager
-import com.luczka.mycoffee.ui.screens.brewassistant.components.DoubleVerticalPagerState
-import com.luczka.mycoffee.ui.screens.brewassistant.dialogs.DoubleVerticalPagerInputDialog
+import com.luczka.mycoffee.ui.screens.brewassistant.BrewAssistantAction
+import com.luczka.mycoffee.ui.screens.brewassistant.BrewAssistantUiState
+import com.luczka.mycoffee.ui.screens.brewassistant.components.BrewAssistantParametersExpandableListItem
+import com.luczka.mycoffee.ui.screens.brewassistant.components.BrewAssistantParametersListItem
+import com.luczka.mycoffee.ui.components.custom.doubleverticalpager.DoubleVerticalPager
+import com.luczka.mycoffee.ui.components.custom.doubleverticalpager.DoubleVerticalPagerState
+import com.luczka.mycoffee.ui.components.custom.doubleverticalpager.DoubleVerticalPagerInputDialog
 
 @Composable
-fun AssistantParametersScreen(
-    uiState: AssistantUiState,
-    onAction: (AssistantAction) -> Unit
+fun BrewAssistantParametersScreen(
+    uiState: BrewAssistantUiState,
+    onAction: (BrewAssistantAction) -> Unit
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -69,7 +69,7 @@ fun AssistantParametersScreen(
         item {
             ListItem(
                 modifier = Modifier.clickable {
-                    val action = AssistantAction.OnSelectRecipeClicked
+                    val action = BrewAssistantAction.OnSelectRecipeClicked
                     onAction(action)
                 },
                 headlineContent = {
@@ -104,7 +104,7 @@ fun AssistantParametersScreen(
                     },
                     onPositive = { coffeeRatio, waterRatio ->
                         openDialog = false
-                        val action = AssistantAction.OnRatioSelectionCoffeeAndWaterValueChanged(
+                        val action = BrewAssistantAction.OnRatioSelectionCoffeeAndWaterValueChanged(
                             leftInputValue = coffeeRatio,
                             rightInputValue = waterRatio
                         )
@@ -116,20 +116,24 @@ fun AssistantParametersScreen(
             RatioSelectionListItemWithPicker(
                 ratioDoubleVerticalPagerState = uiState.ratioSelectionUiState,
                 openPicker = openPicker,
-                onClick = { openPicker = !openPicker },
+                onClick = {
+                    openPicker = !openPicker
+                },
                 onUpdateLeftPager = { index ->
-                    val action = AssistantAction.OnRatioSelectionCoffeeIndexChanged(leftPagerPageIndex = index)
+                    val action = BrewAssistantAction.OnRatioSelectionCoffeeIndexChanged(leftPagerPageIndex = index)
                     onAction(action)
                 },
                 onUpdateRightPager = { index ->
-                    val action = AssistantAction.OnRatioSelectionWaterIndexChanged(rightPagerPageIndex = index)
+                    val action = BrewAssistantAction.OnRatioSelectionWaterIndexChanged(rightPagerPageIndex = index)
                     onAction(action)
                 },
-                onOpenDialog = { openDialog = true }
+                onOpenDialog = {
+                    openDialog = true
+                }
             )
         }
         when (uiState) {
-            is AssistantUiState.NoneSelected -> {
+            is BrewAssistantUiState.NoneSelected -> {
                 item {
                     var openAmountPicker by rememberSaveable { mutableStateOf(false) }
                     var openAmountDialog by rememberSaveable { mutableStateOf(false) }
@@ -143,7 +147,7 @@ fun AssistantParametersScreen(
                             },
                             onPositive = { leftInputValue, rightInputValue ->
                                 openAmountDialog = false
-                                val action = AssistantAction.OnAmountSelectionIntegerAndFractionalPartsValueChanged(
+                                val action = BrewAssistantAction.OnAmountSelectionIntegerAndFractionalPartsValueChanged(
                                     key = null,
                                     leftInputValue = leftInputValue,
                                     rightInputValue = rightInputValue
@@ -156,27 +160,25 @@ fun AssistantParametersScreen(
                     AmountSelectionListItemWithPicker(
                         amountDoubleVerticalPagerState = uiState.defaultAmountDoubleVerticalPagerState,
                         openPicker = openAmountPicker,
-                        onClick = { openAmountPicker = !openAmountPicker },
+                        onClick = {
+                            openAmountPicker = !openAmountPicker
+                        },
                         onUpdateLeftPager = { index ->
-                            val action = AssistantAction.OnAmountSelectionIntegerPartIndexChanged(
-                                key = null,
-                                leftPagerPageIndex = index
-                            )
+                            val action = BrewAssistantAction.OnAmountSelectionIntegerPartIndexChanged(key = null, leftPagerPageIndex = index)
                             onAction(action)
                         },
                         onUpdateRightPager = { index ->
-                            val action = AssistantAction.OnAmountSelectionFractionalPartIndexChanged(
-                                key = null,
-                                rightPagerPageIndex = index
-                            )
+                            val action = BrewAssistantAction.OnAmountSelectionFractionalPartIndexChanged(key = null, rightPagerPageIndex = index)
                             onAction(action)
                         },
-                        onOpenDialog = { openAmountDialog = true }
+                        onOpenDialog = {
+                            openAmountDialog = true
+                        }
                     )
                 }
             }
 
-            is AssistantUiState.CoffeeSelected -> {
+            is BrewAssistantUiState.CoffeeSelected -> {
                 uiState.selectedCoffees.entries.forEachIndexed { index, entry ->
                     item {
                         val selectedCoffee = entry.key
@@ -194,13 +196,12 @@ fun AssistantParametersScreen(
                                 },
                                 onPositive = { leftInputValue, rightInputValue ->
                                     openAmountDialog = false
-                                    val action = AssistantAction.OnAmountSelectionIntegerAndFractionalPartsValueChanged(
+                                    val action = BrewAssistantAction.OnAmountSelectionIntegerAndFractionalPartsValueChanged(
                                         key = selectedCoffee,
                                         leftInputValue = leftInputValue,
                                         rightInputValue = rightInputValue
                                     )
                                     onAction(action)
-
                                 },
                             )
                         }
@@ -210,22 +211,20 @@ fun AssistantParametersScreen(
                             selectedCoffee = selectedCoffee,
                             amountDoubleVerticalPagerState = amountDoubleVerticalPagerState,
                             openAmountPicker = openAmountPicker,
-                            onClick = { openAmountPicker = !openAmountPicker },
+                            onClick = {
+                                openAmountPicker = !openAmountPicker
+                            },
                             onUpdateCoffeeAmountSelectionIntegerPart = { key, index ->
-                                val action = AssistantAction.OnAmountSelectionIntegerPartIndexChanged(
-                                    key = key,
-                                    leftPagerPageIndex = index
-                                )
+                                val action = BrewAssistantAction.OnAmountSelectionIntegerPartIndexChanged(key = key, leftPagerPageIndex = index)
                                 onAction(action)
                             },
                             onUpdateCoffeeAmountSelectionDecimalPart = { key, index ->
-                                val action = AssistantAction.OnAmountSelectionFractionalPartIndexChanged(
-                                    key = key,
-                                    rightPagerPageIndex = index
-                                )
+                                val action = BrewAssistantAction.OnAmountSelectionFractionalPartIndexChanged(key = key, rightPagerPageIndex = index)
                                 onAction(action)
                             },
-                            onOpenDialog = { openAmountDialog = true }
+                            onOpenDialog = {
+                                openAmountDialog = true
+                            }
                         )
                     }
                 }
@@ -233,11 +232,11 @@ fun AssistantParametersScreen(
         }
         item {
             val index = when (uiState) {
-                is AssistantUiState.NoneSelected -> 3
-                is AssistantUiState.CoffeeSelected -> uiState.selectedCoffees.size + 2
+                is BrewAssistantUiState.NoneSelected -> 3
+                is BrewAssistantUiState.CoffeeSelected -> uiState.selectedCoffees.size + 2
             }
 
-            AssistantParametersListItem(
+            BrewAssistantParametersListItem(
                 index = index,
                 overlineText = stringResource(id = R.string.assistant_water),
                 headlineText = stringResource(
@@ -264,11 +263,11 @@ fun AssistantParametersScreen(
             var openTimerDialog by rememberSaveable { mutableStateOf(false) }
 
             val index = when (uiState) {
-                is AssistantUiState.NoneSelected -> 4
-                is AssistantUiState.CoffeeSelected -> uiState.selectedCoffees.size + 3
+                is BrewAssistantUiState.NoneSelected -> 4
+                is BrewAssistantUiState.CoffeeSelected -> uiState.selectedCoffees.size + 3
             }
 
-            AssistantParametersListItem(
+            BrewAssistantParametersListItem(
                 index = index,
                 overlineText = "Time",
                 headlineText = uiState.formattedTime,
@@ -283,11 +282,11 @@ fun AssistantParametersScreen(
                         }
                         IconButton(
                             onClick = {
-                                val action = AssistantAction.OnStartStopTimerClicked
+                                val action = BrewAssistantAction.OnStartStopTimerClicked
                                 onAction(action)
                             }
                         ) {
-                            if(uiState.isTimerRunning) {
+                            if (uiState.isTimerRunning) {
                                 PauseCircleIcon()
                             } else {
                                 PlayCircleIcon()
@@ -295,7 +294,7 @@ fun AssistantParametersScreen(
                         }
                         IconButton(
                             onClick = {
-                                val action = AssistantAction.OnResetTimerClicked
+                                val action = BrewAssistantAction.OnResetTimerClicked
                                 onAction(action)
                             }
                         ) {
@@ -317,7 +316,7 @@ private fun RatioSelectionListItemWithPicker(
     onUpdateRightPager: (Int) -> Unit,
     onOpenDialog: () -> Unit
 ) {
-    AssistantParametersExpandableListItem(
+    BrewAssistantParametersExpandableListItem(
         onClick = onClick,
         index = 1,
         overlineText = stringResource(id = R.string.assistant_ratio),
@@ -348,7 +347,7 @@ private fun AmountSelectionListItemWithPicker(
 ) {
     val integerPart = amountDoubleVerticalPagerState.currentLeftPagerItem()
     val fractionalPart = amountDoubleVerticalPagerState.currentRightPagerItem()
-    AssistantParametersExpandableListItem(
+    BrewAssistantParametersExpandableListItem(
         onClick = onClick,
         index = 2,
         overlineText = stringResource(id = R.string.assistant_coffee),
@@ -381,7 +380,7 @@ private fun AmountSelectionListItemWithPicker(
 ) {
     val integerPart = amountDoubleVerticalPagerState.currentLeftPagerItem()
     val fractionalPart = amountDoubleVerticalPagerState.currentRightPagerItem()
-    AssistantParametersExpandableListItem(
+    BrewAssistantParametersExpandableListItem(
         onClick = onClick,
         index = index,
         overlineText = stringResource(
@@ -408,47 +407,3 @@ private fun AmountSelectionListItemWithPicker(
         )
     }
 }
-
-//@Preview
-//@Composable
-//fun AssistantParametersScreenPreview() {
-//    val firstSelectedCoffee = CoffeeUiState(
-//        name = "ethiopia sami",
-//        brand = "monko.",
-//        amount = "250.0"
-//    )
-//    val uiState = AssistantUiState.CoffeeSelected(
-//        selectedCoffees = mapOf(
-//            Pair(firstSelectedCoffee, AmountSelectionUiState(selectedAmount = "1.2"))
-//        )
-//    )
-//    AssistantParametersScreen(
-//        uiState = uiState,
-//        onAction = {}
-//    )
-//}
-//
-//@Preview
-//@Composable
-//fun AssistantParametersScreenPreview1() {
-//    val firstSelectedCoffee = CoffeeUiState(
-//        name = "ethiopia sami",
-//        brand = "monko.",
-//        amount = "250.0"
-//    )
-//    val secondSelectedCoffee = CoffeeUiState(
-//        name = "Kolumbia",
-//        brand = "Mała Czarna",
-//        amount = "200.0"
-//    )
-//    val uiState = AssistantUiState.CoffeeSelected(
-//        selectedCoffees = mapOf(
-//            Pair(firstSelectedCoffee, AmountSelectionUiState()),
-//            Pair(secondSelectedCoffee, AmountSelectionUiState(selectedAmount = "1.2"))
-//        )
-//    )
-//    AssistantParametersScreen(
-//        uiState = uiState,
-//        onAction = {}
-//    )
-//}

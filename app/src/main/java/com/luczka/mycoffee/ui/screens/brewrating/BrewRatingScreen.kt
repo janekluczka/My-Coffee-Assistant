@@ -1,4 +1,4 @@
-package com.luczka.mycoffee.ui.screens.assistantrating
+package com.luczka.mycoffee.ui.screens.brewrating
 
 import androidx.compose.runtime.Composable
 
