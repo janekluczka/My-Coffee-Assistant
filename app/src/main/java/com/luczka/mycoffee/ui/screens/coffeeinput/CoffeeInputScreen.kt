@@ -55,7 +55,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -111,11 +110,6 @@ fun CoffeeInputScreen(
 
     val sheetState = rememberModalBottomSheetState()
 
-    var openBottomSheet by rememberSaveable { mutableStateOf(false) }
-
-    var openDiscardDialog by rememberSaveable { mutableStateOf(false) }
-    var openScaInfoDialog by rememberSaveable { mutableStateOf(false) }
-
     val roastListState = rememberLazyListState()
     val processListState = rememberLazyListState()
 
@@ -166,42 +160,29 @@ fun CoffeeInputScreen(
         }
     )
 
-    LaunchedEffect(uiState.isSaved) {
-        if (uiState.isSaved) {
-            val action = CoffeeInputAction.NavigateUp
-            onAction(action)
-        }
-    }
-
     BackHandler {
-        onBackPressed(
-            coffeeInputUiState = uiState,
-            onAction = { action ->
-                if (action is CoffeeInputAction.OnOpenDiscardDialog) {
-                    openDiscardDialog = true
-                }
-                onAction(action)
-            }
-        )
+        val action = CoffeeInputAction.OnBackClicked
+        onAction(action)
     }
 
-    if (openDiscardDialog) {
+    if (uiState.openDiscardDialog) {
         CoffeeInputDiscardDialog(
             onNegative = {
-                openDiscardDialog = false
+                val action = CoffeeInputAction.OnHideDiscardDialog
+                onAction(action)
             },
             onPositive = {
-                openDiscardDialog = false
                 val action = CoffeeInputAction.NavigateUp
                 onAction(action)
             }
         )
     }
 
-    if (openScaInfoDialog) {
+    if (uiState.openScaInfoDialog) {
         CoffeeInputScaInfoDialog(
             onDismiss = {
-                openScaInfoDialog = false
+                val action = CoffeeInputAction.OnHideScaInfoDialog
+                onAction(action)
             }
         )
     }
@@ -210,19 +191,14 @@ fun CoffeeInputScreen(
         topBar = {
             AddCoffeeTopBar(
                 uiState = uiState,
-                onAction = { action ->
-                    if (action is CoffeeInputAction.OnOpenDiscardDialog) {
-                        openDiscardDialog = true
-                    }
-                    onAction(action)
-                }
+                onAction = onAction
             )
         },
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState)
         }
     ) { innerPadding ->
-        if (openBottomSheet) {
+        if (uiState.openBottomSheet) {
             val bottomSystemBarHeight = with(LocalDensity.current) {
                 WindowInsets.systemBars.getBottom(this).toDp()
             }
@@ -230,14 +206,16 @@ fun CoffeeInputScreen(
             ModalBottomSheet(
                 sheetState = sheetState,
                 onDismissRequest = {
-                    openBottomSheet = false
+                    val action = CoffeeInputAction.HideBottomSheet
+                    onAction(action)
                 },
                 tonalElevation = 0.dp
             ) {
                 Column(modifier = Modifier.padding(bottom = bottomSystemBarHeight)) {
                     ListItem(
                         modifier = Modifier.clickable {
-                            openBottomSheet = false
+                            val action = CoffeeInputAction.HideBottomSheet
+                            onAction(action)
 
                             if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PERMISSION_GRANTED) {
                                 photoUri = createImageFile(context)
@@ -255,7 +233,8 @@ fun CoffeeInputScreen(
                     )
                     ListItem(
                         modifier = Modifier.clickable {
-                            openBottomSheet = false
+                            val action = CoffeeInputAction.HideBottomSheet
+                            onAction(action)
 
                             val requiredPermissions = when {
                                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE -> arrayOf(
@@ -298,14 +277,7 @@ fun CoffeeInputScreen(
             uiState = uiState,
             roastListState = roastListState,
             processListState = processListState,
-            onAction = { action ->
-                when (action) {
-                    is CoffeeInputAction.OnAddImageClicked -> openBottomSheet = true
-                    is CoffeeInputAction.OnScaInfoButtonClicked -> openScaInfoDialog = true
-                    else -> {}
-                }
-                onAction(action)
-            }
+            onAction = onAction
         )
     }
 }
@@ -332,10 +304,8 @@ private fun AddCoffeeTopBar(
         navigationIcon = {
             IconButton(
                 onClick = {
-                    onBackPressed(
-                        coffeeInputUiState = uiState,
-                        onAction = onAction
-                    )
+                    val action = CoffeeInputAction.OnBackClicked
+                    onAction(action)
                 }
             ) {
                 CloseIcon()
@@ -350,7 +320,7 @@ private fun AddCoffeeTopBar(
         },
         actions = {
             TextButton(
-                enabled = !uiState.isLoading || !uiState.isSaved,
+                enabled = !uiState.isLoading,
                 onClick = {
                     val action = CoffeeInputAction.OnSaveClicked
                     onAction(action)
@@ -360,18 +330,6 @@ private fun AddCoffeeTopBar(
             }
         }
     )
-}
-
-private fun onBackPressed(
-    coffeeInputUiState: CoffeeInputUiState,
-    onAction: (CoffeeInputAction) -> Unit,
-) {
-    val action = if (coffeeInputUiState.newOrUpdatedCoffeeUiState.isBlank()) {
-        CoffeeInputAction.NavigateUp
-    } else {
-        CoffeeInputAction.OnOpenDiscardDialog
-    }
-    onAction(action)
 }
 
 @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
@@ -735,7 +693,7 @@ private fun AddCoffeeContent(
                     trailingIcon = {
                         IconButton(
                             onClick = {
-                                val action = CoffeeInputAction.OnScaInfoButtonClicked
+                                val action = CoffeeInputAction.OnShowScaInfoDialog
                                 onAction(action)
                             }
                         ) {

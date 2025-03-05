@@ -8,8 +8,10 @@ import com.luczka.mycoffee.ui.mappers.toUiState
 import com.luczka.mycoffee.ui.models.BrewUiState
 import com.luczka.mycoffee.ui.models.SwipeableListItemUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -58,6 +60,9 @@ class BrewsViewModel @Inject constructor(
             initialValue = viewModelState.value.toBrewsUiState()
         )
 
+    private val _navigationEvent = MutableSharedFlow<BrewsNavigationEvent>()
+    val navigationEvent = _navigationEvent.asSharedFlow()
+
     init {
         viewModelScope.launch {
             myCoffeeDatabaseRepository
@@ -77,13 +82,25 @@ class BrewsViewModel @Inject constructor(
 
     fun onAction(action: BrewsAction) {
         when (action) {
-            is BrewsAction.NavigateToAssistant -> {}
-            is BrewsAction.NavigateToBrewDetails -> {}
+            is BrewsAction.NavigateToAssistant -> navigateToAssistant()
+            is BrewsAction.NavigateToBrewDetails -> navigateToBrewDetails(action.brewId)
 
             is BrewsAction.OnSelectedFilterChanged -> selectFilter(action.brewFilter)
             is BrewsAction.OnItemActionsExpanded -> collapseOtherItemsActions(action.brewId)
             is BrewsAction.OnItemActionsCollapsed -> collapseItemsActions(action.brewId)
             is BrewsAction.OnDeleteClicked -> deleteBrew(action.brewId)
+        }
+    }
+
+    private fun navigateToAssistant() {
+        viewModelScope.launch {
+            _navigationEvent.emit(BrewsNavigationEvent.NavigateToAssistant)
+        }
+    }
+
+    private fun navigateToBrewDetails(brewId: Long) {
+        viewModelScope.launch {
+            _navigationEvent.emit(BrewsNavigationEvent.NavigateToBrewDetails(brewId))
         }
     }
 

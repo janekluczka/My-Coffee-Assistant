@@ -10,8 +10,10 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -47,6 +49,9 @@ class BrewDetailsViewModel @AssistedInject constructor(
             initialValue = viewModelState.value.toBrewDetailsUiState()
         )
 
+    private val _navigationEvents = MutableSharedFlow<BrewDetailsNavigationEvent>()
+    val navigationEvents = _navigationEvents.asSharedFlow()
+
     init {
         viewModelScope.launch {
             myCoffeeDatabaseRepository
@@ -64,9 +69,14 @@ class BrewDetailsViewModel @AssistedInject constructor(
 
     fun onAction(action: BrewDetailsAction) {
         when (action) {
-            BrewDetailsAction.NavigateUp -> {}
-
+            BrewDetailsAction.NavigateUp -> navigateUp()
             BrewDetailsAction.OnDeleteClicked -> deleteBrew()
+        }
+    }
+
+    private fun navigateUp() {
+        viewModelScope.launch {
+            _navigationEvents.emit(BrewDetailsNavigationEvent.NavigateUp)
         }
     }
 
@@ -74,6 +84,7 @@ class BrewDetailsViewModel @AssistedInject constructor(
         val brew = viewModelState.value.brew ?: return
         viewModelScope.launch {
             myCoffeeDatabaseRepository.deleteBrew(brew.toModel())
+            _navigationEvents.emit(BrewDetailsNavigationEvent.NavigateUp)
         }
     }
 

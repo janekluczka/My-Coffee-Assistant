@@ -3,9 +3,9 @@ package com.luczka.mycoffee.ui.screens.coffeeinput
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.luczka.mycoffee.domain.repositories.MyCoffeeDatabaseRepository
 import com.luczka.mycoffee.ui.mappers.toModel
 import com.luczka.mycoffee.ui.mappers.toUiState
-import com.luczka.mycoffee.domain.repositories.MyCoffeeDatabaseRepository
 import com.luczka.mycoffee.ui.models.CoffeeImageUiState
 import com.luczka.mycoffee.ui.models.CoffeeUiState
 import com.luczka.mycoffee.ui.models.ProcessUiState
@@ -15,8 +15,10 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -30,6 +32,10 @@ data class CoffeeInputUiState(
     val newOrUpdatedCoffeeUiState: CoffeeUiState = CoffeeUiState(),
     val oldCoffeeUiState: CoffeeUiState? = null,
 
+    val openBottomSheet: Boolean = false,
+    val openDiscardDialog: Boolean = false,
+    val openScaInfoDialog: Boolean = false,
+
     val showImage: Boolean = false,
     val selectedImageIndex: Int? = null,
 
@@ -41,7 +47,6 @@ data class CoffeeInputUiState(
 
     val deleteImage: Boolean = false,
     val isLoading: Boolean = false,
-    val isSaved: Boolean = false
 )
 
 @AssistedFactory
@@ -57,6 +62,9 @@ class CoffeeInputViewModel @AssistedInject constructor(
 
     private val _uiState = MutableStateFlow(CoffeeInputUiState())
     val uiState: StateFlow<CoffeeInputUiState> = _uiState.asStateFlow()
+
+    private val _navigationEvents = MutableSharedFlow<CoffeeInputNavigationEvent>()
+    val navigationEvents = _navigationEvents.asSharedFlow()
 
     init {
         if (coffeeId != null) {
@@ -76,10 +84,16 @@ class CoffeeInputViewModel @AssistedInject constructor(
 
     fun onAction(action: CoffeeInputAction) {
         when (action) {
-            is CoffeeInputAction.NavigateUp -> {}
-            is CoffeeInputAction.OnOpenDiscardDialog -> {}
+            is CoffeeInputAction.OnBackClicked -> back()
+            is CoffeeInputAction.NavigateUp -> navigateUp()
             is CoffeeInputAction.OnAddImageClicked -> {}
-            is CoffeeInputAction.OnScaInfoButtonClicked -> {}
+
+            is CoffeeInputAction.ShowBottomSheet -> showBottomSheet()
+            is CoffeeInputAction.HideBottomSheet -> hideBottomSheet()
+
+            is CoffeeInputAction.OnHideDiscardDialog -> hideDiscardDialog()
+            is CoffeeInputAction.OnShowScaInfoDialog -> showScaInfoDialog()
+            is CoffeeInputAction.OnHideScaInfoDialog -> hideScaInfoDialog()
 
             is CoffeeInputAction.OnImagesSelected -> updateImagesUris(action.uris)
             is CoffeeInputAction.OnImageClicked -> showImage(action.index)
@@ -95,6 +109,61 @@ class CoffeeInputViewModel @AssistedInject constructor(
             is CoffeeInputAction.OnAdditionalInformationValueChanged -> updateAdditionalInformation(action.additionalInformation)
 
             is CoffeeInputAction.OnSaveClicked -> saveCoffee()
+        }
+    }
+
+    private fun back() {
+        val newOrUpdatedCoffeeUiState = _uiState.value.newOrUpdatedCoffeeUiState
+        if (newOrUpdatedCoffeeUiState.isBlank()) {
+            viewModelScope.launch {
+                _navigationEvents.emit(CoffeeInputNavigationEvent.NavigateUp)
+            }
+        } else {
+            _uiState.update {
+                it.copy(openDiscardDialog = true)
+            }
+        }
+    }
+
+    private fun navigateUp() {
+        _uiState.update {
+            it.copy(
+                openDiscardDialog = false,
+                openScaInfoDialog = false
+            )
+        }
+        viewModelScope.launch {
+            _navigationEvents.emit(CoffeeInputNavigationEvent.NavigateUp)
+        }
+    }
+
+    private fun showBottomSheet() {
+        _uiState.update {
+            it.copy(openBottomSheet = true)
+        }
+    }
+
+    private fun hideBottomSheet() {
+        _uiState.update {
+            it.copy(openBottomSheet = false)
+        }
+    }
+
+    private fun hideDiscardDialog() {
+        _uiState.update {
+            it.copy(openDiscardDialog = false)
+        }
+    }
+
+    private fun showScaInfoDialog() {
+        _uiState.update {
+            it.copy(openScaInfoDialog = true)
+        }
+    }
+
+    private fun hideScaInfoDialog() {
+        _uiState.update {
+            it.copy(openScaInfoDialog = false)
         }
     }
 
@@ -239,11 +308,10 @@ class CoffeeInputViewModel @AssistedInject constructor(
             }
 
             _uiState.update {
-                it.copy(
-                    isLoading = false,
-                    isSaved = true
-                )
+                it.copy(isLoading = false)
             }
+
+            _navigationEvents.emit(CoffeeInputNavigationEvent.NavigateUp)
         }
     }
 

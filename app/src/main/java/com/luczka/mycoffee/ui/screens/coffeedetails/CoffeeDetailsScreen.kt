@@ -23,11 +23,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
@@ -54,49 +49,25 @@ fun CoffeeDetailsScreen(
     uiState: CoffeeDetailsUiState,
     onAction: (CoffeeDetailsAction) -> Unit
 ) {
-    var openDeleteDialog by rememberSaveable { mutableStateOf(false) }
-
-    LaunchedEffect(uiState.isDeleted) {
-        if (uiState.isDeleted) {
-            val action = CoffeeDetailsAction.NavigateUp
-            onAction(action)
-        }
-    }
-
-    if (openDeleteDialog) {
-        when (uiState) {
-            is CoffeeDetailsUiState.NoCoffee -> {
-
+    if (uiState is CoffeeDetailsUiState.HasCoffee) {
+        DeleteCoffeeDialog(
+            coffeeUiState = uiState.coffee,
+            onNegative = {
+                val action = CoffeeDetailsAction.HideDeleteDialog
+                onAction(action)
+            },
+            onPositive = {
+                val action = CoffeeDetailsAction.OnDeleteClicked
+                onAction(action)
             }
-
-            is CoffeeDetailsUiState.HasCoffee -> {
-                DeleteCoffeeDialog(
-                    coffeeUiState = uiState.coffee,
-                    onNegative = {
-                        openDeleteDialog = false
-                    },
-                    onPositive = {
-                        openDeleteDialog = false
-                        val action = CoffeeDetailsAction.OnDeleteClicked
-                        onAction(action)
-                    }
-                )
-            }
-        }
-
+        )
     }
 
     Scaffold(
         topBar = {
             CoffeeDetailsTopBar(
                 uiState = uiState,
-                onAction = { action ->
-                    when(action) {
-                        CoffeeDetailsAction.ShowDeleteDialog -> openDeleteDialog = true
-                        else -> {}
-                    }
-                    onAction(action)
-                }
+                onAction = onAction
             )
         }
     ) { innerPadding ->
@@ -118,7 +89,7 @@ private fun CoffeeDetailsList(uiState: CoffeeDetailsUiState.HasCoffee) {
         initialPage = 0,
         pageCount = {
             if (uiState.coffee.coffeeImages.isEmpty()) 1 else uiState.coffee.coffeeImages.size
-         }
+        }
     )
 
     LazyColumn(contentPadding = PaddingValues(top = 16.dp, bottom = 16.dp)) {

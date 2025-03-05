@@ -41,35 +41,30 @@ fun MainRoute(
         else -> NavigationType.BOTTOM_NAVIGATION
     }
 
-    when (navigationType) {
-        NavigationType.BOTTOM_NAVIGATION -> {
-            Scaffold(
-                bottomBar = {
-                    MyCoffeeNavigationBar(navController = nestedNavController)
-                }
-            ) { innerPadding ->
-                Column(modifier = Modifier.padding(innerPadding)) {
-                    MyCoffeeNestedNavHost(
-                        modifier = Modifier.weight(1f),
-                        widthSizeClass = widthSizeClass,
-                        navController = nestedNavController,
-                        onAction = onAction
-                    )
+    Scaffold(
+        bottomBar = {
+            if (navigationType == NavigationType.BOTTOM_NAVIGATION) {
+                Column {
                     Divider()
+                    MyCoffeeNavigationBar(navController = nestedNavController)
                 }
             }
         }
-
-        NavigationType.NAVIGATION_RAIL -> {
-            Row(modifier = Modifier.fillMaxSize()) {
+    ) { innerPadding ->
+        Row(
+            modifier = Modifier
+            .padding(innerPadding)
+            .fillMaxSize()
+        ) {
+            if (navigationType == NavigationType.NAVIGATION_RAIL) {
                 MyCoffeeNavigationRail(navController = nestedNavController)
-                MyCoffeeNestedNavHost(
-                    modifier = Modifier,
-                    widthSizeClass = widthSizeClass,
-                    navController = nestedNavController,
-                    onAction = onAction
-                )
             }
+            MyCoffeeNestedNavHost(
+                modifier = Modifier,
+                widthSizeClass = widthSizeClass,
+                navController = nestedNavController,
+                onAction = onAction
+            )
         }
     }
 }

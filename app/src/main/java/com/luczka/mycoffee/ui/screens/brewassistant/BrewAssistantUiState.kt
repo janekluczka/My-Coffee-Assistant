@@ -1,8 +1,8 @@
 package com.luczka.mycoffee.ui.screens.brewassistant
 
 import com.luczka.mycoffee.R
-import com.luczka.mycoffee.ui.models.CoffeeUiState
 import com.luczka.mycoffee.ui.components.custom.doubleverticalpager.DoubleVerticalPagerState
+import com.luczka.mycoffee.ui.models.CoffeeUiState
 
 sealed interface BrewAssistantUiState {
     val pages: List<BrewAssistantPage>
@@ -32,7 +32,7 @@ sealed interface BrewAssistantUiState {
         override val recipeCategories: List<AssistantRecipeCategoryUiState> = emptyList(),
         val defaultAmountDoubleVerticalPagerState: DoubleVerticalPagerState = DoubleVerticalPagerState(
             leftPagerItems = (1..100).toList(),
-            rightPagerItems = (1..9).toList(),
+            rightPagerItems = (1..9).toList(), //
             leftPagerPageIndex = 0,
             rightPagerPageIndex = 0,
             separatorRes = R.string.separator_amount

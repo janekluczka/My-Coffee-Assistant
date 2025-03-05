@@ -6,8 +6,10 @@ import com.luczka.mycoffee.domain.repositories.FirebaseRepository
 import com.luczka.mycoffee.ui.mappers.toUiState
 import com.luczka.mycoffee.ui.models.MethodUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -58,6 +60,9 @@ class RecipeCategoriesViewModel @Inject constructor(
             initialValue = viewModelState.value.toMethodUiState()
         )
 
+    private val _navigationEvent = MutableSharedFlow<RecipeCategoriesNavigationEvent>()
+    val navigationEvent = _navigationEvent.asSharedFlow()
+
     init {
         viewModelState.update {
             it.copy(isLoading = true)
@@ -86,6 +91,18 @@ class RecipeCategoriesViewModel @Inject constructor(
                     }
                 }
             }
+        }
+    }
+
+    fun onAction(action: RecipeCategoriesAction) {
+        when (action) {
+            is RecipeCategoriesAction.NavigateToRecipes -> navigateToRecipes(action.methodUiState)
+        }
+    }
+
+    private fun navigateToRecipes(methodUiState: MethodUiState) {
+        viewModelScope.launch {
+            _navigationEvent.emit(RecipeCategoriesNavigationEvent.NavigateToMethodDetails(methodUiState))
         }
     }
 

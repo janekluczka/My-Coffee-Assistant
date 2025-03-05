@@ -2,6 +2,8 @@ package com.luczka.mycoffee.ui.navigation
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.EaseIn
 import androidx.compose.animation.core.EaseOut
 import androidx.compose.animation.core.LinearEasing
@@ -24,16 +26,17 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -41,28 +44,27 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.navOptions
 import androidx.navigation.toRoute
 import com.luczka.mycoffee.R
-import com.luczka.mycoffee.di.MainNavigatorEntryPoint
+import com.luczka.mycoffee.ui.screens.brewassistant.BrewAssistantNavigationEvent
 import com.luczka.mycoffee.ui.screens.brewassistant.BrewAssistantViewModel
 import com.luczka.mycoffee.ui.screens.brewassistant.screens.BrewAssistantMainScreen
-import com.luczka.mycoffee.ui.screens.brewdetails.BrewDetailsAction
+import com.luczka.mycoffee.ui.screens.brewdetails.BrewDetailsNavigationEvent
 import com.luczka.mycoffee.ui.screens.brewdetails.BrewDetailsScreen
 import com.luczka.mycoffee.ui.screens.brewdetails.BrewDetailsViewModel
 import com.luczka.mycoffee.ui.screens.brewdetails.BrewDetailsViewModelFactory
 import com.luczka.mycoffee.ui.screens.brewrating.AssistantRatingScreen
-import com.luczka.mycoffee.ui.screens.coffeedetails.CoffeeDetailsAction
+import com.luczka.mycoffee.ui.screens.coffeedetails.CoffeeDetailsNavigationEvent
 import com.luczka.mycoffee.ui.screens.coffeedetails.CoffeeDetailsScreen
 import com.luczka.mycoffee.ui.screens.coffeedetails.CoffeeDetailsViewModel
 import com.luczka.mycoffee.ui.screens.coffeedetails.CoffeeDetailsViewModelFactory
-import com.luczka.mycoffee.ui.screens.coffeeinput.CoffeeInputAction
+import com.luczka.mycoffee.ui.screens.coffeeinput.CoffeeInputNavigationEvent
 import com.luczka.mycoffee.ui.screens.coffeeinput.CoffeeInputScreen
 import com.luczka.mycoffee.ui.screens.coffeeinput.CoffeeInputViewModel
 import com.luczka.mycoffee.ui.screens.coffeeinput.CoffeeInputViewModelFactory
 import com.luczka.mycoffee.ui.screens.equipmentinput.EquipmentInputAction
 import com.luczka.mycoffee.ui.screens.equipmentinput.EquipmentInputScreen
-import com.luczka.mycoffee.ui.util.ObserveAsEvents
-import dagger.hilt.android.EntryPointAccessors
 import kotlinx.coroutines.launch
 
 sealed class MainAction {
@@ -136,31 +138,12 @@ fun MyCoffeeMainNavHost(
     mainNavController: NavHostController,
     nestedNavController: NavHostController
 ) {
-    val context = LocalContext.current
-
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
 
     val coroutineScope = rememberCoroutineScope()
 
     val mainNavBackStackEntry by mainNavController.currentBackStackEntryAsState()
     val nestedNavBackStackEntry by nestedNavController.currentBackStackEntryAsState()
-
-    val entryPoint = EntryPointAccessors.fromApplication(
-        context = context,
-        entryPoint = MainNavigatorEntryPoint::class.java
-    )
-    val mainNavigator = entryPoint.getMainNavigator()
-
-    ObserveAsEvents(flow = mainNavigator.mainNavigationActions) {action ->
-        when(action) {
-            is MainNavigationAction.NavigateUp -> mainNavController.navigateUp()
-            is MainNavigationAction.Navigate -> {
-                mainNavController.navigate(route = action.route) {
-                    action.navOptions(this)
-                }
-            }
-        }
-    }
 
     val currentMainDestination = mainNavBackStackEntry?.destination
     val currentNestedDestination = nestedNavBackStackEntry?.destination
@@ -234,7 +217,7 @@ fun MyCoffeeMainNavHost(
                                 }
                             }
 
-                            is MainAction.NavigateToAssistant -> mainNavController.navigate(MainNavHostRoute.BrewAssistant)
+                            MainAction.NavigateToAssistant -> mainNavController.navigate(MainNavHostRoute.BrewAssistant)
                             is MainAction.NavigateToBrewDetails -> mainNavController.navigate(MainNavHostRoute.BrewDetails(action.brewId))
                             is MainAction.NavigateToCoffeeDetails -> mainNavController.navigate(MainNavHostRoute.CoffeeDetails(action.coffeeId))
                             is MainAction.NavigateToCoffeeInput -> mainNavController.navigate(MainNavHostRoute.CoffeeInput(action.coffeeId))
@@ -244,182 +227,141 @@ fun MyCoffeeMainNavHost(
                 )
             }
             composable<MainNavHostRoute.BrewDetails>(
-                enterTransition = {
-                    fadeIn(
-                        animationSpec = tween(durationMillis = 300, easing = LinearEasing)
-                    ) + slideIntoContainer(
-                        animationSpec = tween(durationMillis = 300, easing = EaseIn),
-                        towards = AnimatedContentTransitionScope.SlideDirection.Start
-                    )
-                },
-                exitTransition = {
-                    fadeOut(
-                        animationSpec = tween(durationMillis = 300, easing = LinearEasing)
-                    ) + slideOutOfContainer(
-                        animationSpec = tween(durationMillis = 300, easing = EaseOut),
-                        towards = AnimatedContentTransitionScope.SlideDirection.End
-                    )
-                }
+                enterTransition = fadeInAndSlideToStart(),
+                exitTransition = fadeOutAndSlideToEnd()
             ) { backStackEntry ->
                 val arguments = backStackEntry.toRoute<MainNavHostRoute.BrewDetails>()
                 val viewModel = hiltViewModel<BrewDetailsViewModel, BrewDetailsViewModelFactory> { factory ->
                     factory.create(arguments.brewId)
                 }
                 val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+                LaunchedEffect(Unit) {
+                    viewModel.navigationEvents.collect { brewDetailsNavigationEvent ->
+                        when (brewDetailsNavigationEvent) {
+                            BrewDetailsNavigationEvent.NavigateUp -> mainNavController.navigateUp()
+                        }
+                    }
+                }
+
                 BrewDetailsScreen(
                     brewDetailsUiState = uiState,
-                    onAction = { action ->
-                        when (action) {
-                            BrewDetailsAction.NavigateUp -> mainNavController.navigateUp()
-                            else -> {}
-                        }
-                        viewModel.onAction(action)
-                    }
+                    onAction = viewModel::onAction
                 )
             }
             composable<MainNavHostRoute.BrewAssistant>(
-                enterTransition = {
-                    fadeIn(
-                        animationSpec = tween(durationMillis = 300, easing = LinearEasing)
-                    ) + slideIntoContainer(
-                        animationSpec = tween(durationMillis = 300, easing = EaseIn),
-                        towards = AnimatedContentTransitionScope.SlideDirection.Start
-                    )
-                },
-                exitTransition = {
-                    fadeOut(
-                        animationSpec = tween(durationMillis = 300, easing = LinearEasing)
-                    ) + slideOutOfContainer(
-                        animationSpec = tween(durationMillis = 300, easing = EaseOut),
-                        towards = AnimatedContentTransitionScope.SlideDirection.End
-                    )
-                }
+                enterTransition = fadeInAndSlideToStart(),
+                exitTransition = fadeOutAndSlideToEnd()
             ) {
                 val viewModel = hiltViewModel<BrewAssistantViewModel>()
                 val uiState by viewModel.uiState.collectAsState()
+
+                LaunchedEffect(Unit) {
+                    viewModel.navigationEvents.collect { brewAssistantNavigationEvent ->
+                        when (brewAssistantNavigationEvent) {
+                            BrewAssistantNavigationEvent.NavigateUp -> mainNavController.navigateUp()
+                            is BrewAssistantNavigationEvent.NavigateToBrewRating -> {
+                                mainNavController.navigate(MainNavHostRoute.BrewRating(brewAssistantNavigationEvent.brewId)) {
+                                    navOptions {
+                                        popUpTo(MainNavHostRoute.BrewAssistant) { inclusive = true }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
                 BrewAssistantMainScreen(
                     uiState = uiState,
                     onAction = viewModel::onAction
                 )
             }
             composable<MainNavHostRoute.BrewRating>(
-                enterTransition = {
-                    fadeIn(
-                        animationSpec = tween(durationMillis = 300, easing = LinearEasing)
-                    ) + slideIntoContainer(
-                        animationSpec = tween(durationMillis = 300, easing = EaseIn),
-                        towards = AnimatedContentTransitionScope.SlideDirection.Start
-                    )
-                },
-                exitTransition = {
-                    fadeOut(
-                        animationSpec = tween(durationMillis = 300, easing = LinearEasing)
-                    ) + slideOutOfContainer(
-                        animationSpec = tween(durationMillis = 300, easing = EaseOut),
-                        towards = AnimatedContentTransitionScope.SlideDirection.End
-                    )
-                }
+                enterTransition = fadeInAndSlideToStart(),
+                exitTransition = fadeOutAndSlideToEnd()
             ) { backStackEntry ->
                 val arguments = backStackEntry.toRoute<MainNavHostRoute.BrewRating>()
                 AssistantRatingScreen()
             }
             composable<MainNavHostRoute.CoffeeDetails>(
-                enterTransition = {
-                    fadeIn(
-                        animationSpec = tween(durationMillis = 300, easing = LinearEasing)
-                    ) + slideIntoContainer(
-                        animationSpec = tween(durationMillis = 300, easing = EaseIn),
-                        towards = AnimatedContentTransitionScope.SlideDirection.Start
-                    )
-                },
-                exitTransition = {
-                    fadeOut(
-                        animationSpec = tween(durationMillis = 300, easing = LinearEasing)
-                    ) + slideOutOfContainer(
-                        animationSpec = tween(durationMillis = 300, easing = EaseOut),
-                        towards = AnimatedContentTransitionScope.SlideDirection.End
-                    )
-                }
+                enterTransition = fadeInAndSlideToStart(),
+                exitTransition = fadeOutAndSlideToEnd()
             ) { backStackEntry ->
                 val arguments = backStackEntry.toRoute<MainNavHostRoute.CoffeeDetails>()
                 val viewModel = hiltViewModel<CoffeeDetailsViewModel, CoffeeDetailsViewModelFactory> { factory ->
                     factory.create(arguments.coffeeId)
                 }
                 val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+                LaunchedEffect(Unit) {
+                    viewModel.navigationEvents.collect { event ->
+                        when (event) {
+                            CoffeeDetailsNavigationEvent.NavigateUp -> mainNavController.navigateUp()
+                            is CoffeeDetailsNavigationEvent.NavigateToCoffeeInput -> mainNavController.navigate(MainNavHostRoute.CoffeeInput(event.coffeeId))
+                        }
+                    }
+                }
+
                 CoffeeDetailsScreen(
                     widthSizeClass = widthSizeClass,
                     uiState = uiState,
-                    onAction = { action ->
-                        when (action) {
-                            is CoffeeDetailsAction.NavigateUp -> mainNavController.navigateUp()
-                            is CoffeeDetailsAction.OnEditClicked -> mainNavController.navigate(MainNavHostRoute.CoffeeInput(action.coffeeId))
-                            else -> {}
-                        }
-                        viewModel.onAction(action)
-                    }
+                    onAction = viewModel::onAction
                 )
             }
             composable<MainNavHostRoute.CoffeeInput>(
-                enterTransition = {
-                    fadeIn(
-                        animationSpec = tween(durationMillis = 300, easing = LinearEasing)
-                    ) + slideIntoContainer(
-                        animationSpec = tween(durationMillis = 300, easing = EaseIn),
-                        towards = AnimatedContentTransitionScope.SlideDirection.Start
-                    )
-                },
-                exitTransition = {
-                    fadeOut(
-                        animationSpec = tween(durationMillis = 300, easing = LinearEasing)
-                    ) + slideOutOfContainer(
-                        animationSpec = tween(durationMillis = 300, easing = EaseOut),
-                        towards = AnimatedContentTransitionScope.SlideDirection.End
-                    )
-                }
+                enterTransition = fadeInAndSlideToStart(),
+                exitTransition = fadeOutAndSlideToEnd()
             ) { backStackEntry ->
                 val arguments = backStackEntry.toRoute<MainNavHostRoute.CoffeeInput>()
                 val viewModel = hiltViewModel<CoffeeInputViewModel, CoffeeInputViewModelFactory> { factory ->
                     factory.create(arguments.coffeeId)
                 }
                 val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+                LaunchedEffect(Unit) {
+                    viewModel.navigationEvents.collect { event ->
+                        when (event) {
+                            CoffeeInputNavigationEvent.NavigateUp -> mainNavController.navigateUp()
+                        }
+                    }
+                }
+
                 CoffeeInputScreen(
                     uiState = uiState,
-                    onAction = { action ->
-                        when (action) {
-                            is CoffeeInputAction.NavigateUp -> mainNavController.navigateUp()
-                            else -> {}
-                        }
-                        viewModel.onAction(action)
-                    }
+                    onAction = viewModel::onAction
                 )
             }
             composable<MainNavHostRoute.EquipmentInput>(
-                enterTransition = {
-                    fadeIn(
-                        animationSpec = tween(durationMillis = 300, easing = LinearEasing)
-                    ) + slideIntoContainer(
-                        animationSpec = tween(durationMillis = 300, easing = EaseIn),
-                        towards = AnimatedContentTransitionScope.SlideDirection.Start
-                    )
-                },
-                exitTransition = {
-                    fadeOut(
-                        animationSpec = tween(durationMillis = 300, easing = LinearEasing)
-                    ) + slideOutOfContainer(
-                        animationSpec = tween(durationMillis = 300, easing = EaseOut),
-                        towards = AnimatedContentTransitionScope.SlideDirection.End
-                    )
-                }
+                enterTransition = fadeInAndSlideToStart(),
+                exitTransition = fadeOutAndSlideToEnd()
             ) {
                 EquipmentInputScreen(
                     onAction = { action ->
                         when (action) {
-                            is EquipmentInputAction.NavigateUp -> mainNavController.navigateUp()
-                            else -> {}
+                            EquipmentInputAction.NavigateUp -> mainNavController.navigateUp()
                         }
                     }
                 )
             }
         }
     }
+}
+
+private fun fadeInAndSlideToStart(): AnimatedContentTransitionScope<NavBackStackEntry>.() -> @JvmSuppressWildcards EnterTransition? = {
+    fadeIn(
+        animationSpec = tween(durationMillis = 300, easing = LinearEasing)
+    ) + slideIntoContainer(
+        animationSpec = tween(durationMillis = 300, easing = EaseIn),
+        towards = AnimatedContentTransitionScope.SlideDirection.Start
+    )
+}
+
+
+private fun fadeOutAndSlideToEnd(): AnimatedContentTransitionScope<NavBackStackEntry>.() -> @JvmSuppressWildcards ExitTransition? = {
+    fadeOut(
+        animationSpec = tween(durationMillis = 300, easing = LinearEasing)
+    ) + slideOutOfContainer(
+        animationSpec = tween(durationMillis = 300, easing = EaseOut),
+        towards = AnimatedContentTransitionScope.SlideDirection.End
+    )
 }

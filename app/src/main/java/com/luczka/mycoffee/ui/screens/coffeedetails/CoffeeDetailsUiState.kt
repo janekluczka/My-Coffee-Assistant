@@ -6,18 +6,18 @@ import com.luczka.mycoffee.ui.models.RoastUiState
 
 sealed interface CoffeeDetailsUiState {
     val isLoading: Boolean
-    val isDeleted: Boolean
+    val openDeleteDialog: Boolean
 
     data class NoCoffee(
         override val isLoading: Boolean,
-        override val isDeleted: Boolean
+        override val openDeleteDialog: Boolean
     ) : CoffeeDetailsUiState
 
     data class HasCoffee(
+        override val isLoading: Boolean,
+        override val openDeleteDialog: Boolean,
         val roasts: List<RoastUiState> = RoastUiState.entries,
         val processes: List<ProcessUiState> = ProcessUiState.entries,
         val coffee: CoffeeUiState,
-        override val isLoading: Boolean,
-        override val isDeleted: Boolean
     ) : CoffeeDetailsUiState
 }

@@ -3,23 +3,22 @@ package com.luczka.mycoffee.ui.screens.brewassistant
 import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.navOptions
 import com.luczka.mycoffee.R
 import com.luczka.mycoffee.domain.repositories.MyCoffeeDatabaseRepository
+import com.luczka.mycoffee.ui.components.custom.doubleverticalpager.DoubleVerticalPagerState
 import com.luczka.mycoffee.ui.mappers.toUiState
 import com.luczka.mycoffee.ui.models.BrewUiState
 import com.luczka.mycoffee.ui.models.BrewedCoffeeUiState
 import com.luczka.mycoffee.ui.models.CoffeeUiState
-import com.luczka.mycoffee.ui.navigation.MainNavHostRoute
-import com.luczka.mycoffee.ui.navigation.MainNavigator
-import com.luczka.mycoffee.ui.components.custom.doubleverticalpager.DoubleVerticalPagerState
 import com.luczka.mycoffee.ui.util.TimeFormatter
 import com.luczka.mycoffee.ui.util.toStringWithOneDecimalPoint
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -179,8 +178,7 @@ private data class BrewAssistantViewModelState(
 
 @HiltViewModel
 class BrewAssistantViewModel @Inject constructor(
-    private val myCoffeeDatabaseRepository: MyCoffeeDatabaseRepository,
-    private val mainNavigator: MainNavigator
+    private val myCoffeeDatabaseRepository: MyCoffeeDatabaseRepository
 ) : ViewModel() {
 
     private val viewModelState = MutableStateFlow(BrewAssistantViewModelState())
@@ -191,6 +189,9 @@ class BrewAssistantViewModel @Inject constructor(
             started = SharingStarted.Eagerly,
             initialValue = viewModelState.value.toAssistantUiState()
         )
+
+    private val _navigationEvents = MutableSharedFlow<BrewAssistantNavigationEvent>()
+    val navigationEvents = _navigationEvents.asSharedFlow()
 
     private var timerJob: Job? = null
 
@@ -228,7 +229,10 @@ class BrewAssistantViewModel @Inject constructor(
                 if (action.key == null) {
                     updateAmountLeftPagerIndex(leftPagerPageIndex = action.leftPagerPageIndex)
                 } else {
-                    updateAmountLeftPagerIndex(key = action.key, leftPagerPageIndex = action.leftPagerPageIndex)
+                    updateAmountLeftPagerIndex(
+                        key = action.key,
+                        leftPagerPageIndex = action.leftPagerPageIndex
+                    )
                 }
             }
 
@@ -236,15 +240,25 @@ class BrewAssistantViewModel @Inject constructor(
                 if (action.key == null) {
                     updateAmountRightPagerIndex(rightPagerPageIndex = action.rightPagerPageIndex)
                 } else {
-                    updateAmountRightPagerIndex(key = action.key, rightPagerPageIndex = action.rightPagerPageIndex)
+                    updateAmountRightPagerIndex(
+                        key = action.key,
+                        rightPagerPageIndex = action.rightPagerPageIndex
+                    )
                 }
             }
 
             is BrewAssistantAction.OnAmountSelectionIntegerAndFractionalPartsValueChanged -> {
                 if (action.key == null) {
-                    updateAmountSelectionValue(action.leftInputValue, action.rightInputValue)
+                    updateAmountSelectionValue(
+                        leftInputValue = action.leftInputValue,
+                        rightInputValue = action.rightInputValue
+                    )
                 } else {
-                    updateAmountSelectionValue(action.key, action.leftInputValue, action.rightInputValue)
+                    updateAmountSelectionValue(
+                        key = action.key,
+                        leftInputValue = action.leftInputValue,
+                        rightInputValue = action.rightInputValue
+                    )
                 }
             }
 
@@ -260,7 +274,7 @@ class BrewAssistantViewModel @Inject constructor(
     private fun abort() {
         if (viewModelState.value.selectedCoffees.isEmpty()) {
             viewModelScope.launch {
-                mainNavigator.navigateUp()
+                _navigationEvents.emit(BrewAssistantNavigationEvent.NavigateUp)
             }
         } else {
             viewModelState.update {
@@ -278,7 +292,7 @@ class BrewAssistantViewModel @Inject constructor(
                     showBottomSheet = false
                 )
             }
-            mainNavigator.navigateUp()
+            _navigationEvents.emit(BrewAssistantNavigationEvent.NavigateUp)
         }
     }
 
@@ -291,7 +305,7 @@ class BrewAssistantViewModel @Inject constructor(
         if (currentPage == 0) {
             if (selectedCoffees.isEmpty()) {
                 viewModelScope.launch {
-                    mainNavigator.navigateUp()
+                    _navigationEvents.emit(BrewAssistantNavigationEvent.NavigateUp)
                 }
             } else {
                 viewModelState.update {
@@ -582,11 +596,7 @@ class BrewAssistantViewModel @Inject constructor(
 //                }
 //            }
 
-            mainNavigator.navigate(MainNavHostRoute.BrewRating(brewId = 0L)) {
-                navOptions {
-                    popUpTo(MainNavHostRoute.BrewAssistant) { inclusive = true }
-                }
-            }
+            _navigationEvents.emit(BrewAssistantNavigationEvent.NavigateToBrewRating(brewId = 0L))
         }
     }
 

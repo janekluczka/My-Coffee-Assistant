@@ -2,16 +2,18 @@ package com.luczka.mycoffee.ui.screens.coffeedetails
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.luczka.mycoffee.domain.repositories.MyCoffeeDatabaseRepository
 import com.luczka.mycoffee.ui.mappers.toModel
 import com.luczka.mycoffee.ui.mappers.toUiState
-import com.luczka.mycoffee.domain.repositories.MyCoffeeDatabaseRepository
 import com.luczka.mycoffee.ui.models.CoffeeUiState
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -20,20 +22,20 @@ import kotlinx.coroutines.launch
 data class CoffeeDetailsViewModelState(
     val coffeeUiState: CoffeeUiState? = null,
     val isLoading: Boolean = false,
-    val isDeleted: Boolean = false
+    val openDeleteDialog: Boolean = false
 ) {
     fun toCoffeeDetailsUiState(): CoffeeDetailsUiState {
         if (coffeeUiState == null) {
             return CoffeeDetailsUiState.NoCoffee(
                 isLoading = isLoading,
-                isDeleted = isDeleted
+                openDeleteDialog = openDeleteDialog
             )
         }
 
         return CoffeeDetailsUiState.HasCoffee(
             coffee = coffeeUiState,
             isLoading = isLoading,
-            isDeleted = isDeleted
+            openDeleteDialog = openDeleteDialog
         )
     }
 }
@@ -58,6 +60,9 @@ class CoffeeDetailsViewModel @AssistedInject constructor(
             initialValue = viewModelState.value.toCoffeeDetailsUiState()
         )
 
+    private val _navigationEvents = MutableSharedFlow<CoffeeDetailsNavigationEvent>()
+    val navigationEvents = _navigationEvents.asSharedFlow()
+
     init {
         viewModelScope.launch {
             myCoffeeDatabaseRepository.getCoffeeFlow(coffeeId).collect { coffeeModel ->
@@ -70,9 +75,18 @@ class CoffeeDetailsViewModel @AssistedInject constructor(
 
     fun onAction(action: CoffeeDetailsAction) {
         when (action) {
-            CoffeeDetailsAction.OnFavouriteClicked -> updateFavourite()
-            CoffeeDetailsAction.OnDeleteClicked -> delete()
-            else -> {}
+            is CoffeeDetailsAction.NavigateUp -> navigateUp()
+            is CoffeeDetailsAction.OnFavouriteClicked -> updateFavourite()
+            is CoffeeDetailsAction.OnEditClicked -> navigateToEdit()
+            is CoffeeDetailsAction.ShowDeleteDialog -> showDeleteDialog()
+            is CoffeeDetailsAction.HideDeleteDialog -> hideDeleteDialog()
+            is CoffeeDetailsAction.OnDeleteClicked -> delete()
+        }
+    }
+
+    private fun navigateUp() {
+        viewModelScope.launch {
+            _navigationEvents.emit(CoffeeDetailsNavigationEvent.NavigateUp)
         }
     }
 
@@ -84,22 +98,43 @@ class CoffeeDetailsViewModel @AssistedInject constructor(
         }
     }
 
+    private fun navigateToEdit() {
+        val coffeeUiState = viewModelState.value.coffeeUiState ?: return
+        viewModelScope.launch {
+            _navigationEvents.emit(CoffeeDetailsNavigationEvent.NavigateToCoffeeInput(coffeeUiState.coffeeId))
+        }
+    }
+
+    private fun showDeleteDialog() {
+        viewModelState.update {
+            it.copy(openDeleteDialog = true)
+        }
+    }
+
+    private fun hideDeleteDialog() {
+        viewModelState.update {
+            it.copy(openDeleteDialog = false)
+        }
+    }
+
     private fun delete() {
         val coffeeUiState = viewModelState.value.coffeeUiState ?: return
 
         viewModelScope.launch {
             viewModelState.update {
-                it.copy(isLoading = true)
+                it.copy(
+                    isLoading = true,
+                    openDeleteDialog = false
+                )
             }
 
             myCoffeeDatabaseRepository.deleteCoffee(coffeeModel = coffeeUiState.toModel())
 
             viewModelState.update {
-                it.copy(
-                    isLoading = false,
-                    isDeleted = true
-                )
+                it.copy(isLoading = false)
             }
+
+            _navigationEvents.emit(CoffeeDetailsNavigationEvent.NavigateUp)
         }
     }
 

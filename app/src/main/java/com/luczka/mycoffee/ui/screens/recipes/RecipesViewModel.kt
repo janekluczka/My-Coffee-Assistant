@@ -10,8 +10,10 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -70,6 +72,9 @@ class RecipesViewModel @AssistedInject constructor(
             initialValue = viewModelState.value.toRecipesUiState()
         )
 
+    private val _navigationEvent = MutableSharedFlow<RecipesNavigationEvent>()
+    val navigationEvent = _navigationEvent.asSharedFlow()
+
     init {
         viewModelScope.launch {
             val result = firebaseRepository.getRecipes(methodId = methodUiState.id)
@@ -95,6 +100,25 @@ class RecipesViewModel @AssistedInject constructor(
                     }
                 }
             }
+        }
+    }
+
+    fun onAction(action: RecipesAction) {
+        when (action) {
+            RecipesAction.NavigateUp -> navigateUp()
+            is RecipesAction.NavigateToRecipeDetails -> navigateToRecipeDetails(action.recipeUiState)
+        }
+    }
+
+    private fun navigateUp() {
+        viewModelScope.launch {
+            _navigationEvent.emit(RecipesNavigationEvent.NavigateUp)
+        }
+    }
+
+    private fun navigateToRecipeDetails(recipeUiState: RecipeUiState) {
+        viewModelScope.launch {
+            _navigationEvent.emit(RecipesNavigationEvent.NavigateToRecipeDetails(recipeUiState))
         }
     }
 

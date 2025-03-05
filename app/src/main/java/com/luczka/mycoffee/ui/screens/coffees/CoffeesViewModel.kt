@@ -8,8 +8,10 @@ import com.luczka.mycoffee.ui.mappers.toUiState
 import com.luczka.mycoffee.ui.models.CoffeeUiState
 import com.luczka.mycoffee.ui.models.SwipeableListItemUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -74,6 +76,9 @@ class CoffeesViewModel @Inject constructor(
             initialValue = viewModelState.value.toCoffeesUiState()
         )
 
+    private val _navigationEvent = MutableSharedFlow<CoffeesNavigationEvent>()
+    val navigationEvent = _navigationEvent.asSharedFlow()
+
     init {
         viewModelScope.launch {
             myCoffeeDatabaseRepository
@@ -93,16 +98,40 @@ class CoffeesViewModel @Inject constructor(
 
     fun onAction(action: CoffeesAction) {
         when (action) {
-            is CoffeesAction.NavigateUp -> {}
-            is CoffeesAction.NavigateToAddCoffee -> {}
-            is CoffeesAction.OnEditClicked -> {}
-            is CoffeesAction.NavigateToCoffeeDetails -> {}
+            is CoffeesAction.NavigateUp -> navigateUp()
+            is CoffeesAction.NavigateToAddCoffee -> navigateToAddCoffee()
+            is CoffeesAction.OnEditClicked -> navigateToEdit(action.coffeeId)
+            is CoffeesAction.NavigateToCoffeeDetails -> navigateToCoffeeDetails(action.coffeeId)
 
             is CoffeesAction.OnSelectedFilterChanged -> selectedFilterChanged(action.filter)
             is CoffeesAction.OnItemActionsExpanded -> collapseOtherItemsActions(action.coffeeId)
             is CoffeesAction.OnItemActionsCollapsed -> collapseItemsActions(action.coffeeId)
             is CoffeesAction.OnFavouriteItemClicked -> updateFavourite(action.coffeeId)
             is CoffeesAction.OnDeleteItemClicked -> deleteCoffee(action.coffeeId)
+        }
+    }
+
+    private fun navigateUp() {
+        viewModelScope.launch {
+            _navigationEvent.emit(CoffeesNavigationEvent.NavigateUp)
+        }
+    }
+
+    private fun navigateToAddCoffee() {
+        viewModelScope.launch {
+            _navigationEvent.emit(CoffeesNavigationEvent.NavigateToAddCoffee)
+        }
+    }
+
+    private fun navigateToEdit(coffeeId: Long) {
+        viewModelScope.launch {
+            _navigationEvent.emit(CoffeesNavigationEvent.NavigateToEditCoffee(coffeeId))
+        }
+    }
+
+    private fun navigateToCoffeeDetails(coffeeId: Long) {
+        viewModelScope.launch {
+            _navigationEvent.emit(CoffeesNavigationEvent.NavigateToCoffeeDetails(coffeeId))
         }
     }
 
