@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationRail
@@ -58,8 +59,8 @@ fun MainRoute(
     ) { innerPadding ->
         Row(
             modifier = Modifier
-            .padding(innerPadding)
-            .fillMaxSize()
+                .padding(innerPadding)
+                .fillMaxSize()
         ) {
             if (navigationType == NavigationType.NAVIGATION_RAIL) {
                 MyCoffeeNavigationRail(navController = nestedNavController)
@@ -123,7 +124,10 @@ private fun MyCoffeeNavigationBar(navController: NavHostController) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
 
-    NavigationBar(tonalElevation = 0.dp) {
+    NavigationBar(
+        tonalElevation = 0.dp,
+        containerColor = MaterialTheme.colorScheme.surface
+    ) {
         topLevelRoutes.forEach { topLevelRoute ->
             NavigationBarItem(
                 icon = {

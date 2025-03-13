@@ -89,7 +89,7 @@ val topLevelRoutes = listOf(
 //                drawableRes = R.drawable.ic_coffee_maker_24_fill_0_weight_300_grade_0_opticalsize_24
 //            ),
     TopLevelRoute(
-        route = NestedNavHostRoutes.RecipeCategories,
+        route = NestedNavHostRoutes.Recipes.Categories,
         stringRes = R.string.tab_recipes,
         drawableRes = R.drawable.ic_list_alt_24_fill_0_weight_300_grade_0_opticalsize_24
     )
@@ -117,7 +117,7 @@ val drawerRoutes = listOf(
 //                drawableRes = R.drawable.ic_coffee_maker_24_fill_0_weight_300_grade_0_opticalsize_24
 //            ),
     TopLevelRoute(
-        route = NestedNavHostRoutes.RecipeCategories,
+        route = NestedNavHostRoutes.Recipes.Categories,
         stringRes = R.string.tab_recipes,
         drawableRes = R.drawable.ic_list_alt_24_fill_0_weight_300_grade_0_opticalsize_24
     )

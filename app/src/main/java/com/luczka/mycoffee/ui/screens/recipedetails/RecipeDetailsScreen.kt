@@ -1,8 +1,5 @@
 package com.luczka.mycoffee.ui.screens.recipedetails
 
-import android.content.Context
-import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -18,18 +15,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat.startActivity
 import com.luczka.mycoffee.R
 import com.luczka.mycoffee.ui.components.icons.ArrowBackIcon
 import com.luczka.mycoffee.ui.components.listitem.BrewingStepListItem
@@ -37,25 +28,18 @@ import com.luczka.mycoffee.ui.components.listitem.BrewingStepListItem
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RecipeDetailsScreen(
-    widthSizeClass: WindowWidthSizeClass,
     uiState: RecipeDetailsUiState,
     onAction: (RecipeDetailsAction) -> Unit
 ) {
-    val context = LocalContext.current
-
-    var openLeaveApplicationDialog by rememberSaveable { mutableStateOf(false) }
-
-    if (openLeaveApplicationDialog) {
+    if (uiState.openLeaveApplicationDialog) {
         RecipeDetailsLeaveApplicationDialog(
             onNegative = {
-                openLeaveApplicationDialog = false
+                val action = RecipeDetailsAction.OnLeaveApplicationClicked
+                onAction(action)
             },
             onPositive = {
-                openLeaveApplicationDialog = false
-                onOpenUrl(
-                    context = context,
-                    url = uiState.recipe.videoUrl
-                )
+                val action = RecipeDetailsAction.OnLeaveApplicationClicked
+                onAction(action)
             }
         )
     }
@@ -83,12 +67,13 @@ fun RecipeDetailsScreen(
                 actions = {
                     IconButton(
                         onClick = {
-                            openLeaveApplicationDialog = true
+                            val action = RecipeDetailsAction.ShowLeaveApplicationDialog
+                            onAction(action)
                         }
                     ) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_baseline_youtube),
-                            contentDescription = "YouTube icon"
+                            contentDescription = stringResource(R.string.icon_description_youtube)
                         )
                     }
                 }
@@ -128,10 +113,4 @@ fun RecipeDetailsScreen(
             }
         }
     }
-}
-
-fun onOpenUrl(context: Context, url: String) {
-    val intent = Intent(Intent.ACTION_VIEW)
-    intent.data = Uri.parse(url)
-    startActivity(context, intent, null)
 }

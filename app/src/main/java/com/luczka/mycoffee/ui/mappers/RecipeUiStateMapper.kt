@@ -13,13 +13,13 @@ import com.luczka.mycoffee.ui.models.RecipeUiState
  * 320×180 https://i.ytimg.com/vi/[YOUTUBE VIDEO ID]/mqdefault.jpg
  * 120×90 https://i.ytimg.com/vi/[YOUTUBE VIDEO ID]/default.jpg
  */
-fun RecipeModel.toUiState() : RecipeUiState {
+fun RecipeModel.toUiState(): RecipeUiState {
     return RecipeUiState(
         author = author,
         title = title,
         imageUrl = "https://i.ytimg.com/vi/${youtubeId}/mqdefault.jpg",
         videoUrl = "https://www.youtube.com/watch?v=${youtubeId}",
-        steps = steps.map { it.toUiState() },
+        steps = steps.toUiState(),
         youtubeId = youtubeId
     )
 }

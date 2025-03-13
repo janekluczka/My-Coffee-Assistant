@@ -1,5 +1,7 @@
 package com.luczka.mycoffee.ui.screens.recipedetails
 
 sealed class RecipeDetailsAction {
-    object NavigateUp : RecipeDetailsAction()
+    data object NavigateUp : RecipeDetailsAction()
+    data object ShowLeaveApplicationDialog : RecipeDetailsAction()
+    data object OnLeaveApplicationClicked : RecipeDetailsAction()
 }

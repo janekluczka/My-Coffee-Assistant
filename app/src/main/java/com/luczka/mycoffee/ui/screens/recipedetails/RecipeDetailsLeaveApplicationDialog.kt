@@ -15,10 +15,10 @@ fun RecipeDetailsLeaveApplicationDialog(
 ) {
     AlertDialog(
         title = {
-            Text(text = "Open YouTube?")
+            Text(text = stringResource(R.string.dialog_open_youtube_title))
         },
         text = {
-            Text(text = "You are about to open YouTube. Are you sure you want to do this?")
+            Text(text = stringResource(R.string.dialog_open_youtube_text))
         },
         onDismissRequest = onNegative,
         dismissButton = {
@@ -28,7 +28,7 @@ fun RecipeDetailsLeaveApplicationDialog(
         },
         confirmButton = {
             TextButton(onClick = onPositive) {
-                Text(text = "Open")
+                Text(text = stringResource(id = R.string.dialog_action_open))
             }
         },
         tonalElevation = 0.dp

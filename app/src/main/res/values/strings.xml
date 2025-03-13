@@ -17,6 +17,18 @@
     <string name="format_coffee_amount_grams">%1$s g</string>
     <!--  %1$s: Amount [grams]  -->
 
+    <!--  Icon descriptions  -->
+    <string name="icon_description_add">Add</string>
+    <string name="icon_description_edit">Edit</string>
+    <string name="icon_description_delete">Delete</string>
+    <string name="icon_description_save">Save</string>
+    <string name="icon_description_cancel">Cancel</string>
+    <string name="icon_description_close">Close</string>
+    <string name="icon_description_back">Back</string>
+    <string name="icon_description_previous">Previous</string>
+    <string name="icon_description_next">Next</string>
+    <string name="icon_description_filter">Filter</string>
+    <string name="icon_description_youtube">YouTube</string>
 
     <!--  Format separators  -->
     <string name="separator_amount">.</string>
@@ -157,6 +169,10 @@
     <string name="dialog_text_select_ratio">Select ratio between %1$d:%2$d and %3$d:%4$d</string>
     <!--  %1$d: Min coffee ratio, %2$d: Max coffee ratio, %3$d: Min water ratio, %4$d: Max water ratio  -->
 
+    <!--  Dialog content  -->
+    <string name="dialog_open_youtube_title">Open YouTube?</string>
+    <string name="dialog_open_youtube_text">You are about to open YouTube. Are you sure you want to do this?</string>
+
     <!--  Dialog actions  -->
     <string name="dialog_action_save">Save</string>
     <string name="dialog_action_delete">Delete</string>
@@ -165,6 +181,7 @@
     <string name="dialog_action_cancel">Cancel</string>
     <string name="dialog_action_finish">Finish</string>
     <string name="dialog_action_select">Select</string>
+    <string name="dialog_action_open">Open</string>
 
     <!--  Units  -->
     <string name="unit_gram_short">g</string>

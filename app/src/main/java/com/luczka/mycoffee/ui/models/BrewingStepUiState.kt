@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 @Parcelize
 data class BrewingStepUiState(
-    val number: Int = 0,
+    val number: Int,
     val description: String,
     val time: String?,
 ) : Parcelable

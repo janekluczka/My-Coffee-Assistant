@@ -18,11 +18,14 @@ data object NestedNavHostRoutes {
     data object Equipment
 
     @Serializable
-    data object RecipeCategories
+    sealed class Recipes {
+        @Serializable
+        data object Categories : Recipes()
 
-    @Serializable
-    data class Recipes(val methodUiState: MethodUiState)
+        @Serializable
+        data class List (val methodUiState: MethodUiState) : Recipes()
 
-    @Serializable
-    data class RecipeDetails(val recipeUiState: RecipeUiState)
+        @Serializable
+        data class Details(val recipeUiState: RecipeUiState) : Recipes()
+    }
 }

@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
@@ -28,7 +29,7 @@ import com.luczka.mycoffee.ui.screens.home.HomeViewModel
 import com.luczka.mycoffee.ui.screens.recipecategories.RecipeCategoriesNavigationEvent
 import com.luczka.mycoffee.ui.screens.recipecategories.RecipeCategoriesScreen
 import com.luczka.mycoffee.ui.screens.recipecategories.RecipeCategoriesViewModel
-import com.luczka.mycoffee.ui.screens.recipedetails.RecipeDetailsNavigationEvent
+import com.luczka.mycoffee.ui.screens.recipedetails.RecipeDetailsOneTimeEvent
 import com.luczka.mycoffee.ui.screens.recipedetails.RecipeDetailsScreen
 import com.luczka.mycoffee.ui.screens.recipedetails.RecipeDetailsViewModel
 import com.luczka.mycoffee.ui.screens.recipedetails.RecipeDetailsViewModelFactory
@@ -125,14 +126,14 @@ fun MyCoffeeNestedNavHost(
                 }
             )
         }
-        composable<NestedNavHostRoutes.RecipeCategories> {
+        composable<NestedNavHostRoutes.Recipes.Categories> {
             val viewModel = hiltViewModel<RecipeCategoriesViewModel>()
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
             LaunchedEffect(Unit) {
                 viewModel.navigationEvent.collect { event ->
                     when (event) {
-                        is RecipeCategoriesNavigationEvent.NavigateToMethodDetails -> navController.navigateToRecipes(event.methodUiState)
+                        is RecipeCategoriesNavigationEvent.NavigateToMethodDetails -> navController.navigateToRecipesList(event.methodUiState)
                     }
                 }
             }
@@ -143,12 +144,12 @@ fun MyCoffeeNestedNavHost(
                 onAction = viewModel::onAction
             )
         }
-        composable<NestedNavHostRoutes.Recipes>(
+        composable<NestedNavHostRoutes.Recipes.List>(
             typeMap = mapOf(
                 typeOf<MethodUiState>() to CustomNavTypes.MethodUiStateNavType
             )
         ) { backStackEntry ->
-            val arguments = backStackEntry.toRoute<NestedNavHostRoutes.Recipes>()
+            val arguments = backStackEntry.toRoute<NestedNavHostRoutes.Recipes.List>()
             val viewModel = hiltViewModel<RecipesViewModel, RecipesViewModelFactory> { factory ->
                 factory.create(arguments.methodUiState)
             }
@@ -158,7 +159,7 @@ fun MyCoffeeNestedNavHost(
                 viewModel.navigationEvent.collect { event ->
                     when (event) {
                         RecipesNavigationEvent.NavigateUp -> navController.navigateUp()
-                        is RecipesNavigationEvent.NavigateToRecipeDetails -> navController.navigateToRecipeDetails(event.recipeUiState)
+                        is RecipesNavigationEvent.NavigateToRecipeDetails -> navController.navigateToRecipesDetails(event.recipeUiState)
                     }
                 }
             }
@@ -168,27 +169,28 @@ fun MyCoffeeNestedNavHost(
                 onAction = viewModel::onAction
             )
         }
-        composable<NestedNavHostRoutes.RecipeDetails>(
+        composable<NestedNavHostRoutes.Recipes.Details>(
             typeMap = mapOf(
                 typeOf<RecipeUiState>() to CustomNavTypes.RecipeUiStateNavType
             )
         ) { backStackEntry ->
-            val arguments = backStackEntry.toRoute<NestedNavHostRoutes.RecipeDetails>()
+            val localUriHandler = LocalUriHandler.current
+            val arguments = backStackEntry.toRoute<NestedNavHostRoutes.Recipes.Details>()
             val viewModel = hiltViewModel<RecipeDetailsViewModel, RecipeDetailsViewModelFactory> { factory ->
                 factory.create(arguments.recipeUiState)
             }
+            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
             LaunchedEffect(Unit) {
-                viewModel.navigationEvent.collect { event ->
+                viewModel.oneTimeEvent.collect { event ->
                     when (event) {
-                        RecipeDetailsNavigationEvent.NavigateUp -> navController.navigateUp()
+                        RecipeDetailsOneTimeEvent.NavigateUp -> navController.navigateUp()
+                        is RecipeDetailsOneTimeEvent.OpenBrowser -> localUriHandler.openUri(event.uri)
                     }
                 }
             }
 
-            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
             RecipeDetailsScreen(
-                widthSizeClass = widthSizeClass,
                 uiState = uiState,
                 onAction = viewModel::onAction
             )
@@ -196,10 +198,10 @@ fun MyCoffeeNestedNavHost(
     }
 }
 
-private fun NavHostController.navigateToRecipes(methodUiState: MethodUiState) {
-    navigate(NestedNavHostRoutes.Recipes(methodUiState))
+private fun NavHostController.navigateToRecipesList(methodUiState: MethodUiState) {
+    navigate(NestedNavHostRoutes.Recipes.List(methodUiState))
 }
 
-private fun NavHostController.navigateToRecipeDetails(recipeUiState: RecipeUiState) {
-    navigate(NestedNavHostRoutes.RecipeDetails(recipeUiState))
+private fun NavHostController.navigateToRecipesDetails(recipeUiState: RecipeUiState) {
+    navigate(NestedNavHostRoutes.Recipes.Details(recipeUiState))
 }

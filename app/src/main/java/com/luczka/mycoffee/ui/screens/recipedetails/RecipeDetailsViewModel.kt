@@ -13,15 +13,18 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-sealed class RecipeDetailsNavigationEvent {
-    data object NavigateUp : RecipeDetailsNavigationEvent()
-}
-
-private data class RecipeDetailsViewModelState(val recipe: RecipeUiState) {
+private data class RecipeDetailsViewModelState(
+    val recipe: RecipeUiState,
+    val openLeaveApplicationDialog: Boolean = false,
+) {
     fun toRecipeDetailsUiState(): RecipeDetailsUiState {
-        return RecipeDetailsUiState(recipe = recipe)
+        return RecipeDetailsUiState(
+            recipe = recipe,
+            openLeaveApplicationDialog = openLeaveApplicationDialog,
+        )
     }
 }
 
@@ -44,18 +47,35 @@ class RecipeDetailsViewModel @AssistedInject constructor(
             initialValue = viewModelState.value.toRecipeDetailsUiState()
         )
 
-    private val _navigationEvent = MutableSharedFlow<RecipeDetailsNavigationEvent>()
-    val navigationEvent = _navigationEvent.asSharedFlow()
+    private val _oneTimeEvent = MutableSharedFlow<RecipeDetailsOneTimeEvent>()
+    val oneTimeEvent = _oneTimeEvent.asSharedFlow()
 
     fun onAction(action: RecipeDetailsAction) {
         when (action) {
             RecipeDetailsAction.NavigateUp -> navigateUp()
+            RecipeDetailsAction.ShowLeaveApplicationDialog -> showLeaveApplicationDialog()
+            RecipeDetailsAction.OnLeaveApplicationClicked -> leaveApplication()
         }
     }
 
     private fun navigateUp() {
         viewModelScope.launch {
-            _navigationEvent.emit(RecipeDetailsNavigationEvent.NavigateUp)
+            _oneTimeEvent.emit(RecipeDetailsOneTimeEvent.NavigateUp)
+        }
+    }
+
+    private fun showLeaveApplicationDialog() {
+        viewModelState.update {
+            it.copy(openLeaveApplicationDialog = true)
+        }
+    }
+
+    private fun leaveApplication() {
+        viewModelState.update {
+            it.copy(openLeaveApplicationDialog = false)
+        }
+        viewModelScope.launch {
+            _oneTimeEvent.emit(RecipeDetailsOneTimeEvent.OpenBrowser(recipeUiState.videoUrl))
         }
     }
 
