@@ -22,6 +22,7 @@ import com.luczka.mycoffee.ui.screens.coffees.CoffeesScreen
 import com.luczka.mycoffee.ui.screens.coffees.CoffeesViewModel
 import com.luczka.mycoffee.ui.screens.equipments.EquipmentsAction
 import com.luczka.mycoffee.ui.screens.equipments.EquipmentsScreen
+import com.luczka.mycoffee.ui.screens.home.HomeNavigationEvent
 import com.luczka.mycoffee.ui.screens.home.HomeScreen
 import com.luczka.mycoffee.ui.screens.home.HomeViewModel
 import com.luczka.mycoffee.ui.screens.recipecategories.RecipeCategoriesNavigationEvent
@@ -42,7 +43,11 @@ fun MyCoffeeNestedNavHost(
     widthSizeClass: WindowWidthSizeClass,
     modifier: Modifier,
     navController: NavHostController,
-    onAction: (MainAction) -> Unit,
+    navigateToAssistant: () -> Unit,
+    navigateToBrewDetails: (brewId: Long) -> Unit,
+    navigateToCoffeeDetails: (coffeeId: Long) -> Unit,
+    navigateToCoffeeInput: (coffeeId: Long?) -> Unit,
+    navigateToEquipmentInput: (equipmentId: Long?) -> Unit
 ) {
     NavHost(
         modifier = modifier.fillMaxSize(),
@@ -52,6 +57,17 @@ fun MyCoffeeNestedNavHost(
         composable<NestedNavHostRoutes.Home> {
             val viewModel = hiltViewModel<HomeViewModel>()
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+            LaunchedEffect(Unit) {
+                viewModel.navigationEvent.collect { event ->
+                    when (event) {
+                        HomeNavigationEvent.NavigateToBrewAssistant -> navigateToAssistant()
+                        is HomeNavigationEvent.NavigateToBrewDetails -> navigateToBrewDetails(event.brewId)
+                        is HomeNavigationEvent.NavigateToCoffeeDetails -> navigateToCoffeeDetails(event.coffeeId)
+                    }
+                }
+            }
+
             HomeScreen(
                 widthSizeClass = widthSizeClass,
                 uiState = uiState,
@@ -65,8 +81,8 @@ fun MyCoffeeNestedNavHost(
             LaunchedEffect(Unit) {
                 viewModel.navigationEvent.collect { event ->
                     when (event) {
-                        BrewsNavigationEvent.NavigateToAssistant -> onAction(MainAction.NavigateToAssistant)
-                        is BrewsNavigationEvent.NavigateToBrewDetails -> onAction(MainAction.NavigateToBrewDetails(event.brewId))
+                        BrewsNavigationEvent.NavigateToAssistant -> navigateToAssistant()
+                        is BrewsNavigationEvent.NavigateToBrewDetails -> navigateToBrewDetails(event.brewId)
                     }
                 }
             }
@@ -86,9 +102,9 @@ fun MyCoffeeNestedNavHost(
                 viewModel.navigationEvent.collect { event ->
                     when (event) {
                         CoffeesNavigationEvent.NavigateUp -> navController.navigateUp()
-                        CoffeesNavigationEvent.NavigateToAddCoffee -> onAction(MainAction.NavigateToCoffeeInput(coffeeId = null))
-                        is CoffeesNavigationEvent.NavigateToCoffeeDetails -> onAction(MainAction.NavigateToCoffeeDetails(coffeeId = event.coffeeId))
-                        is CoffeesNavigationEvent.NavigateToEditCoffee -> onAction(MainAction.NavigateToCoffeeInput(coffeeId = event.coffeeId))
+                        CoffeesNavigationEvent.NavigateToAddCoffee -> navigateToCoffeeInput(null)
+                        is CoffeesNavigationEvent.NavigateToCoffeeDetails -> navigateToCoffeeDetails(event.coffeeId)
+                        is CoffeesNavigationEvent.NavigateToEditCoffee -> navigateToCoffeeInput(event.coffeeId)
                     }
                 }
             }
@@ -104,7 +120,7 @@ fun MyCoffeeNestedNavHost(
             EquipmentsScreen(
                 onAction = { action ->
                     when(action) {
-                        EquipmentsAction.NavigateToEquipmentInput -> onAction(MainAction.NavigateToEquipmentInput(equipmentId = null))
+                        EquipmentsAction.NavigateToEquipmentInput -> navigateToEquipmentInput(null)
                     }
                 }
             )
@@ -116,7 +132,7 @@ fun MyCoffeeNestedNavHost(
             LaunchedEffect(Unit) {
                 viewModel.navigationEvent.collect { event ->
                     when (event) {
-                        is RecipeCategoriesNavigationEvent.NavigateToMethodDetails -> navController.navigate(NestedNavHostRoutes.Recipes(event.methodUiState))
+                        is RecipeCategoriesNavigationEvent.NavigateToMethodDetails -> navController.navigateToRecipes(event.methodUiState)
                     }
                 }
             }
@@ -142,7 +158,7 @@ fun MyCoffeeNestedNavHost(
                 viewModel.navigationEvent.collect { event ->
                     when (event) {
                         RecipesNavigationEvent.NavigateUp -> navController.navigateUp()
-                        is RecipesNavigationEvent.NavigateToRecipeDetails -> navController.navigate(NestedNavHostRoutes.RecipeDetails(event.recipeUiState))
+                        is RecipesNavigationEvent.NavigateToRecipeDetails -> navController.navigateToRecipeDetails(event.recipeUiState)
                     }
                 }
             }
@@ -178,4 +194,12 @@ fun MyCoffeeNestedNavHost(
             )
         }
     }
+}
+
+private fun NavHostController.navigateToRecipes(methodUiState: MethodUiState) {
+    navigate(NestedNavHostRoutes.Recipes(methodUiState))
+}
+
+private fun NavHostController.navigateToRecipeDetails(recipeUiState: RecipeUiState) {
+    navigate(NestedNavHostRoutes.RecipeDetails(recipeUiState))
 }

@@ -67,15 +67,6 @@ import com.luczka.mycoffee.ui.screens.equipmentinput.EquipmentInputAction
 import com.luczka.mycoffee.ui.screens.equipmentinput.EquipmentInputScreen
 import kotlinx.coroutines.launch
 
-sealed class MainAction {
-    data object OnMenuClicked : MainAction()
-    data object NavigateToAssistant : MainAction()
-    data class NavigateToBrewDetails(val brewId: Long) : MainAction()
-    data class NavigateToCoffeeDetails(val coffeeId: Long) : MainAction()
-    data class NavigateToCoffeeInput(val coffeeId: Long?) : MainAction()
-    data class NavigateToEquipmentInput(val equipmentId: Long?) : MainAction()
-}
-
 val topLevelRoutes = listOf(
     TopLevelRoute(
         route = NestedNavHostRoutes.Home,
@@ -209,21 +200,16 @@ fun MyCoffeeMainNavHost(
                 MainRoute(
                     widthSizeClass = widthSizeClass,
                     nestedNavController = nestedNavController,
-                    onAction = { action ->
-                        when (action) {
-                            MainAction.OnMenuClicked -> {
-                                coroutineScope.launch {
-                                    drawerState.open()
-                                }
-                            }
-
-                            MainAction.NavigateToAssistant -> mainNavController.navigate(MainNavHostRoute.BrewAssistant)
-                            is MainAction.NavigateToBrewDetails -> mainNavController.navigate(MainNavHostRoute.BrewDetails(action.brewId))
-                            is MainAction.NavigateToCoffeeDetails -> mainNavController.navigate(MainNavHostRoute.CoffeeDetails(action.coffeeId))
-                            is MainAction.NavigateToCoffeeInput -> mainNavController.navigate(MainNavHostRoute.CoffeeInput(action.coffeeId))
-                            is MainAction.NavigateToEquipmentInput -> mainNavController.navigate(MainNavHostRoute.EquipmentInput(action.equipmentId))
+                    onMenuButtonClick = {
+                        coroutineScope.launch {
+                            drawerState.open()
                         }
-                    }
+                    },
+                    navigateToAssistant = mainNavController::navigateToBrewAssistant,
+                    navigateToBrewDetails = mainNavController::navigateToBrewDetails,
+                    navigateToCoffeeDetails = mainNavController::navigateToCoffeeDetails,
+                    navigateToCoffeeInput = mainNavController::navigateToCoffeeInput,
+                    navigateToEquipmentInput = mainNavController::navigateToEquipmentInput
                 )
             }
             composable<MainNavHostRoute.BrewDetails>(
@@ -260,13 +246,7 @@ fun MyCoffeeMainNavHost(
                     viewModel.navigationEvents.collect { brewAssistantNavigationEvent ->
                         when (brewAssistantNavigationEvent) {
                             BrewAssistantNavigationEvent.NavigateUp -> mainNavController.navigateUp()
-                            is BrewAssistantNavigationEvent.NavigateToBrewRating -> {
-                                mainNavController.navigate(MainNavHostRoute.BrewRating(brewAssistantNavigationEvent.brewId)) {
-                                    navOptions {
-                                        popUpTo(MainNavHostRoute.BrewAssistant) { inclusive = true }
-                                    }
-                                }
-                            }
+                            is BrewAssistantNavigationEvent.NavigateToBrewRating -> mainNavController.navigateToBrewRating(brewAssistantNavigationEvent.brewId)
                         }
                     }
                 }
@@ -356,7 +336,6 @@ private fun fadeInAndSlideToStart(): AnimatedContentTransitionScope<NavBackStack
     )
 }
 
-
 private fun fadeOutAndSlideToEnd(): AnimatedContentTransitionScope<NavBackStackEntry>.() -> @JvmSuppressWildcards ExitTransition? = {
     fadeOut(
         animationSpec = tween(durationMillis = 300, easing = LinearEasing)
@@ -364,4 +343,32 @@ private fun fadeOutAndSlideToEnd(): AnimatedContentTransitionScope<NavBackStackE
         animationSpec = tween(durationMillis = 300, easing = EaseOut),
         towards = AnimatedContentTransitionScope.SlideDirection.End
     )
+}
+
+private fun NavHostController.navigateToBrewAssistant() {
+    navigate(MainNavHostRoute.BrewAssistant)
+}
+
+private fun NavHostController.navigateToBrewRating(brewId: Long) {
+    navigate(MainNavHostRoute.BrewRating(brewId)) {
+        navOptions {
+            popUpTo(MainNavHostRoute.BrewAssistant) { inclusive = true }
+        }
+    }
+}
+
+private fun NavHostController.navigateToBrewDetails(brewId: Long) {
+    navigate(MainNavHostRoute.BrewDetails(brewId))
+}
+
+private fun NavHostController.navigateToCoffeeDetails(coffeeId: Long) {
+    navigate(MainNavHostRoute.CoffeeDetails(coffeeId))
+}
+
+private fun NavHostController.navigateToCoffeeInput(coffeeId: Long?) {
+    navigate(MainNavHostRoute.CoffeeInput(coffeeId))
+}
+
+private fun NavHostController.navigateToEquipmentInput(equipmentId: Long?) {
+
 }

@@ -32,7 +32,12 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 fun MainRoute(
     widthSizeClass: WindowWidthSizeClass,
     nestedNavController: NavHostController,
-    onAction: (MainAction) -> Unit,
+    onMenuButtonClick: () -> Unit,
+    navigateToAssistant: () -> Unit,
+    navigateToBrewDetails: (brewId: Long) -> Unit,
+    navigateToCoffeeDetails: (coffeeId: Long) -> Unit,
+    navigateToCoffeeInput: (coffeeId: Long?) -> Unit,
+    navigateToEquipmentInput: (equipmentId: Long?) -> Unit
 ) {
     val navigationType = when (widthSizeClass) {
         WindowWidthSizeClass.Compact -> NavigationType.BOTTOM_NAVIGATION
@@ -63,7 +68,11 @@ fun MainRoute(
                 modifier = Modifier,
                 widthSizeClass = widthSizeClass,
                 navController = nestedNavController,
-                onAction = onAction
+                navigateToAssistant = navigateToAssistant,
+                navigateToBrewDetails = navigateToBrewDetails,
+                navigateToCoffeeDetails = navigateToCoffeeDetails,
+                navigateToCoffeeInput = navigateToCoffeeInput,
+                navigateToEquipmentInput = navigateToEquipmentInput
             )
         }
     }

@@ -26,7 +26,6 @@ class FirebaseRepositoryImpl(
         private const val DOCUMENT_METHODS = "methods"
 
         private const val FIELD_METHOD = "methodId"
-        private const val FIELD_YOUTUBE_ID = "youtubeId"
     }
 
     private val localeCode: String = context.resources.configuration.locales[0].language

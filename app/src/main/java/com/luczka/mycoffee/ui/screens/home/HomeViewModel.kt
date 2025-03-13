@@ -6,11 +6,11 @@ import com.luczka.mycoffee.domain.repositories.MyCoffeeDatabaseRepository
 import com.luczka.mycoffee.ui.mappers.toUiState
 import com.luczka.mycoffee.ui.models.BrewUiState
 import com.luczka.mycoffee.ui.models.CoffeeUiState
-import com.luczka.mycoffee.ui.navigation.MainNavHostRoute
-import com.luczka.mycoffee.ui.navigation.MainNavigator
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -32,7 +32,6 @@ private data class HomeViewModelState(
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val myCoffeeDatabaseRepository: MyCoffeeDatabaseRepository,
-    private val mainNavigator: MainNavigator
 ) : ViewModel() {
 
     private val viewModelState = MutableStateFlow(HomeViewModelState())
@@ -43,6 +42,9 @@ class HomeViewModel @Inject constructor(
             started = SharingStarted.Eagerly,
             initialValue = viewModelState.value.toHomeUiState()
         )
+
+    private val _navigationEvent = MutableSharedFlow<HomeNavigationEvent>()
+    val navigationEvent = _navigationEvent.asSharedFlow()
 
     init {
         viewModelScope.launch {
@@ -74,19 +76,19 @@ class HomeViewModel @Inject constructor(
 
     private fun navigateToAssistant() {
         viewModelScope.launch {
-            mainNavigator.navigate(MainNavHostRoute.BrewAssistant)
+            _navigationEvent.emit(HomeNavigationEvent.NavigateToBrewAssistant)
         }
     }
 
     private fun navigateToBrewDetails(brewId: Long) {
         viewModelScope.launch {
-            mainNavigator.navigate(MainNavHostRoute.BrewDetails(brewId))
+            _navigationEvent.emit(HomeNavigationEvent.NavigateToBrewDetails(brewId))
         }
     }
 
     private fun navigateToCoffeeDetails(coffeeId: Long) {
         viewModelScope.launch {
-            mainNavigator.navigate(MainNavHostRoute.CoffeeDetails(coffeeId))
+            _navigationEvent.emit(HomeNavigationEvent.NavigateToCoffeeDetails(coffeeId))
         }
     }
 
