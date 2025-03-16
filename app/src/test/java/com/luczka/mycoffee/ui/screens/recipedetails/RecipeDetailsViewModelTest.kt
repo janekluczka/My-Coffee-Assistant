@@ -50,24 +50,24 @@ class RecipeDetailsViewModelTest {
     fun `Initial uiState value`() = runTest {
         val uiState = viewModel.uiState.first()
         assertEquals(sampleRecipe, uiState.recipe)
-        assertFalse(uiState.openLeaveApplicationDialog)
+        assertFalse(uiState.showOpenYouTubeDialog)
     }
 
     // TODO: Fix
     @Test
     fun `showLeaveApplicationDialog state change`() = runTest {
-        viewModel.onAction(RecipeDetailsAction.ShowLeaveApplicationDialog)
+        viewModel.onAction(RecipeDetailsAction.ShowOpenYouTubeDialog)
         val uiState = viewModel.uiState.first()
-        assertTrue(uiState.openLeaveApplicationDialog)
+        assertTrue(uiState.showOpenYouTubeDialog)
     }
 
     // TODO: Fix
     @Test
     fun `leaveApplication dialog state reset`() = runTest {
-        viewModel.onAction(RecipeDetailsAction.ShowLeaveApplicationDialog)
+        viewModel.onAction(RecipeDetailsAction.ShowOpenYouTubeDialog)
         viewModel.onAction(RecipeDetailsAction.OnLeaveApplicationClicked)
         val uiState = viewModel.uiState.first()
-        assertTrue(uiState.openLeaveApplicationDialog)
+        assertTrue(uiState.showOpenYouTubeDialog)
     }
 
     @Test
@@ -79,7 +79,7 @@ class RecipeDetailsViewModelTest {
 
     @Test
     fun `leaveApplication event emission`() = runTest {
-        viewModel.onAction(RecipeDetailsAction.ShowLeaveApplicationDialog)
+        viewModel.onAction(RecipeDetailsAction.ShowOpenYouTubeDialog)
         viewModel.onAction(RecipeDetailsAction.OnLeaveApplicationClicked)
         val event = viewModel.oneTimeEvent.first()
         assertEquals(RecipeDetailsOneTimeEvent.OpenBrowser(sampleRecipe.videoUrl), event)
@@ -91,7 +91,7 @@ class RecipeDetailsViewModelTest {
         val event1 = viewModel.oneTimeEvent.first()
         assertEquals(RecipeDetailsOneTimeEvent.NavigateUp, event1)
 
-        viewModel.onAction(RecipeDetailsAction.ShowLeaveApplicationDialog)
+        viewModel.onAction(RecipeDetailsAction.ShowOpenYouTubeDialog)
         viewModel.onAction(RecipeDetailsAction.OnLeaveApplicationClicked)
         val event2 = viewModel.oneTimeEvent.first()
         assertEquals(RecipeDetailsOneTimeEvent.OpenBrowser(sampleRecipe.videoUrl), event2)
@@ -101,7 +101,7 @@ class RecipeDetailsViewModelTest {
     fun `Empty videoUrl`() = runTest {
         val emptyUrlRecipe = sampleRecipe.copy(videoUrl = "")
         viewModel = RecipeDetailsViewModel(emptyUrlRecipe)
-        viewModel.onAction(RecipeDetailsAction.ShowLeaveApplicationDialog)
+        viewModel.onAction(RecipeDetailsAction.ShowOpenYouTubeDialog)
         viewModel.onAction(RecipeDetailsAction.OnLeaveApplicationClicked)
         val event = viewModel.oneTimeEvent.first()
         assertEquals(RecipeDetailsOneTimeEvent.OpenBrowser(""), event)

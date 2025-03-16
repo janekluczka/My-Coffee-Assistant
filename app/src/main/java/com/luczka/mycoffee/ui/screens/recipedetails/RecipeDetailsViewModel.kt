@@ -18,12 +18,12 @@ import kotlinx.coroutines.launch
 
 private data class RecipeDetailsViewModelState(
     val recipe: RecipeUiState,
-    val openLeaveApplicationDialog: Boolean = false,
+    val showOpenYouTubeDialog: Boolean = false,
 ) {
     fun toRecipeDetailsUiState(): RecipeDetailsUiState {
         return RecipeDetailsUiState(
             recipe = recipe,
-            openLeaveApplicationDialog = openLeaveApplicationDialog,
+            showOpenYouTubeDialog = showOpenYouTubeDialog,
         )
     }
 }
@@ -53,7 +53,8 @@ class RecipeDetailsViewModel @AssistedInject constructor(
     fun onAction(action: RecipeDetailsAction) {
         when (action) {
             RecipeDetailsAction.NavigateUp -> navigateUp()
-            RecipeDetailsAction.ShowLeaveApplicationDialog -> showLeaveApplicationDialog()
+            RecipeDetailsAction.ShowOpenYouTubeDialog -> showOpenYoutubeDialog()
+            RecipeDetailsAction.HideOpenYouTubeDialog -> hideOpenYouTubeDialog()
             RecipeDetailsAction.OnLeaveApplicationClicked -> leaveApplication()
         }
     }
@@ -64,15 +65,21 @@ class RecipeDetailsViewModel @AssistedInject constructor(
         }
     }
 
-    private fun showLeaveApplicationDialog() {
+    private fun showOpenYoutubeDialog() {
         viewModelState.update {
-            it.copy(openLeaveApplicationDialog = true)
+            it.copy(showOpenYouTubeDialog = true)
+        }
+    }
+
+    private fun hideOpenYouTubeDialog() {
+        viewModelState.update {
+            it.copy(showOpenYouTubeDialog = false)
         }
     }
 
     private fun leaveApplication() {
         viewModelState.update {
-            it.copy(openLeaveApplicationDialog = false)
+            it.copy(showOpenYouTubeDialog = false)
         }
         viewModelScope.launch {
             _oneTimeEvent.emit(RecipeDetailsOneTimeEvent.OpenBrowser(recipeUiState.videoUrl))

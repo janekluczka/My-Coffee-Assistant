@@ -36,7 +36,7 @@ fun AssistantSelectionScreen(
             ) {
                 Text(
                     modifier = Modifier.padding(horizontal = 16.dp),
-                    text = stringResource(id = R.string.assistant_selection_screen_title),
+                    text = stringResource(id = R.string.brew_assistant_selection_screen_title),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     style = MaterialTheme.typography.headlineSmall
@@ -62,7 +62,7 @@ fun AssistantSelectionScreen(
                 item {
                     Text(
                         modifier = Modifier.padding(horizontal = 16.dp),
-                        text = stringResource(id = R.string.assistant_selection_screen_title),
+                        text = stringResource(id = R.string.brew_assistant_selection_screen_title),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         style = MaterialTheme.typography.headlineSmall

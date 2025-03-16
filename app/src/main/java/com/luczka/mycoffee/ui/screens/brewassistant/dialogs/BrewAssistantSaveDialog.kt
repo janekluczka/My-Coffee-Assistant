@@ -31,12 +31,12 @@ fun BrewAssistantSaveDialog(
         onDismissRequest = onNegative,
         dismissButton = {
             TextButton(onClick = onNegative) {
-                Text(text = stringResource(id = R.string.dialog_action_cancel))
+                Text(text = stringResource(id = R.string.action_cancel))
             }
         },
         confirmButton = {
             TextButton(onClick = onPositive) {
-                Text(text = stringResource(id = R.string.dialog_action_save))
+                Text(text = stringResource(id = R.string.action_save))
             }
         },
         tonalElevation = 0.dp

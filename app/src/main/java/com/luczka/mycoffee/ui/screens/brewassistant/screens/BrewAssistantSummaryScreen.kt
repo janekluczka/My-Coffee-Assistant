@@ -31,7 +31,7 @@ fun BrewAssistantSummaryScreen(
         item {
             Text(
                 modifier = Modifier.padding(horizontal = 16.dp),
-                text = stringResource(id = R.string.assistant_summary_screen_title),
+                text = stringResource(id = R.string.brew_assistant_summary_screen_title),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 style = MaterialTheme.typography.headlineSmall
@@ -52,9 +52,9 @@ fun BrewAssistantSummaryScreen(
                             bottom = 8.dp
                         ),
                         text = if (uiState.selectedCoffees.size > 1) {
-                            stringResource(id = R.string.assistant_selected_coffees)
+                            stringResource(id = R.string.selected_coffees)
                         } else {
-                            stringResource(id = R.string.assistant_selected_coffee)
+                            stringResource(id = R.string.selected_coffee)
                         },
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -97,7 +97,7 @@ fun BrewAssistantSummaryScreen(
             Column {
                 BrewAssistantSummaryParametersListItem(
                     index = 0,
-                    headlineText = stringResource(id = R.string.assistant_ratio),
+                    headlineText = stringResource(id = R.string.ratio),
                     trailingText = stringResource(
                         id = R.string.format_ratio,
                         uiState.ratioSelectionUiState.currentLeftPagerItem(),
@@ -106,7 +106,7 @@ fun BrewAssistantSummaryScreen(
                 )
                 BrewAssistantSummaryParametersListItem(
                     index = 1,
-                    headlineText = stringResource(id = R.string.assistant_coffee),
+                    headlineText = stringResource(id = R.string.coffee),
                     trailingText = stringResource(
                         id = R.string.format_coffee_amount_grams,
                         uiState.selectedAmountsSum
@@ -114,7 +114,7 @@ fun BrewAssistantSummaryScreen(
                 )
                 BrewAssistantSummaryParametersListItem(
                     index = 2,
-                    headlineText = stringResource(id = R.string.assistant_water),
+                    headlineText = stringResource(id = R.string.water),
                     trailingText = stringResource(
                         id = R.string.format_coffee_amount_grams,
                         uiState.waterAmount

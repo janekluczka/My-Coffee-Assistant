@@ -263,7 +263,7 @@ private fun AssistantBottomBar(
             }
         ) {
             Text(
-                text = stringResource(id = R.string.button_previous),
+                text = stringResource(id = R.string.action_previous),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -279,9 +279,9 @@ private fun AssistantBottomBar(
         ) {
             Text(
                 text = if (uiState.isLastPage) {
-                    stringResource(id = R.string.button_save)
+                    stringResource(id = R.string.action_save)
                 } else {
-                    stringResource(id = R.string.button_next)
+                    stringResource(id = R.string.action_next)
                 },
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis

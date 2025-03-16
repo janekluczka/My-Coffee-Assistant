@@ -4,6 +4,6 @@ import com.luczka.mycoffee.data.database.queries.BrewWithBrewedCoffeesRelation
 import com.luczka.mycoffee.domain.models.BrewModel
 
 fun BrewWithBrewedCoffeesRelation.toModel() : BrewModel {
-    val brewedCoffeeModels = brewedCoffeesEntity.map { it.toModel() }
+    val brewedCoffeeModels = brewedCoffeesEntity.toModel()
     return brewEntity.toModel(brewedCoffees = brewedCoffeeModels)
 }

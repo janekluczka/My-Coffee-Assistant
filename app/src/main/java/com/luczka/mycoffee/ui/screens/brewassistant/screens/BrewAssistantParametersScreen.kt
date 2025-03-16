@@ -47,7 +47,7 @@ fun BrewAssistantParametersScreen(
         item {
             Text(
                 modifier = Modifier.padding(horizontal = 16.dp),
-                text = stringResource(id = R.string.assistant_parameters_screen_title),
+                text = stringResource(id = R.string.brew_assistant_parameters_screen_title),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 style = MaterialTheme.typography.headlineSmall
@@ -238,7 +238,7 @@ fun BrewAssistantParametersScreen(
 
             BrewAssistantParametersListItem(
                 index = index,
-                overlineText = stringResource(id = R.string.assistant_water),
+                overlineText = stringResource(id = R.string.water),
                 headlineText = stringResource(
                     id = R.string.format_coffee_amount_grams,
                     uiState.waterAmount
@@ -319,7 +319,7 @@ private fun RatioSelectionListItemWithPicker(
     BrewAssistantParametersExpandableListItem(
         onClick = onClick,
         index = 1,
-        overlineText = stringResource(id = R.string.assistant_ratio),
+        overlineText = stringResource(id = R.string.ratio),
         headlineText = stringResource(
             id = R.string.format_ratio,
             ratioDoubleVerticalPagerState.currentLeftPagerItem(),
@@ -350,7 +350,7 @@ private fun AmountSelectionListItemWithPicker(
     BrewAssistantParametersExpandableListItem(
         onClick = onClick,
         index = 2,
-        overlineText = stringResource(id = R.string.assistant_coffee),
+        overlineText = stringResource(id = R.string.coffee),
         headlineText = stringResource(
             id = R.string.format_coffee_integer_part_decimal_part_grams,
             integerPart,

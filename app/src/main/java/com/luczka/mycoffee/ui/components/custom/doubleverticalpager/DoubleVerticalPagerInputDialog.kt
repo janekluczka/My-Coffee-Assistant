@@ -96,7 +96,7 @@ fun DoubleVerticalPagerInputDialog(
         onDismissRequest = onNegative,
         dismissButton = {
             TextButton(onClick = onNegative) {
-                Text(text = stringResource(id = R.string.dialog_action_cancel))
+                Text(text = stringResource(id = R.string.action_cancel))
             }
         },
         confirmButton = {
@@ -111,7 +111,7 @@ fun DoubleVerticalPagerInputDialog(
                     isWaterRatioError = isRightInputError
                 )
             ) {
-                Text(text = stringResource(id = R.string.dialog_action_select))
+                Text(text = stringResource(id = R.string.action_select))
             }
         },
         tonalElevation = 0.dp

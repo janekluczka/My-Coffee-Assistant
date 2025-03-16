@@ -33,10 +33,10 @@ import com.luczka.mycoffee.ui.screens.recipedetails.RecipeDetailsOneTimeEvent
 import com.luczka.mycoffee.ui.screens.recipedetails.RecipeDetailsScreen
 import com.luczka.mycoffee.ui.screens.recipedetails.RecipeDetailsViewModel
 import com.luczka.mycoffee.ui.screens.recipedetails.RecipeDetailsViewModelFactory
-import com.luczka.mycoffee.ui.screens.recipes.RecipesNavigationEvent
-import com.luczka.mycoffee.ui.screens.recipes.RecipesScreen
-import com.luczka.mycoffee.ui.screens.recipes.RecipesViewModel
-import com.luczka.mycoffee.ui.screens.recipes.RecipesViewModelFactory
+import com.luczka.mycoffee.ui.screens.recipelist.RecipeListNavigationEvent
+import com.luczka.mycoffee.ui.screens.recipelist.RecipesListScreen
+import com.luczka.mycoffee.ui.screens.recipelist.RecipesListViewModel
+import com.luczka.mycoffee.ui.screens.recipelist.RecipeListViewModelFactory
 import kotlin.reflect.typeOf
 
 @Composable
@@ -150,7 +150,7 @@ fun MyCoffeeNestedNavHost(
             )
         ) { backStackEntry ->
             val arguments = backStackEntry.toRoute<NestedNavHostRoutes.Recipes.List>()
-            val viewModel = hiltViewModel<RecipesViewModel, RecipesViewModelFactory> { factory ->
+            val viewModel = hiltViewModel<RecipesListViewModel, RecipeListViewModelFactory> { factory ->
                 factory.create(arguments.methodUiState)
             }
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -158,13 +158,13 @@ fun MyCoffeeNestedNavHost(
             LaunchedEffect(Unit) {
                 viewModel.navigationEvent.collect { event ->
                     when (event) {
-                        RecipesNavigationEvent.NavigateUp -> navController.navigateUp()
-                        is RecipesNavigationEvent.NavigateToRecipeDetails -> navController.navigateToRecipesDetails(event.recipeUiState)
+                        RecipeListNavigationEvent.NavigateUp -> navController.navigateUp()
+                        is RecipeListNavigationEvent.NavigateToRecipeDetails -> navController.navigateToRecipesDetails(event.recipeUiState)
                     }
                 }
             }
 
-            RecipesScreen(
+            RecipesListScreen(
                 uiState = uiState,
                 onAction = viewModel::onAction
             )

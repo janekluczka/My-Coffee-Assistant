@@ -10,3 +10,7 @@ fun MethodDto.toModel(localeCode: String) : MethodModel {
         description = description
     )
 }
+
+fun List<MethodDto>.toModel(localeCode: String) : List<MethodModel> {
+    return this.map { it.toModel(localeCode) }
+}

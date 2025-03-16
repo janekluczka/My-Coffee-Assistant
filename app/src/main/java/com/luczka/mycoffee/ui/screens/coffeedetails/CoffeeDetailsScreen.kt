@@ -130,19 +130,19 @@ private fun CoffeeDetailsList(uiState: CoffeeDetailsUiState.HasCoffee) {
         }
         item {
             CoffeeDetailListItem(
-                supportingText = stringResource(id = R.string.coffee_parameters_name),
+                supportingText = stringResource(id = R.string.name),
                 headlineText = uiState.coffee.originOrName
             )
         }
         item {
             CoffeeDetailListItem(
-                supportingText = stringResource(id = R.string.coffee_parameters_brand),
+                supportingText = stringResource(id = R.string.brand),
                 headlineText = uiState.coffee.roasterOrBrand
             )
         }
         item {
             CoffeeDetailListItem(
-                supportingText = stringResource(id = R.string.coffee_parameters_amount),
+                supportingText = stringResource(id = R.string.amount),
                 headlineText = uiState.coffee.amount + " " + stringResource(id = R.string.unit_gram_short)
             )
         }
@@ -150,7 +150,7 @@ private fun CoffeeDetailsList(uiState: CoffeeDetailsUiState.HasCoffee) {
             Column {
                 Text(
                     modifier = Modifier.padding(horizontal = 16.dp),
-                    text = stringResource(id = R.string.coffee_parameters_roast),
+                    text = stringResource(id = R.string.roast),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
@@ -180,7 +180,7 @@ private fun CoffeeDetailsList(uiState: CoffeeDetailsUiState.HasCoffee) {
             Column {
                 Text(
                     modifier = Modifier.padding(horizontal = 16.dp),
-                    text = stringResource(id = R.string.coffee_parameters_process),
+                    text = stringResource(id = R.string.process),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,

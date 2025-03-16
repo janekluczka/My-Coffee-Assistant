@@ -2,7 +2,8 @@ package com.luczka.mycoffee.ui.screens.brews
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.luczka.mycoffee.domain.repositories.MyCoffeeDatabaseRepository
+import com.luczka.mycoffee.domain.usecases.DeleteBrewUseCase
+import com.luczka.mycoffee.domain.usecases.GetAllBrewsFlowUseCase
 import com.luczka.mycoffee.ui.mappers.toModel
 import com.luczka.mycoffee.ui.mappers.toUiState
 import com.luczka.mycoffee.ui.models.BrewUiState
@@ -48,7 +49,8 @@ private data class BrewsViewModelState(
 
 @HiltViewModel
 class BrewsViewModel @Inject constructor(
-    private val myCoffeeDatabaseRepository: MyCoffeeDatabaseRepository
+    private val getAllBrewsFlowUseCase: GetAllBrewsFlowUseCase,
+    private val deleteBrewUseCase: DeleteBrewUseCase
 ) : ViewModel() {
 
     private val viewModelState = MutableStateFlow(BrewsViewModelState())
@@ -65,8 +67,7 @@ class BrewsViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            myCoffeeDatabaseRepository
-                .getAllBrewsFlow()
+            getAllBrewsFlowUseCase()
                 .map { brewModels ->
                     brewModels.map { brewModel ->
                         SwipeableListItemUiState(item = brewModel.toUiState())
@@ -142,7 +143,7 @@ class BrewsViewModel @Inject constructor(
         val swipeableListItemUiState = viewModelState.value.brews.find { it.item.brewId == brewId }
         val brewUiState = swipeableListItemUiState?.item ?: return
         viewModelScope.launch {
-            myCoffeeDatabaseRepository.deleteBrew(brewUiState.toModel())
+            deleteBrewUseCase(brewUiState.toModel())
         }
     }
 

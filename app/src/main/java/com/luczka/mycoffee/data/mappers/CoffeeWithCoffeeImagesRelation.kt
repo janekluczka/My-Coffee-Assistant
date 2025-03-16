@@ -4,6 +4,6 @@ import com.luczka.mycoffee.data.database.queries.CoffeeWithCoffeeImagesRelation
 import com.luczka.mycoffee.domain.models.CoffeeModel
 
 fun CoffeeWithCoffeeImagesRelation.toModel(): CoffeeModel {
-    val coffeeImageModels = coffeeImages.map { it.toModel() }
+    val coffeeImageModels = coffeeImages.toModel()
     return coffee.toModel(coffeeImageModels)
 }

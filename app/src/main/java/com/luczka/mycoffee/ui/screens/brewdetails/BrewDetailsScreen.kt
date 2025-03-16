@@ -100,9 +100,9 @@ fun BrewDetailsScreen(
                                 bottom = 8.dp
                             ),
                             text = if (brewUiState.brewedCoffees.size > 1) {
-                                stringResource(id = R.string.assistant_selected_coffees)
+                                stringResource(id = R.string.selected_coffees)
                             } else {
-                                stringResource(id = R.string.assistant_selected_coffee)
+                                stringResource(id = R.string.selected_coffee)
                             },
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -140,7 +140,7 @@ fun BrewDetailsScreen(
                     item {
                         BrewDetailsParametersListItem(
                             index = 0,
-                            headlineText = stringResource(id = R.string.assistant_ratio),
+                            headlineText = stringResource(id = R.string.ratio),
                             trailingText = stringResource(
                                 id = R.string.format_ratio,
                                 brewUiState.coffeeRatio,
@@ -149,7 +149,7 @@ fun BrewDetailsScreen(
                         )
                         BrewDetailsParametersListItem(
                             index = 1,
-                            headlineText = stringResource(id = R.string.assistant_coffee),
+                            headlineText = stringResource(id = R.string.coffee),
                             trailingText = stringResource(
                                 id = R.string.format_coffee_amount_grams,
                                 brewUiState.coffeeAmount
@@ -157,7 +157,7 @@ fun BrewDetailsScreen(
                         )
                         BrewDetailsParametersListItem(
                             index = 2,
-                            headlineText = stringResource(id = R.string.assistant_water),
+                            headlineText = stringResource(id = R.string.water),
                             trailingText = stringResource(
                                 id = R.string.format_coffee_amount_grams,
                                 brewUiState.waterAmount

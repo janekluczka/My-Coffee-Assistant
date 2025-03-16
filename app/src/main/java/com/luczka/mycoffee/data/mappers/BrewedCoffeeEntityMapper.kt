@@ -17,3 +17,7 @@ fun BrewedCoffeeWithCoffeeRelation.toModel(): BrewedCoffeeModel {
         coffee = coffeeEntity.toModel()
     )
 }
+
+fun List<BrewedCoffeeWithCoffeeRelation>.toModel(): List<BrewedCoffeeModel> {
+    return this.map { it.toModel() }
+}

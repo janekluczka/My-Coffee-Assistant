@@ -2,7 +2,8 @@ package com.luczka.mycoffee.ui.screens.brewdetails
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.luczka.mycoffee.domain.repositories.MyCoffeeDatabaseRepository
+import com.luczka.mycoffee.domain.usecases.DeleteBrewUseCase
+import com.luczka.mycoffee.domain.usecases.GetBrewFlowUseCase
 import com.luczka.mycoffee.ui.mappers.toModel
 import com.luczka.mycoffee.ui.mappers.toUiState
 import com.luczka.mycoffee.ui.models.BrewUiState
@@ -37,7 +38,8 @@ interface BrewDetailsViewModelFactory {
 @HiltViewModel(assistedFactory = BrewDetailsViewModelFactory::class)
 class BrewDetailsViewModel @AssistedInject constructor(
     @Assisted brewId: Long,
-    private val myCoffeeDatabaseRepository: MyCoffeeDatabaseRepository
+    private val getBrewFlowUseCase: GetBrewFlowUseCase,
+    private val deleteBrewUseCase: DeleteBrewUseCase
 ) : ViewModel() {
 
     private val viewModelState = MutableStateFlow(BrewDetailsViewModelState())
@@ -54,16 +56,11 @@ class BrewDetailsViewModel @AssistedInject constructor(
 
     init {
         viewModelScope.launch {
-            myCoffeeDatabaseRepository
-                .getBrewFlow(brewId = brewId)
-                .map { brewModel ->
-                    brewModel?.toUiState()
+            getBrewFlowUseCase(brewId = brewId).collect { brewModel ->
+                viewModelState.update {
+                    it.copy(brew = brewModel?.toUiState())
                 }
-                .collect { brewUiState ->
-                    viewModelState.update {
-                        it.copy(brew = brewUiState)
-                    }
-                }
+            }
         }
     }
 
@@ -83,7 +80,7 @@ class BrewDetailsViewModel @AssistedInject constructor(
     private fun deleteBrew() {
         val brew = viewModelState.value.brew ?: return
         viewModelScope.launch {
-            myCoffeeDatabaseRepository.deleteBrew(brew.toModel())
+            deleteBrewUseCase(brew.toModel())
             _navigationEvents.emit(BrewDetailsNavigationEvent.NavigateUp)
         }
     }

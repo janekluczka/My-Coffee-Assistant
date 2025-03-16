@@ -22,6 +22,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.luczka.mycoffee.R
+import com.luczka.mycoffee.ui.components.dialogs.OpenYoutubeDialog
 import com.luczka.mycoffee.ui.components.icons.ArrowBackIcon
 import com.luczka.mycoffee.ui.components.listitem.BrewingStepListItem
 
@@ -31,10 +32,10 @@ fun RecipeDetailsScreen(
     uiState: RecipeDetailsUiState,
     onAction: (RecipeDetailsAction) -> Unit
 ) {
-    if (uiState.openLeaveApplicationDialog) {
-        RecipeDetailsLeaveApplicationDialog(
+    if (uiState.showOpenYouTubeDialog) {
+        OpenYoutubeDialog(
             onNegative = {
-                val action = RecipeDetailsAction.OnLeaveApplicationClicked
+                val action = RecipeDetailsAction.HideOpenYouTubeDialog
                 onAction(action)
             },
             onPositive = {
@@ -67,7 +68,7 @@ fun RecipeDetailsScreen(
                 actions = {
                     IconButton(
                         onClick = {
-                            val action = RecipeDetailsAction.ShowLeaveApplicationDialog
+                            val action = RecipeDetailsAction.ShowOpenYouTubeDialog
                             onAction(action)
                         }
                     ) {

@@ -1,4 +1,4 @@
-package com.luczka.mycoffee.ui.screens.recipes
+package com.luczka.mycoffee.ui.screens.recipelist
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,32 +17,28 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.luczka.mycoffee.ui.components.dialogs.MethodInfoDialog
 import com.luczka.mycoffee.ui.components.icons.ArrowBackIcon
 import com.luczka.mycoffee.ui.components.icons.InfoIcon
 import com.luczka.mycoffee.ui.components.listitem.RecipeListItem
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RecipesScreen(
-    uiState: RecipesUiState,
-    onAction: (RecipesAction) -> Unit,
+fun RecipesListScreen(
+    uiState: RecipeListUiState,
+    onAction: (RecipeListAction) -> Unit,
 ) {
-    var openMethodInfoDialog by rememberSaveable { mutableStateOf(false) }
-
-    if (openMethodInfoDialog) {
-        RecipesMethodInfoDialog(
+    if (uiState.openMethodInfoDialog) {
+        MethodInfoDialog(
             method = uiState.methodUiState,
             onDismiss = {
-                openMethodInfoDialog = false
+                val action = RecipeListAction.HideMethodInfoDialog
+                onAction(action)
             }
         )
     }
@@ -53,7 +49,7 @@ fun RecipesScreen(
                 navigationIcon = {
                     IconButton(
                         onClick = {
-                            val action = RecipesAction.NavigateUp
+                            val action = RecipeListAction.NavigateUp
                             onAction(action)
                         }
                     ) {
@@ -68,10 +64,11 @@ fun RecipesScreen(
                     )
                 },
                 actions = {
-                    if (uiState.showInfoButton) {
+                    if (uiState.hasInfoButton) {
                         IconButton(
                             onClick = {
-                                openMethodInfoDialog = true
+                                val action = RecipeListAction.ShowMethodInfoDialog
+                                onAction(action)
                             }
                         ) {
                             InfoIcon()
@@ -94,7 +91,7 @@ fun RecipesScreen(
                                 modifier = Modifier.animateItem(),
                                 recipeCardUiState = recipeCardUiState,
                                 onClick = {
-                                    val action = RecipesAction.NavigateToRecipeDetails(recipeUiState = recipeCardUiState)
+                                    val action = RecipeListAction.NavigateToRecipeDetails(recipeUiState = recipeCardUiState)
                                     onAction(action)
                                 }
                             )

@@ -325,7 +325,7 @@ private fun AddCoffeeTopBar(
                     onAction(action)
                 }
             ) {
-                Text(text = stringResource(id = R.string.dialog_action_save))
+                Text(text = stringResource(id = R.string.action_save))
             }
         }
     )
@@ -450,9 +450,9 @@ private fun AddCoffeeContent(
             }
             item {
                 val supportingText = if (uiState.isRoasterOrBrandError) {
-                    stringResource(id = R.string.coffee_input_required_text_field_supporting_text_error)
+                    stringResource(id = R.string.error_text_field_can_not_be_empty)
                 } else {
-                    stringResource(id = R.string.coffee_input_required_text_field_supporting_text_neutral)
+                    stringResource(id = R.string.supporting_text_required)
                 }
                 MyCoffeeOutlinedTextField(
                     modifier = Modifier
@@ -464,7 +464,7 @@ private fun AddCoffeeContent(
                         onAction(action)
                     },
                     label = {
-                        Text(text = stringResource(id = R.string.coffee_input_required_text_field_label_roaster_brand))
+                        Text(text = stringResource(id = R.string.label_text_roaster_brand_required))
                     },
                     isError = uiState.isRoasterOrBrandError,
                     supportingText = {
@@ -482,9 +482,9 @@ private fun AddCoffeeContent(
             }
             item {
                 val supportingText = if (uiState.isOriginOrNameError) {
-                    stringResource(id = R.string.coffee_input_required_text_field_supporting_text_error)
+                    stringResource(id = R.string.error_text_field_can_not_be_empty)
                 } else {
-                    stringResource(id = R.string.coffee_input_required_text_field_supporting_text_neutral)
+                    stringResource(id = R.string.supporting_text_required)
                 }
                 MyCoffeeOutlinedTextField(
                     modifier = Modifier
@@ -496,7 +496,7 @@ private fun AddCoffeeContent(
                         onAction(action)
                     },
                     label = {
-                        Text(text = stringResource(id = R.string.coffee_input_required_text_field_label_origin_name))
+                        Text(text = stringResource(id = R.string.label_text_origin_name_required))
                     },
                     isError = uiState.isOriginOrNameError,
                     supportingText = {
@@ -524,8 +524,8 @@ private fun AddCoffeeContent(
                         onAction(action)
                     },
                     regex = Regex("([0-9]+([.][0-9]?)?|[.][0-9])"),
-                    label = { Text(text = stringResource(id = R.string.coffee_parameters_amount)) },
-                    placeholder = { Text(text = stringResource(id = R.string.coffee_input_text_field_placeholder_amount)) },
+                    label = { Text(text = stringResource(id = R.string.amount)) },
+                    placeholder = { Text(text = stringResource(id = R.string.placeholder_text_amount)) },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                 )
@@ -533,7 +533,7 @@ private fun AddCoffeeContent(
             item {
                 Text(
                     modifier = Modifier.padding(horizontal = 24.dp),
-                    text = stringResource(id = R.string.coffee_parameters_roast),
+                    text = stringResource(id = R.string.roast),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -563,7 +563,7 @@ private fun AddCoffeeContent(
             item {
                 Text(
                     modifier = Modifier.padding(horizontal = 24.dp),
-                    text = stringResource(id = R.string.coffee_parameters_process),
+                    text = stringResource(id = R.string.process),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -679,10 +679,10 @@ private fun AddCoffeeContent(
                     },
                     regex = Regex("([0-9]+([.][0-9]?)?|[.][0-9])"),
                     label = {
-                        Text(text = stringResource(id = R.string.coffee_parameters_sca_score))
+                        Text(text = stringResource(id = R.string.sca_score))
                     },
                     placeholder = {
-                        Text(text = stringResource(id = R.string.coffee_input_text_field_placeholder_amount))
+                        Text(text = stringResource(id = R.string.placeholder_text_amount))
                     },
                     supportingText = {
                         Text(

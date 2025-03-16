@@ -52,7 +52,7 @@ fun EquipmentInputScreen(
                             // TODO: Add save action
                         }
                     ) {
-                        Text(text = stringResource(id = R.string.dialog_action_save))
+                        Text(text = stringResource(id = R.string.action_save))
                     }
                 }
             )

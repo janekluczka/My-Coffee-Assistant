@@ -2,7 +2,9 @@ package com.luczka.mycoffee.ui.screens.coffeedetails
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.luczka.mycoffee.domain.repositories.MyCoffeeDatabaseRepository
+import com.luczka.mycoffee.domain.usecases.DeleteCoffeeUseCase
+import com.luczka.mycoffee.domain.usecases.GetCoffeeFlowUseCase
+import com.luczka.mycoffee.domain.usecases.UpdateCoffeeUseCase
 import com.luczka.mycoffee.ui.mappers.toModel
 import com.luczka.mycoffee.ui.mappers.toUiState
 import com.luczka.mycoffee.ui.models.CoffeeUiState
@@ -48,7 +50,9 @@ interface CoffeeDetailsViewModelFactory {
 @HiltViewModel(assistedFactory = CoffeeDetailsViewModelFactory::class)
 class CoffeeDetailsViewModel @AssistedInject constructor(
     @Assisted coffeeId: Long,
-    private val myCoffeeDatabaseRepository: MyCoffeeDatabaseRepository
+    private val getCoffeeFlowUseCase: GetCoffeeFlowUseCase,
+    private val updateCoffeeUseCase: UpdateCoffeeUseCase,
+    private val deleteCoffeeUseCase: DeleteCoffeeUseCase,
 ) : ViewModel() {
 
     private val viewModelState = MutableStateFlow(CoffeeDetailsViewModelState())
@@ -65,7 +69,7 @@ class CoffeeDetailsViewModel @AssistedInject constructor(
 
     init {
         viewModelScope.launch {
-            myCoffeeDatabaseRepository.getCoffeeFlow(coffeeId).collect { coffeeModel ->
+            getCoffeeFlowUseCase(coffeeId).collect { coffeeModel ->
                 viewModelState.update {
                     it.copy(coffeeUiState = coffeeModel?.toUiState())
                 }
@@ -94,7 +98,7 @@ class CoffeeDetailsViewModel @AssistedInject constructor(
         val coffeeUiState = viewModelState.value.coffeeUiState ?: return
         viewModelScope.launch {
             val updatedCoffeeUiState = coffeeUiState.copy(isFavourite = !coffeeUiState.isFavourite)
-            myCoffeeDatabaseRepository.updateCoffee(coffeeModel = updatedCoffeeUiState.toModel())
+            updateCoffeeUseCase(coffeeModel = updatedCoffeeUiState.toModel())
         }
     }
 
@@ -128,7 +132,7 @@ class CoffeeDetailsViewModel @AssistedInject constructor(
                 )
             }
 
-            myCoffeeDatabaseRepository.deleteCoffee(coffeeModel = coffeeUiState.toModel())
+            deleteCoffeeUseCase(coffeeModel = coffeeUiState.toModel())
 
             viewModelState.update {
                 it.copy(isLoading = false)

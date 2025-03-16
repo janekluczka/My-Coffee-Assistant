@@ -16,7 +16,7 @@ fun DeleteBrewDialog(
     onPositive: () -> Unit,
 ) {
     AlertDialog(
-        title = { Text(text = stringResource(id = R.string.dialog_title_delete)) },
+        title = { Text(text = stringResource(id = R.string.dialog_delete_coffee_title)) },
         text = {
 //            Text(
 //                text = stringResource(
@@ -29,12 +29,12 @@ fun DeleteBrewDialog(
         onDismissRequest = onNegative,
         dismissButton = {
             TextButton(onClick = onNegative) {
-                Text(text = stringResource(id = R.string.dialog_action_cancel))
+                Text(text = stringResource(id = R.string.action_cancel))
             }
         },
         confirmButton = {
             TextButton(onClick = onPositive) {
-                Text(text = stringResource(id = R.string.dialog_action_delete))
+                Text(text = stringResource(id = R.string.action_delete))
             }
         },
         tonalElevation = 0.dp

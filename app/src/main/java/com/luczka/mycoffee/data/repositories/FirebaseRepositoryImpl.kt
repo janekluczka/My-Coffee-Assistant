@@ -41,7 +41,7 @@ class FirebaseRepositoryImpl(
             val methodsDto = configDocumentSnapshot.toObject<MethodsDto>()
             val methodDtoList = methodsDto?.list ?: emptyList()
             val methodModelList = methodDtoList
-                .map { it.toModel(localeCode) }
+                .toModel(localeCode)
                 .sortedBy { it.name }
 
             Result.success(methodModelList)
@@ -62,7 +62,7 @@ class FirebaseRepositoryImpl(
             val recipeDtoList = recipesQuerySnapshots.documents.mapNotNull { documentSnapshot ->
                 documentSnapshot.toObject<RecipeDto>()
             }
-            val recipeModelList = recipeDtoList.map { it.toModel() }
+            val recipeModelList = recipeDtoList.toModel()
 
             Result.success(recipeModelList)
         } catch (exception: Exception) {

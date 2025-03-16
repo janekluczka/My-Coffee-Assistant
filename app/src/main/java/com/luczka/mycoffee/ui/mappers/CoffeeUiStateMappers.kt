@@ -7,7 +7,7 @@ import java.time.LocalDate
 fun CoffeeModel.toUiState(): CoffeeUiState {
     return CoffeeUiState(
         coffeeId = coffeeId,
-        coffeeImages = coffeeImages.map { it.toUiState() },
+        coffeeImages = coffeeImages.toUiState(),
         roasterOrBrand = brand,
         originOrName = name,
         amount = amount.toString(),
@@ -23,10 +23,14 @@ fun CoffeeModel.toUiState(): CoffeeUiState {
     )
 }
 
+fun List<CoffeeModel>.toUiState(): List<CoffeeUiState> {
+    return this.map { it.toUiState() }
+}
+
 fun CoffeeUiState.toModel(): CoffeeModel {
     return CoffeeModel(
         coffeeId = coffeeId,
-        coffeeImages = coffeeImages.map { it.toModel() },
+        coffeeImages = coffeeImages.toModel(),
         brand = roasterOrBrand,
         name = originOrName,
         amount = if (amount.isBlank()) 0f else amount.toFloat(),

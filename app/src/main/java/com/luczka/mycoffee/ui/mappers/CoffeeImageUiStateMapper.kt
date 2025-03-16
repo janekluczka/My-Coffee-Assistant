@@ -12,6 +12,10 @@ fun CoffeeImageModel.toUiState() : CoffeeImageUiState {
     )
 }
 
+fun List<CoffeeImageModel>.toUiState() : List<CoffeeImageUiState> {
+    return this.map { it.toUiState() }
+}
+
 fun CoffeeImageUiState.toModel() : CoffeeImageModel {
     return CoffeeImageModel(
         coffeeImageId = coffeeImageId,
@@ -19,4 +23,8 @@ fun CoffeeImageUiState.toModel() : CoffeeImageModel {
         filename = filename ?: "",
         index = index
     )
+}
+
+fun List<CoffeeImageUiState>.toModel() : List<CoffeeImageModel> {
+    return this.map { it.toModel() }
 }

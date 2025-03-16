@@ -1,29 +1,32 @@
-package com.luczka.mycoffee.ui.screens.recipes
+package com.luczka.mycoffee.ui.screens.recipelist
 
 import com.luczka.mycoffee.ui.models.MethodUiState
 import com.luczka.mycoffee.ui.models.RecipeUiState
 
-sealed interface RecipesUiState {
+sealed interface RecipeListUiState {
     val methodUiState: MethodUiState
-    val showInfoButton: Boolean
+    val hasInfoButton: Boolean
     val isLoading: Boolean
     val isError: Boolean
     val recipes: List<RecipeUiState>
+    val openMethodInfoDialog: Boolean
 
     data class NoRecipes(
         override val methodUiState: MethodUiState,
-        override val showInfoButton: Boolean,
+        override val hasInfoButton: Boolean,
         override val isLoading: Boolean,
         override val isError: Boolean,
         override val recipes: List<RecipeUiState> = emptyList(),
-        val errorMessage: String,
-    ) : RecipesUiState
+        override val openMethodInfoDialog: Boolean,
+        val errorMessage: String
+    ) : RecipeListUiState
 
     data class HasRecipes(
         override val methodUiState: MethodUiState,
-        override val showInfoButton: Boolean,
+        override val hasInfoButton: Boolean,
         override val isLoading: Boolean,
         override val isError: Boolean,
         override val recipes: List<RecipeUiState>,
-    ) : RecipesUiState
+        override val openMethodInfoDialog: Boolean
+    ) : RecipeListUiState
 }

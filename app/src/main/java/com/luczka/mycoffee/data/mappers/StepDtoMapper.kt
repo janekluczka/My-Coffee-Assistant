@@ -9,3 +9,7 @@ fun StepDto.toModel() : StepModel {
         time = time
     )
 }
+
+fun List<StepDto>.toModel() : List<StepModel> {
+    return this.map { it.toModel() }
+}

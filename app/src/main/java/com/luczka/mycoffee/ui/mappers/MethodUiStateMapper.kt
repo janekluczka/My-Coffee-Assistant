@@ -10,3 +10,7 @@ fun MethodModel.toUiState() : MethodUiState {
         description = description
     )
 }
+
+fun List<MethodModel>.toUiState() : List<MethodUiState> {
+    return map { it.toUiState() }
+}

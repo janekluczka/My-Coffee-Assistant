@@ -42,7 +42,7 @@ class RecipeDetailsScreenTest {
 
         sampleUiState = RecipeDetailsUiState(
             recipe = sampleRecipe,
-            openLeaveApplicationDialog = false
+            showOpenYouTubeDialog = false
         )
     }
 
@@ -109,12 +109,12 @@ class RecipeDetailsScreenTest {
 
         composeTestRule.onNodeWithContentDescription(youTubeButtonDescription).performClick()
 
-        assert(actionTriggered == RecipeDetailsAction.ShowLeaveApplicationDialog)
+        assert(actionTriggered == RecipeDetailsAction.ShowOpenYouTubeDialog)
     }
 
     @Test
     fun recipeDetailsScreen_leaveApplicationDialog_displaysWhenOpen() {
-        val uiStateWithDialog = sampleUiState.copy(openLeaveApplicationDialog = true)
+        val uiStateWithDialog = sampleUiState.copy(showOpenYouTubeDialog = true)
 
         val dialogTitle = composeTestRule.activity.getString(R.string.dialog_open_youtube_title)
         val dialogText = composeTestRule.activity.getString(R.string.dialog_open_youtube_text)
@@ -133,8 +133,8 @@ class RecipeDetailsScreenTest {
     @Test
     fun recipeDetailsScreen_leaveApplicationDialog_negativeButtonTriggersAction() {
         var actionTriggered: RecipeDetailsAction? = null
-        val uiStateWithDialog = sampleUiState.copy(openLeaveApplicationDialog = true)
-        val confirmButtonText = composeTestRule.activity.getString(R.string.dialog_action_cancel)
+        val uiStateWithDialog = sampleUiState.copy(showOpenYouTubeDialog = true)
+        val confirmButtonText = composeTestRule.activity.getString(R.string.action_cancel)
 
         composeTestRule.setContent {
             RecipeDetailsScreen(
@@ -151,8 +151,8 @@ class RecipeDetailsScreenTest {
     @Test
     fun recipeDetailsScreen_leaveApplicationDialog_positiveButtonTriggersAction() {
         var actionTriggered: RecipeDetailsAction? = null
-        val uiStateWithDialog = sampleUiState.copy(openLeaveApplicationDialog = true)
-        val dismissButtonText = composeTestRule.activity.getString(R.string.dialog_action_cancel)
+        val uiStateWithDialog = sampleUiState.copy(showOpenYouTubeDialog = true)
+        val dismissButtonText = composeTestRule.activity.getString(R.string.action_cancel)
 
         composeTestRule.setContent {
             RecipeDetailsScreen(

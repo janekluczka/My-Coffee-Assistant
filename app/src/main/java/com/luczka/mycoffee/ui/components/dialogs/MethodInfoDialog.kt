@@ -1,20 +1,22 @@
-package com.luczka.mycoffee.ui.screens.recipes
+package com.luczka.mycoffee.ui.components.dialogs
 
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.luczka.mycoffee.R
 import com.luczka.mycoffee.ui.models.MethodUiState
 
 @Composable
-fun RecipesMethodInfoDialog(
+fun MethodInfoDialog(
     method: MethodUiState,
     onDismiss: () -> Unit,
 ) {
     AlertDialog(
         title = {
-            Text(text = "What is ${method.name}?")
+            Text(text = stringResource(R.string.dialog_method_info_title, method.name))
         },
         text = {
             Text(text = method.description)
@@ -22,7 +24,7 @@ fun RecipesMethodInfoDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text(text = "OK")
+                Text(text = stringResource(R.string.action_ok))
             }
         },
         tonalElevation = 0.dp

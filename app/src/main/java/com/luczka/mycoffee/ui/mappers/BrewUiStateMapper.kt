@@ -14,7 +14,7 @@ fun BrewUiState.toModel(): BrewModel {
         waterAmount = waterAmount,
         rating = rating,
         notes = notes,
-        brewedCoffees = brewedCoffees.map { it.toModel() }
+        brewedCoffees = brewedCoffees.toModel()
     )
 }
 
@@ -29,6 +29,10 @@ fun BrewModel.toUiState() : BrewUiState {
         waterAmount = waterAmount,
         rating = rating,
         notes = notes,
-        brewedCoffees = brewedCoffees.map { it.toUiState() }
+        brewedCoffees = brewedCoffees.toUiState()
     )
+}
+
+fun List<BrewModel>.toUiState(): List<BrewUiState> {
+    return this.map { it.toUiState() }
 }

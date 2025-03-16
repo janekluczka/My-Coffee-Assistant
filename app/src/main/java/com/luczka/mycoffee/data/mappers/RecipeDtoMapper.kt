@@ -8,6 +8,10 @@ fun RecipeDto.toModel() : RecipeModel {
         author = author,
         title = title,
         youtubeId = youtubeId,
-        steps = steps.map { it.toModel() }
+        steps = steps.toModel()
     )
+}
+
+fun List<RecipeDto>.toModel() : List<RecipeModel> {
+    return this.map { it.toModel() }
 }

@@ -1,6 +1,6 @@
 package com.luczka.mycoffee.data.mappers
 
-import android.net.Uri
+import androidx.core.net.toUri
 import com.luczka.mycoffee.data.database.entities.CoffeeImageEntity
 import com.luczka.mycoffee.domain.models.CoffeeImageModel
 
@@ -16,8 +16,12 @@ fun CoffeeImageModel.toEntity() : CoffeeImageEntity {
 fun CoffeeImageEntity.toModel() : CoffeeImageModel {
     return CoffeeImageModel(
         coffeeImageId = coffeeImageId,
-        uri = Uri.parse(uri),
+        uri = uri.toUri(),
         filename = filename,
         index = index
     )
+}
+
+fun List<CoffeeImageEntity>.toModel() : List<CoffeeImageModel> {
+    return this.map { it.toModel() }
 }

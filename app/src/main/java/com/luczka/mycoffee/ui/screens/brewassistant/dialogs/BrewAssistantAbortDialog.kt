@@ -16,17 +16,17 @@ fun BrewAssistantAbortDialog(
     onPositive: () -> Unit
 ) {
     AlertDialog(
-        title = { Text(text = stringResource(id = R.string.dialog_title_abort)) },
-        text = { Text(text = stringResource(id = R.string.dialog_text_abort)) },
+        title = { Text(text = stringResource(id = R.string.dialog_abort_brew_title)) },
+        text = { Text(text = stringResource(id = R.string.dialog_abort_brew_text)) },
         onDismissRequest = onNegative,
         dismissButton = {
             TextButton(onClick = onNegative) {
-                Text(text = stringResource(id = R.string.dialog_action_cancel))
+                Text(text = stringResource(id = R.string.action_cancel))
             }
         },
         confirmButton = {
             TextButton(onClick = onPositive) {
-                Text(text = stringResource(id = R.string.dialog_action_abort))
+                Text(text = stringResource(id = R.string.action_abort))
             }
         },
         tonalElevation = 0.dp

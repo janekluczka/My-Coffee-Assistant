@@ -16,17 +16,17 @@ fun CoffeeInputDiscardDialog(
     onNegative: () -> Unit
 ) {
     AlertDialog(
-        title = { Text(text = stringResource(id = R.string.dialog_title_discard)) },
-        text = { Text(text = stringResource(id = R.string.dialog_text_discard)) },
+        title = { Text(text = stringResource(id = R.string.dialog_discard_coffee_changes_title)) },
+        text = { Text(text = stringResource(id = R.string.dialog_discard_coffee_changes_text)) },
         onDismissRequest = onNegative,
         dismissButton = {
             TextButton(onClick = onNegative) {
-                Text(text = stringResource(id = R.string.dialog_action_cancel))
+                Text(text = stringResource(id = R.string.action_cancel))
             }
         },
         confirmButton = {
             TextButton(onClick = onPositive) {
-                Text(text = stringResource(id = R.string.dialog_action_discard))
+                Text(text = stringResource(id = R.string.action_discard))
             }
         },
         tonalElevation = 0.dp

@@ -23,3 +23,7 @@ fun RecipeModel.toUiState(): RecipeUiState {
         youtubeId = youtubeId
     )
 }
+
+fun List<RecipeModel>.toUiState(): List<RecipeUiState> {
+    return this.map { it.toUiState() }
+}

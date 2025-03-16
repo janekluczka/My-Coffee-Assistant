@@ -1,4 +1,4 @@
-package com.luczka.mycoffee.ui.screens.recipedetails
+package com.luczka.mycoffee.ui.components.dialogs
 
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
@@ -9,7 +9,7 @@ import androidx.compose.ui.unit.dp
 import com.luczka.mycoffee.R
 
 @Composable
-fun RecipeDetailsLeaveApplicationDialog(
+fun OpenYoutubeDialog(
     onNegative: () -> Unit,
     onPositive: () -> Unit,
 ) {
@@ -23,12 +23,12 @@ fun RecipeDetailsLeaveApplicationDialog(
         onDismissRequest = onNegative,
         dismissButton = {
             TextButton(onClick = onNegative) {
-                Text(text = stringResource(id = R.string.dialog_action_cancel))
+                Text(text = stringResource(id = R.string.action_cancel))
             }
         },
         confirmButton = {
             TextButton(onClick = onPositive) {
-                Text(text = stringResource(id = R.string.dialog_action_open))
+                Text(text = stringResource(id = R.string.action_open))
             }
         },
         tonalElevation = 0.dp

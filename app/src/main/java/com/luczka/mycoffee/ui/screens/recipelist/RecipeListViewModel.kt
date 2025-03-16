@@ -1,9 +1,9 @@
-package com.luczka.mycoffee.ui.screens.recipes
+package com.luczka.mycoffee.ui.screens.recipelist
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.luczka.mycoffee.data.mappers.toUiState
-import com.luczka.mycoffee.domain.repositories.FirebaseRepository
+import com.luczka.mycoffee.domain.usecases.GetRecipesUseCase
 import com.luczka.mycoffee.ui.models.MethodUiState
 import com.luczka.mycoffee.ui.models.RecipeUiState
 import dagger.assisted.Assisted
@@ -15,74 +15,79 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-private data class RecipesViewModelState(
+private data class RecipesListViewModelState(
     val methodUiState: MethodUiState,
     val isLoading: Boolean = false,
     val isError: Boolean = false,
     val errorMessage: String = "",
     val recipes: List<RecipeUiState>? = null,
+    val openMethodInfoDialog: Boolean = false,
 ) {
-    fun toRecipesUiState(): RecipesUiState {
+    fun toRecipeListUiState(): RecipeListUiState {
         return if (recipes == null) {
-            RecipesUiState.NoRecipes(
+            RecipeListUiState.NoRecipes(
                 methodUiState = methodUiState,
-                showInfoButton = methodUiState.description.isNotBlank(),
+                hasInfoButton = methodUiState.description.isNotBlank(),
                 isLoading = isLoading,
                 isError = isError,
                 errorMessage = errorMessage,
+                openMethodInfoDialog = openMethodInfoDialog
             )
         } else {
-            RecipesUiState.HasRecipes(
+            RecipeListUiState.HasRecipes(
                 methodUiState = methodUiState,
-                showInfoButton = methodUiState.description.isNotBlank(),
+                hasInfoButton = methodUiState.description.isNotBlank(),
                 isLoading = isLoading,
                 isError = isError,
                 recipes = recipes,
+                openMethodInfoDialog = openMethodInfoDialog
             )
         }
     }
 }
 
 @AssistedFactory
-interface RecipesViewModelFactory {
-    fun create(methodUiState: MethodUiState): RecipesViewModel
+interface RecipeListViewModelFactory {
+    fun create(methodUiState: MethodUiState): RecipesListViewModel
 }
 
-@HiltViewModel(assistedFactory = RecipesViewModelFactory::class)
-class RecipesViewModel @AssistedInject constructor(
+@HiltViewModel(assistedFactory = RecipeListViewModelFactory::class)
+class RecipesListViewModel @AssistedInject constructor(
     @Assisted methodUiState: MethodUiState,
-    private val firebaseRepository: FirebaseRepository
+    private val getRecipesUseCase: GetRecipesUseCase
 ) : ViewModel() {
 
     private val viewModelState = MutableStateFlow(
-        RecipesViewModelState(
-            methodUiState = methodUiState,
-            isLoading = true
-        )
+        RecipesListViewModelState(methodUiState = methodUiState,)
     )
     val uiState = viewModelState
-        .map(RecipesViewModelState::toRecipesUiState)
+        .onStart { loadRecipes() }
+        .map(RecipesListViewModelState::toRecipeListUiState)
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.Eagerly,
-            initialValue = viewModelState.value.toRecipesUiState()
+            started = SharingStarted.WhileSubscribed(5_000L),
+            initialValue = viewModelState.value.toRecipeListUiState()
         )
 
-    private val _navigationEvent = MutableSharedFlow<RecipesNavigationEvent>()
+    private val _navigationEvent = MutableSharedFlow<RecipeListNavigationEvent>()
     val navigationEvent = _navigationEvent.asSharedFlow()
 
-    init {
+    private fun loadRecipes() {
         viewModelScope.launch {
-            val result = firebaseRepository.getRecipes(methodId = methodUiState.id)
+            viewModelState.update {
+                it.copy(isLoading = true)
+            }
+
+            val result = getRecipesUseCase(methodId = viewModelState.value.methodUiState.id)
+
             when {
                 result.isSuccess -> {
-                    val recipes = result.getOrNull()?.map { recipeModel ->
-                        recipeModel.toUiState()
-                    }
+                    val recipes = result.getOrNull()?.toUiState()
                     viewModelState.update {
                         it.copy(
                             isLoading = false,
@@ -103,22 +108,36 @@ class RecipesViewModel @AssistedInject constructor(
         }
     }
 
-    fun onAction(action: RecipesAction) {
+    fun onAction(action: RecipeListAction) {
         when (action) {
-            RecipesAction.NavigateUp -> navigateUp()
-            is RecipesAction.NavigateToRecipeDetails -> navigateToRecipeDetails(action.recipeUiState)
+            RecipeListAction.NavigateUp -> navigateUp()
+            is RecipeListAction.NavigateToRecipeDetails -> navigateToRecipeDetails(action.recipeUiState)
+            RecipeListAction.ShowMethodInfoDialog -> showMethodInfoDialog()
+            RecipeListAction.HideMethodInfoDialog -> hideMethodInfoDialog()
         }
     }
 
     private fun navigateUp() {
         viewModelScope.launch {
-            _navigationEvent.emit(RecipesNavigationEvent.NavigateUp)
+            _navigationEvent.emit(RecipeListNavigationEvent.NavigateUp)
         }
     }
 
     private fun navigateToRecipeDetails(recipeUiState: RecipeUiState) {
         viewModelScope.launch {
-            _navigationEvent.emit(RecipesNavigationEvent.NavigateToRecipeDetails(recipeUiState))
+            _navigationEvent.emit(RecipeListNavigationEvent.NavigateToRecipeDetails(recipeUiState))
+        }
+    }
+
+    private fun showMethodInfoDialog() {
+        viewModelState.update {
+            it.copy(openMethodInfoDialog = true)
+        }
+    }
+
+    private fun hideMethodInfoDialog() {
+        viewModelState.update {
+            it.copy(openMethodInfoDialog = false)
         }
     }
 
