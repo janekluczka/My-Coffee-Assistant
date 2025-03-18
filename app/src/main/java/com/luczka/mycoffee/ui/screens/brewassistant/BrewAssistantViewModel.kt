@@ -4,7 +4,7 @@ import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.luczka.mycoffee.R
-import com.luczka.mycoffee.domain.repositories.MyCoffeeDatabaseRepository
+import com.luczka.mycoffee.domain.usecases.GetCurrentCoffeesUseCase
 import com.luczka.mycoffee.ui.components.custom.doubleverticalpager.DoubleVerticalPagerState
 import com.luczka.mycoffee.ui.mappers.toUiState
 import com.luczka.mycoffee.ui.models.BrewUiState
@@ -178,7 +178,7 @@ private data class BrewAssistantViewModelState(
 
 @HiltViewModel
 class BrewAssistantViewModel @Inject constructor(
-    private val myCoffeeDatabaseRepository: MyCoffeeDatabaseRepository
+    private val getCurrentCoffeesUseCase: GetCurrentCoffeesUseCase
 ) : ViewModel() {
 
     private val viewModelState = MutableStateFlow(BrewAssistantViewModelState())
@@ -197,26 +197,26 @@ class BrewAssistantViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            myCoffeeDatabaseRepository.getCurrentCoffeesStream().collect { coffeeModels ->
-                val coffeeUiStateList = coffeeModels
-                    .map { it.toUiState() }
-                    .sortedWith(
-                        compareBy<CoffeeUiState> { !it.isFavourite }
-                            .thenBy { it.originOrName }
-                            .thenBy { it.roasterOrBrand }
-                            .thenBy { it.amount }
-                    )
-                viewModelState.update { it.copy(currentCoffees = coffeeUiStateList) }
-            }
+            getCurrentCoffeesUseCase()
+                .toUiState()
+                .sortedWith(
+                    compareBy<CoffeeUiState> { !it.isFavourite }
+                        .thenBy { it.originOrName }
+                        .thenBy { it.roasterOrBrand }
+                        .thenBy { it.amount }
+                )
+                .also { currentCoffees ->
+                    viewModelState.update { it.copy(currentCoffees = currentCoffees) }
+                }
         }
     }
 
     fun onAction(action: BrewAssistantAction) {
         when (action) {
-            is BrewAssistantAction.OnAbort -> abort()
-            is BrewAssistantAction.OnBack -> back()
-            is BrewAssistantAction.OnPrevious -> previous()
-            is BrewAssistantAction.OnNext -> next()
+            BrewAssistantAction.OnAbort -> abort()
+            BrewAssistantAction.OnBack -> back()
+            BrewAssistantAction.OnPrevious -> previous()
+            BrewAssistantAction.OnNext -> next()
 
             BrewAssistantAction.OnHideBottomSheet -> hideBottomSheet()
             BrewAssistantAction.OnHideAbortDialog -> hideAbortDialog()
@@ -229,10 +229,7 @@ class BrewAssistantViewModel @Inject constructor(
                 if (action.key == null) {
                     updateAmountLeftPagerIndex(leftPagerPageIndex = action.leftPagerPageIndex)
                 } else {
-                    updateAmountLeftPagerIndex(
-                        key = action.key,
-                        leftPagerPageIndex = action.leftPagerPageIndex
-                    )
+                    updateAmountLeftPagerIndex(key = action.key, leftPagerPageIndex = action.leftPagerPageIndex)
                 }
             }
 
@@ -240,34 +237,25 @@ class BrewAssistantViewModel @Inject constructor(
                 if (action.key == null) {
                     updateAmountRightPagerIndex(rightPagerPageIndex = action.rightPagerPageIndex)
                 } else {
-                    updateAmountRightPagerIndex(
-                        key = action.key,
-                        rightPagerPageIndex = action.rightPagerPageIndex
-                    )
+                    updateAmountRightPagerIndex(key = action.key, rightPagerPageIndex = action.rightPagerPageIndex)
                 }
             }
 
             is BrewAssistantAction.OnAmountSelectionIntegerAndFractionalPartsValueChanged -> {
                 if (action.key == null) {
-                    updateAmountSelectionValue(
-                        leftInputValue = action.leftInputValue,
-                        rightInputValue = action.rightInputValue
-                    )
+                    updateAmountSelectionValue(leftInputValue = action.leftInputValue, rightInputValue = action.rightInputValue)
                 } else {
-                    updateAmountSelectionValue(
-                        key = action.key,
-                        leftInputValue = action.leftInputValue,
-                        rightInputValue = action.rightInputValue
-                    )
+                    updateAmountSelectionValue(key = action.key, leftInputValue = action.leftInputValue, rightInputValue = action.rightInputValue)
                 }
             }
 
             is BrewAssistantAction.OnRatioSelectionCoffeeIndexChanged -> updateCoffeeRatioIndex(action.leftPagerPageIndex)
             is BrewAssistantAction.OnRatioSelectionWaterIndexChanged -> updateWaterRatioIndex(action.rightPagerPageIndex)
             is BrewAssistantAction.OnRatioSelectionCoffeeAndWaterValueChanged -> updateRatioValues(action.leftInputValue, action.rightInputValue)
-            is BrewAssistantAction.OnResetTimerClicked -> resetTimer()
-            is BrewAssistantAction.OnStartStopTimerClicked -> startStopTimerTimer()
-            is BrewAssistantAction.OnFinishBrewClicked -> finishBrew()
+
+            BrewAssistantAction.OnResetTimerClicked -> resetTimer()
+            BrewAssistantAction.OnStartStopTimerClicked -> startStopTimerTimer()
+            BrewAssistantAction.OnFinishBrewClicked -> finishBrew()
         }
     }
 
@@ -589,12 +577,6 @@ class BrewAssistantViewModel @Inject constructor(
 //                brewModel = brewUiState.toModel(),
 //                coffeeModels = coffeeUiStateListToUpdate.map { it.toModel() }
 //            )
-//
-//            mainNavigator.navigate(MainNavHostRoute.BrewRating(brewId = brewId)) {
-//                navOptions {
-//                    popUpTo(MainNavHostRoute.BrewAssistant) { inclusive = true }
-//                }
-//            }
 
             _navigationEvents.emit(BrewAssistantNavigationEvent.NavigateToBrewRating(brewId = 0L))
         }

@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface MyCoffeeDatabaseRepository {
 
-    suspend fun insertCoffee(coffeeModel: CoffeeModel)
+    suspend fun insertCoffee(coffeeModel: CoffeeModel): Long
 
     suspend fun getCoffee(coffeeId: Long): CoffeeModel?
 
@@ -16,7 +16,9 @@ interface MyCoffeeDatabaseRepository {
 
     fun getRecentlyAddedCoffeesFlow(amount: Int): Flow<List<CoffeeModel>>
 
-    fun getCurrentCoffeesStream(): Flow<List<CoffeeModel>>
+    fun getCurrentCoffeesFlow(): Flow<List<CoffeeModel>>
+
+    suspend fun getCurrentCoffees() : List<CoffeeModel>
 
     suspend fun updateCoffee(coffeeModel: CoffeeModel)
 

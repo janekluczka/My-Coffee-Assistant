@@ -7,3 +7,7 @@ fun CoffeeWithCoffeeImagesRelation.toModel(): CoffeeModel {
     val coffeeImageModels = coffeeImages.toModel()
     return coffee.toModel(coffeeImageModels)
 }
+
+fun List<CoffeeWithCoffeeImagesRelation>.toModel(): List<CoffeeModel> {
+    return map { it.toModel() }
+}

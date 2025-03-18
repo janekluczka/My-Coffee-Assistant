@@ -19,7 +19,7 @@ class MyCoffeeDatabaseRepositoryImpl(
     private val myCoffeeDao: MyCoffeeDao
 ) : MyCoffeeDatabaseRepository {
 
-    override suspend fun insertCoffee(coffeeModel: CoffeeModel) {
+    override suspend fun insertCoffee(coffeeModel: CoffeeModel): Long {
         val contentResolver = context.contentResolver
         val filesDir = context.filesDir
 
@@ -40,7 +40,7 @@ class MyCoffeeDatabaseRepositoryImpl(
             coffeeImage.copy(filename = destinationFile.name).toEntity()
         }
 
-        myCoffeeDao.insertCoffeeWithImages(
+        return myCoffeeDao.insertCoffeeWithImages(
             coffeeEntity = coffeeModel.toEntity(),
             coffeeImageEntities = coffeeImageEntitiesWithImageFilename
         )
@@ -65,30 +65,26 @@ class MyCoffeeDatabaseRepositoryImpl(
 
     override fun getCoffeeFlow(coffeeId: Long): Flow<CoffeeModel?> {
         return myCoffeeDao.getCoffeeWithImagesFlow(coffeeId)
-            .map { coffeeWithCoffeeImagesRelation ->
-                coffeeWithCoffeeImagesRelation?.toModel()
-            }
+            .map { it?.toModel() }
     }
 
     override fun getAllCoffeesFlow(): Flow<List<CoffeeModel>> {
         return myCoffeeDao.getAllCoffeesWithImagesFlow()
-            .map { coffeeWithCoffeeImagesRelations ->
-                coffeeWithCoffeeImagesRelations.map { it.toModel() }
-            }
+            .map { it.toModel() }
     }
 
     override fun getRecentlyAddedCoffeesFlow(amount: Int): Flow<List<CoffeeModel>> {
         return myCoffeeDao.getRecentlyAddedCoffeesWithImagesFlow(amount)
-            .map { coffeeWithCoffeeImagesRelations ->
-                coffeeWithCoffeeImagesRelations.map { it.toModel() }
-            }
+            .map { it.toModel() }
     }
 
-    override fun getCurrentCoffeesStream(): Flow<List<CoffeeModel>> {
+    override fun getCurrentCoffeesFlow(): Flow<List<CoffeeModel>> {
         return myCoffeeDao.getCurrentCoffeesWithImagesFlow()
-            .map { coffeeWithCoffeeImagesRelations ->
-                coffeeWithCoffeeImagesRelations.map { it.toModel() }
-            }
+            .map { it.toModel() }
+    }
+
+    override suspend fun getCurrentCoffees(): List<CoffeeModel> {
+        return myCoffeeDao.getCurrentCoffeesWithImages().toModel()
     }
 
     override suspend fun updateCoffee(coffeeModel: CoffeeModel) {

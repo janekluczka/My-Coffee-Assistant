@@ -8,6 +8,7 @@ import com.luczka.mycoffee.domain.usecases.GetAllBrewsFlowUseCase
 import com.luczka.mycoffee.domain.usecases.GetAllCoffeesFlowUseCase
 import com.luczka.mycoffee.domain.usecases.GetBrewFlowUseCase
 import com.luczka.mycoffee.domain.usecases.GetCoffeeFlowUseCase
+import com.luczka.mycoffee.domain.usecases.GetCurrentCoffeesUseCase
 import com.luczka.mycoffee.domain.usecases.GetMethodsUseCase
 import com.luczka.mycoffee.domain.usecases.GetRecentlyAddedBrewsFlowUseCase
 import com.luczka.mycoffee.domain.usecases.GetRecentlyAddedCoffeesFlowUseCase
@@ -35,6 +36,11 @@ object UseCasesModule {
     @Provides
     fun providesGetRecentlyAddedCoffeesFlowUseCase(myCoffeeDatabaseRepository: MyCoffeeDatabaseRepository): GetRecentlyAddedCoffeesFlowUseCase {
         return GetRecentlyAddedCoffeesFlowUseCase(myCoffeeDatabaseRepository)
+    }
+
+    @Provides
+    fun providesGetCurrentCoffeesUseCase(myCoffeeDatabaseRepository: MyCoffeeDatabaseRepository): GetCurrentCoffeesUseCase {
+        return GetCurrentCoffeesUseCase(myCoffeeDatabaseRepository)
     }
 
     @Provides

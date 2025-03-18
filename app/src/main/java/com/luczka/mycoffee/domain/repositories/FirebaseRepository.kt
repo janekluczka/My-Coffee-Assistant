@@ -5,8 +5,7 @@ import com.luczka.mycoffee.domain.models.RecipeModel
 
 interface FirebaseRepository {
 
-    suspend fun getMethods(): Result<List<MethodModel>>
+    suspend fun getCategories(): Result<List<MethodModel>>
 
     suspend fun getRecipes(methodId: String): Result<List<RecipeModel>>
-
 }
