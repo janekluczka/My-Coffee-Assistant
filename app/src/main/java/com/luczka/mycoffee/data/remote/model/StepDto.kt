@@ -1,4 +1,4 @@
-package com.luczka.mycoffee.data.remote.dto
+package com.luczka.mycoffee.data.remote.model
 
 import androidx.annotation.Keep
 

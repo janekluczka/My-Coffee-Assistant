@@ -27,9 +27,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.luczka.mycoffee.R
 import com.luczka.mycoffee.ui.components.cards.MethodCard
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -39,23 +41,24 @@ fun RecipeCategoriesScreen(
     uiState: RecipeCategoriesUiState,
     onAction: (RecipeCategoriesAction) -> Unit,
 ) {
+    val context = LocalContext.current
+
     val snackbarHostState = remember { SnackbarHostState() }
 
-    LaunchedEffect(uiState) {
+    LaunchedEffect(uiState.isError) {
         if (uiState.isError) {
             val result = snackbarHostState.showSnackbar(
-                message = "Error",
-                actionLabel = "Retry",
-                duration = SnackbarDuration.Indefinite
+                message = context.getString(uiState.errorMessageRes),
+                actionLabel = context.getString(R.string.action_retry),
+                duration = SnackbarDuration.Indefinite,
             )
             when (result) {
                 SnackbarResult.ActionPerformed -> {
-                    /* Handle snackbar action performed */
+                    val action = RecipeCategoriesAction.OnRetryClicked
+                    onAction(action)
                 }
 
-                SnackbarResult.Dismissed -> {
-
-                }
+                SnackbarResult.Dismissed -> {}
             }
         }
     }
@@ -83,38 +86,40 @@ fun RecipeCategoriesScreen(
         Box(modifier = Modifier.padding(innerPadding)) {
             Column {
                 Divider()
-                LazyVerticalGrid(
-                    columns = GridCells.Adaptive(150.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    contentPadding = PaddingValues(16.dp)
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
                 ) {
-                    items(
-                        items = uiState.methods,
-                        key = { it.id }
-                    ) { methodCardUiState ->
-                        MethodCard(
-                            modifier = Modifier.animateItem(),
-                            categoryUiState = methodCardUiState,
-                            onClick = {
-                                val action = RecipeCategoriesAction.NavigateToRecipes(methodCardUiState)
-                                onAction(action)
-                            }
-                        )
-                        if (!uiState.isLoading && uiState.methods.isEmpty()) {
-                            Box(
-                                modifier = Modifier
-                                    .padding(16.dp)
-                                    .fillMaxSize(),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = "No categories at the moment",
-                                    style = MaterialTheme.typography.headlineSmall,
-                                    fontWeight = FontWeight.Medium
+                    LazyVerticalGrid(
+                        modifier = Modifier.fillMaxSize(),
+                        columns = GridCells.Adaptive(150.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        contentPadding = PaddingValues(16.dp)
+                    ) {
+                        if (uiState is RecipeCategoriesUiState.HasRecipeCategories) {
+                            items(
+                                items = uiState.categories,
+                                key = { it.id }
+                            ) { methodCardUiState ->
+                                MethodCard(
+                                    modifier = Modifier.animateItem(),
+                                    categoryUiState = methodCardUiState,
+                                    onClick = {
+                                        val action = RecipeCategoriesAction.NavigateToRecipes(methodCardUiState)
+                                        onAction(action)
+                                    }
                                 )
                             }
                         }
+                    }
+                    if (uiState is RecipeCategoriesUiState.NoRecipeCategories && !uiState.isLoading && !uiState.isError) {
+                        Text(
+                            modifier = Modifier.padding(32.dp),
+                            text = "No categories at the moment",
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.Medium
+                        )
                     }
                 }
             }

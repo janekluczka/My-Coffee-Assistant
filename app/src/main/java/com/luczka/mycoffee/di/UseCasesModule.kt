@@ -7,9 +7,9 @@ import com.luczka.mycoffee.domain.usecases.DeleteCoffeeUseCase
 import com.luczka.mycoffee.domain.usecases.GetAllBrewsFlowUseCase
 import com.luczka.mycoffee.domain.usecases.GetAllCoffeesFlowUseCase
 import com.luczka.mycoffee.domain.usecases.GetBrewFlowUseCase
+import com.luczka.mycoffee.domain.usecases.GetCategoriesUseCase
 import com.luczka.mycoffee.domain.usecases.GetCoffeeFlowUseCase
 import com.luczka.mycoffee.domain.usecases.GetCurrentCoffeesUseCase
-import com.luczka.mycoffee.domain.usecases.GetMethodsUseCase
 import com.luczka.mycoffee.domain.usecases.GetRecentlyAddedBrewsFlowUseCase
 import com.luczka.mycoffee.domain.usecases.GetRecentlyAddedCoffeesFlowUseCase
 import com.luczka.mycoffee.domain.usecases.GetRecipesUseCase
@@ -74,8 +74,8 @@ object UseCasesModule {
     }
 
     @Provides
-    fun providesGetMethodsUseCase(firebaseRepository: FirebaseRepository): GetMethodsUseCase {
-        return GetMethodsUseCase(firebaseRepository)
+    fun providesGetCategoriesUseCase(firebaseRepository: FirebaseRepository): GetCategoriesUseCase {
+        return GetCategoriesUseCase(firebaseRepository)
     }
 
     @Provides

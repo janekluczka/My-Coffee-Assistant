@@ -1,6 +1,6 @@
 package com.luczka.mycoffee.data.mappers
 
-import com.luczka.mycoffee.data.remote.dto.CategoryDto
+import com.luczka.mycoffee.data.remote.model.CategoryDto
 import com.luczka.mycoffee.domain.models.CategoryModel
 
 fun CategoryDto.toModel(localeCode: String) : CategoryModel {

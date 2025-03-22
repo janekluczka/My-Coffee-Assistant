@@ -4,4 +4,5 @@ import com.luczka.mycoffee.ui.models.CategoryUiState
 
 sealed class RecipeCategoriesAction {
     data class NavigateToRecipes(val categoryUiState: CategoryUiState) : RecipeCategoriesAction()
+    data object OnRetryClicked : RecipeCategoriesAction()
 }

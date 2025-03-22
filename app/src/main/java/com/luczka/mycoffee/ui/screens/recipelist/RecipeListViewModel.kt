@@ -2,10 +2,12 @@ package com.luczka.mycoffee.ui.screens.recipelist
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.luczka.mycoffee.R
 import com.luczka.mycoffee.data.mappers.toUiState
 import com.luczka.mycoffee.domain.usecases.GetRecipesUseCase
 import com.luczka.mycoffee.ui.models.CategoryUiState
 import com.luczka.mycoffee.ui.models.RecipeUiState
+import com.luczka.mycoffee.ui.util.ErrorUtil
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -22,30 +24,31 @@ import kotlinx.coroutines.launch
 
 private data class RecipesListViewModelState(
     val categoryUiState: CategoryUiState,
+    val openMethodInfoDialog: Boolean = false,
     val isLoading: Boolean = false,
     val isError: Boolean = false,
-    val errorMessage: String = "",
+    val errorMessageRes: Int = R.string.error_text_unknown_error,
     val recipes: List<RecipeUiState>? = null,
-    val openMethodInfoDialog: Boolean = false,
 ) {
     fun toRecipeListUiState(): RecipeListUiState {
         return if (recipes == null) {
             RecipeListUiState.NoRecipes(
                 categoryUiState = categoryUiState,
                 hasInfoButton = categoryUiState.description.isNotBlank(),
+                openMethodInfoDialog = openMethodInfoDialog,
                 isLoading = isLoading,
                 isError = isError,
-                errorMessage = errorMessage,
-                openMethodInfoDialog = openMethodInfoDialog
+                errorMessageRes = errorMessageRes
             )
         } else {
             RecipeListUiState.HasRecipes(
                 categoryUiState = categoryUiState,
                 hasInfoButton = categoryUiState.description.isNotBlank(),
-                isLoading = isLoading,
+                openMethodInfoDialog = openMethodInfoDialog,
                 isError = isError,
+                isLoading = isLoading,
+                errorMessageRes = errorMessageRes,
                 recipes = recipes,
-                openMethodInfoDialog = openMethodInfoDialog
             )
         }
     }
@@ -63,7 +66,7 @@ class RecipesListViewModel @AssistedInject constructor(
 ) : ViewModel() {
 
     private val _viewModelState = MutableStateFlow(
-        RecipesListViewModelState(categoryUiState = categoryUiState,)
+        RecipesListViewModelState(categoryUiState = categoryUiState)
     )
     val uiState = _viewModelState
         .onStart { loadRecipes() }
@@ -80,31 +83,35 @@ class RecipesListViewModel @AssistedInject constructor(
     private fun loadRecipes() {
         viewModelScope.launch {
             _viewModelState.update {
-                it.copy(isLoading = true)
+                it.copy(
+                    isLoading = true,
+                    isError = false
+                )
             }
 
-            val result = getRecipesUseCase(methodId = _viewModelState.value.categoryUiState.id)
-
-            when {
-                result.isSuccess -> {
-                    val recipes = result.getOrNull()?.toUiState()
+            getRecipesUseCase(methodId = _viewModelState.value.categoryUiState.id).fold(
+                onSuccess = { recipeModelList ->
+                    recipeModelList
+                        .toUiState()
+                        .also { recipeUiStateList ->
+                            _viewModelState.update {
+                                it.copy(
+                                    isLoading = false,
+                                    recipes = recipeUiStateList,
+                                )
+                            }
+                        }
+                },
+                onFailure = { exception ->
                     _viewModelState.update {
                         it.copy(
                             isLoading = false,
-                            recipes = recipes,
+                            isError = true,
+                            errorMessageRes = ErrorUtil.getErrorMessageResource(exception)
                         )
                     }
                 }
-
-                result.isFailure -> {
-                    _viewModelState.update {
-                        it.copy(
-                            isLoading = false,
-                            isError = true
-                        )
-                    }
-                }
-            }
+            )
         }
     }
 
@@ -114,6 +121,7 @@ class RecipesListViewModel @AssistedInject constructor(
             is RecipeListAction.NavigateToRecipeDetails -> navigateToRecipeDetails(action.recipeUiState)
             RecipeListAction.ShowMethodInfoDialog -> showMethodInfoDialog()
             RecipeListAction.HideMethodInfoDialog -> hideMethodInfoDialog()
+            RecipeListAction.OnRetryClicked -> loadRecipes()
         }
     }
 

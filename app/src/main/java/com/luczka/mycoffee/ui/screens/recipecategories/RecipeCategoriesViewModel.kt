@@ -2,9 +2,11 @@ package com.luczka.mycoffee.ui.screens.recipecategories
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.luczka.mycoffee.domain.usecases.GetMethodsUseCase
+import com.luczka.mycoffee.R
+import com.luczka.mycoffee.domain.usecases.GetCategoriesUseCase
 import com.luczka.mycoffee.ui.mappers.toUiState
 import com.luczka.mycoffee.ui.models.CategoryUiState
+import com.luczka.mycoffee.ui.util.ErrorUtil
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,28 +22,22 @@ import javax.inject.Inject
 private data class RecipeCategoriesViewModelState(
     val isLoading: Boolean = false,
     val isError: Boolean = false,
-    val errorMessage: String = "",
-    val methods: List<CategoryUiState>? = null
+    val errorMessageRes: Int = R.string.error_text_unknown_error,
+    val categories: List<CategoryUiState>? = null
 ) {
     fun toRecipeCategoriesUiState(): RecipeCategoriesUiState {
-        return when {
-            isError -> RecipeCategoriesUiState.IsError(
-                isError = true,
+        return if (categories == null) {
+            RecipeCategoriesUiState.NoRecipeCategories(
+                isError = isError,
                 isLoading = isLoading,
-                methods = methods ?: emptyList()
+                errorMessageRes = errorMessageRes,
             )
-
-            methods == null -> RecipeCategoriesUiState.NoRecipeCategories(
-                isError = false,
+        } else {
+            RecipeCategoriesUiState.HasRecipeCategories(
                 isLoading = isLoading,
-                errorMessage = errorMessage,
-                methods = emptyList()
-            )
-
-            else -> RecipeCategoriesUiState.HasRecipeCategories(
-                isLoading = isLoading,
-                isError = false,
-                methods = methods
+                isError = isError,
+                errorMessageRes = errorMessageRes,
+                categories = categories
             )
         }
     }
@@ -49,7 +45,7 @@ private data class RecipeCategoriesViewModelState(
 
 @HiltViewModel
 class RecipeCategoriesViewModel @Inject constructor(
-    private val getMethodsUseCase: GetMethodsUseCase
+    private val getCategoriesUseCase: GetCategoriesUseCase
 ) : ViewModel() {
 
     private val _viewModelState = MutableStateFlow(RecipeCategoriesViewModelState(isLoading = true))
@@ -68,41 +64,43 @@ class RecipeCategoriesViewModel @Inject constructor(
     private fun loadCategories() {
         viewModelScope.launch {
             _viewModelState.update {
-                it.copy(isLoading = true)
+                it.copy(
+                    isLoading = true,
+                    isError = false
+                )
             }
 
-            val result = getMethodsUseCase()
-
-            when {
-                result.isSuccess -> {
-                    val methodUiStateList = result
-                        .getOrNull()
-                        ?.toUiState()
-                        ?.sorted()
-
+            getCategoriesUseCase().fold(
+                onSuccess = { categoryModelList ->
+                    categoryModelList
+                        .toUiState()
+                        .sorted()
+                        .also { categoryUiStateList ->
+                            _viewModelState.update {
+                                it.copy(
+                                    isLoading = false,
+                                    categories = categoryUiStateList
+                                )
+                            }
+                        }
+                },
+                onFailure = { exception ->
                     _viewModelState.update {
                         it.copy(
                             isLoading = false,
-                            methods = methodUiStateList
+                            isError = true,
+                            errorMessageRes = ErrorUtil.getErrorMessageResource(exception)
                         )
                     }
                 }
-
-                result.isFailure -> {
-                    _viewModelState.update {
-                        it.copy(
-                            isLoading = false,
-                            isError = true
-                        )
-                    }
-                }
-            }
+            )
         }
     }
 
     fun onAction(action: RecipeCategoriesAction) {
         when (action) {
             is RecipeCategoriesAction.NavigateToRecipes -> navigateToRecipes(action.categoryUiState)
+            RecipeCategoriesAction.OnRetryClicked -> loadCategories()
         }
     }
 

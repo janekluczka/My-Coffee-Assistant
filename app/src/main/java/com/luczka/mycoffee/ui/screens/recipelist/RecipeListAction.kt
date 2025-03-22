@@ -7,4 +7,5 @@ sealed class RecipeListAction {
     data class NavigateToRecipeDetails(val recipeUiState: RecipeUiState) : RecipeListAction()
     data object ShowMethodInfoDialog : RecipeListAction()
     data object HideMethodInfoDialog : RecipeListAction()
+    data object OnRetryClicked : RecipeListAction()
 }

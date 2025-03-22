@@ -14,14 +14,22 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.luczka.mycoffee.R
 import com.luczka.mycoffee.ui.components.dialogs.MethodInfoDialog
 import com.luczka.mycoffee.ui.components.icons.ArrowBackIcon
 import com.luczka.mycoffee.ui.components.icons.InfoIcon
@@ -33,6 +41,28 @@ fun RecipesListScreen(
     uiState: RecipeListUiState,
     onAction: (RecipeListAction) -> Unit,
 ) {
+    val context = LocalContext.current
+
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(uiState.isError) {
+        if (uiState.isError) {
+            val result = snackbarHostState.showSnackbar(
+                message = context.getString(uiState.errorMessageRes),
+                actionLabel = context.getString(R.string.action_retry),
+                duration = SnackbarDuration.Indefinite,
+            )
+            when (result) {
+                SnackbarResult.ActionPerformed -> {
+                    val action = RecipeListAction.OnRetryClicked
+                    onAction(action)
+                }
+
+                SnackbarResult.Dismissed -> {}
+            }
+        }
+    }
+
     if (uiState.openMethodInfoDialog) {
         MethodInfoDialog(
             method = uiState.categoryUiState,
@@ -44,6 +74,9 @@ fun RecipesListScreen(
     }
 
     Scaffold(
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
+        },
         topBar = {
             TopAppBar(
                 navigationIcon = {
@@ -81,35 +114,34 @@ fun RecipesListScreen(
         Box(modifier = Modifier.padding(innerPadding)) {
             Column {
                 Divider()
-                Box {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
                     LazyColumn(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                        items(
-                            items = uiState.recipes,
-                            key = { it.youtubeId }
-                        ) { recipeCardUiState ->
-                            RecipeListItem(
-                                modifier = Modifier.animateItem(),
-                                recipeCardUiState = recipeCardUiState,
-                                onClick = {
-                                    val action = RecipeListAction.NavigateToRecipeDetails(recipeUiState = recipeCardUiState)
-                                    onAction(action)
-                                }
-                            )
+                        if (uiState is RecipeListUiState.HasRecipes) {
+                            items(
+                                items = uiState.recipes,
+                                key = { it.youtubeId }
+                            ) { recipeCardUiState ->
+                                RecipeListItem(
+                                    modifier = Modifier.animateItem(),
+                                    recipeCardUiState = recipeCardUiState,
+                                    onClick = {
+                                        val action = RecipeListAction.NavigateToRecipeDetails(recipeUiState = recipeCardUiState)
+                                        onAction(action)
+                                    }
+                                )
+                            }
                         }
                     }
-                    if (!uiState.isLoading && uiState.recipes.isEmpty()) {
-                        Box(
-                            modifier = Modifier
-                                .padding(16.dp)
-                                .fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = "No recipes at the moment",
-                                style = MaterialTheme.typography.headlineSmall,
-                                fontWeight = FontWeight.Medium
-                            )
-                        }
+                    if (uiState is RecipeListUiState.NoRecipes && !uiState.isLoading && !uiState.isError) {
+                        Text(
+                            modifier = Modifier.padding(32.dp),
+                            text = "No recipes at the moment",
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.Medium
+                        )
                     }
                 }
             }
@@ -119,4 +151,3 @@ fun RecipesListScreen(
         }
     }
 }
-

@@ -48,6 +48,7 @@
     <string name="action_ok">OK</string>
     <string name="action_open">Open</string>
     <string name="action_previous">Previous</string>
+    <string name="action_retry">Retry</string>
     <string name="action_save">Save</string>
     <string name="action_select">Select</string>
 
@@ -99,6 +100,10 @@
     <!--  Error texts  -->
     <string name="error_text_field_can_not_be_empty">Field can not be empty</string>
     <string name="error_text_must_be_greater_than_zero">"Must be greater than 0"</string>
+    <string name="error_text_no_network">No network connection</string>
+    <string name="error_text_server_error">Server error</string>
+    <string name="error_text_fetch_cancelled">Fetch cancelled</string>
+    <string name="error_text_unknown_error">Unknown error</string>
 
     <!--  Dialogs  -->
     <string name="dialog_delete_coffee_title">Delete?</string>

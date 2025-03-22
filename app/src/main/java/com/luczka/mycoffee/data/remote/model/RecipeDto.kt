@@ -1,4 +1,4 @@
-package com.luczka.mycoffee.data.remote.dto
+package com.luczka.mycoffee.data.remote.model
 
 import androidx.annotation.Keep
 
@@ -9,4 +9,3 @@ data class RecipeDto(
     val steps: List<StepDto> = emptyList(),
     val youtubeId: String = "",
 )
-
