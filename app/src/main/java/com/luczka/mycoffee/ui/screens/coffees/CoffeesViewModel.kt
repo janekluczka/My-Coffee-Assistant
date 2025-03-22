@@ -44,17 +44,17 @@ class CoffeesViewModel @Inject constructor(
     private val deleteCoffeeUseCase: DeleteCoffeeUseCase
 ) : ViewModel() {
 
-    private val viewModelState = MutableStateFlow(CoffeesViewModelState())
-    val uiState = viewModelState
+    private val _viewModelState = MutableStateFlow(CoffeesViewModelState())
+    val uiState = _viewModelState
         .map(CoffeesViewModelState::toCoffeesUiState)
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.Eagerly,
-            initialValue = viewModelState.value.toCoffeesUiState()
+            initialValue = _viewModelState.value.toCoffeesUiState()
         )
 
-    private val _navigationEvent = MutableSharedFlow<CoffeesNavigationEvent>()
-    val navigationEvent = _navigationEvent.asSharedFlow()
+    private val _oneTimeEvent = MutableSharedFlow<CoffeesOneTimeEvent>()
+    val oneTimeEvent = _oneTimeEvent.asSharedFlow()
 
     init {
         viewModelScope.launch {
@@ -65,7 +65,7 @@ class CoffeesViewModel @Inject constructor(
                     }
                 }
                 .collect { swipeableListItemUiStates ->
-                    viewModelState.update {
+                    _viewModelState.update {
                         it.copy(coffees = swipeableListItemUiStates)
                     }
                 }
@@ -74,11 +74,10 @@ class CoffeesViewModel @Inject constructor(
 
     fun onAction(action: CoffeesAction) {
         when (action) {
-            is CoffeesAction.NavigateUp -> navigateUp()
-            is CoffeesAction.NavigateToAddCoffee -> navigateToAddCoffee()
+            CoffeesAction.NavigateUp -> navigateUp()
+            CoffeesAction.NavigateToAddCoffee -> navigateToAddCoffee()
             is CoffeesAction.OnEditClicked -> navigateToEdit(action.coffeeId)
             is CoffeesAction.NavigateToCoffeeDetails -> navigateToCoffeeDetails(action.coffeeId)
-
             is CoffeesAction.OnSelectedFilterChanged -> selectedFilterChanged(action.filter)
             is CoffeesAction.OnItemActionsExpanded -> collapseOtherItemsActions(action.coffeeId)
             is CoffeesAction.OnItemActionsCollapsed -> collapseItemsActions(action.coffeeId)
@@ -89,30 +88,30 @@ class CoffeesViewModel @Inject constructor(
 
     private fun navigateUp() {
         viewModelScope.launch {
-            _navigationEvent.emit(CoffeesNavigationEvent.NavigateUp)
+            _oneTimeEvent.emit(CoffeesOneTimeEvent.NavigateUp)
         }
     }
 
     private fun navigateToAddCoffee() {
         viewModelScope.launch {
-            _navigationEvent.emit(CoffeesNavigationEvent.NavigateToAddCoffee)
+            _oneTimeEvent.emit(CoffeesOneTimeEvent.NavigateToAddCoffee)
         }
     }
 
     private fun navigateToEdit(coffeeId: Long) {
         viewModelScope.launch {
-            _navigationEvent.emit(CoffeesNavigationEvent.NavigateToEditCoffee(coffeeId))
+            _oneTimeEvent.emit(CoffeesOneTimeEvent.NavigateToEditCoffee(coffeeId))
         }
     }
 
     private fun navigateToCoffeeDetails(coffeeId: Long) {
         viewModelScope.launch {
-            _navigationEvent.emit(CoffeesNavigationEvent.NavigateToCoffeeDetails(coffeeId))
+            _oneTimeEvent.emit(CoffeesOneTimeEvent.NavigateToCoffeeDetails(coffeeId))
         }
     }
 
     private fun selectedFilterChanged(coffeeFilterUiState: CoffeeFilterUiState) {
-        viewModelState.update {
+        _viewModelState.update {
             val filteredCoffees = when (coffeeFilterUiState) {
                 CoffeeFilterUiState.Current -> {
                     it.coffees.filter { swipeableCoffeeListItemUiState ->
@@ -148,7 +147,7 @@ class CoffeesViewModel @Inject constructor(
 
 
     private fun collapseOtherItemsActions(expandedCoffeeId: Long?) {
-        viewModelState.update { currentState ->
+        _viewModelState.update { currentState ->
             currentState.copy(
                 coffees = currentState.coffees.map { itemState ->
                     when {
@@ -162,7 +161,7 @@ class CoffeesViewModel @Inject constructor(
     }
 
     private fun collapseItemsActions(collapsedCoffeeId: Long) {
-        viewModelState.update { currentState ->
+        _viewModelState.update { currentState ->
             currentState.copy(
                 coffees = currentState.coffees.map { itemState ->
                     if (itemState.item.coffeeId == collapsedCoffeeId) {
@@ -176,7 +175,7 @@ class CoffeesViewModel @Inject constructor(
     }
 
     private fun updateFavourite(coffeeId: Long) {
-        val swipeableListItemUiState = viewModelState.value.coffees.find { it.item.coffeeId == coffeeId }
+        val swipeableListItemUiState = _viewModelState.value.coffees.find { it.item.coffeeId == coffeeId }
         val coffeeUiState = swipeableListItemUiState?.item ?: return
         viewModelScope.launch {
             val updatedCoffeeUiState = coffeeUiState.copy(isFavourite = !coffeeUiState.isFavourite)
@@ -185,12 +184,11 @@ class CoffeesViewModel @Inject constructor(
     }
 
     private fun deleteCoffee(coffeeId: Long) {
-        val swipeableListItemUiState = viewModelState.value.coffees.find { it.item.coffeeId == coffeeId }
+        val swipeableListItemUiState = _viewModelState.value.coffees.find { it.item.coffeeId == coffeeId }
         val coffeeUiState = swipeableListItemUiState?.item ?: return
         viewModelScope.launch {
             val updatedCoffeeUiState = coffeeUiState.copy(isFavourite = !coffeeUiState.isFavourite)
             deleteCoffeeUseCase(coffeeModel = updatedCoffeeUiState.toModel())
         }
     }
-
 }

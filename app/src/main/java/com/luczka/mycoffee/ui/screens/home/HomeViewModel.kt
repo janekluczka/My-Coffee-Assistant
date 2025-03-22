@@ -36,29 +36,29 @@ class HomeViewModel @Inject constructor(
     private val getRecentlyAddedBrewsFlowUseCase: GetRecentlyAddedBrewsFlowUseCase
 ) : ViewModel() {
 
-    private val viewModelState = MutableStateFlow(HomeViewModelState())
-    val uiState = viewModelState
+    private val _viewModelState = MutableStateFlow(HomeViewModelState())
+    val uiState = _viewModelState
         .map(HomeViewModelState::toHomeUiState)
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.Eagerly,
-            initialValue = viewModelState.value.toHomeUiState()
+            initialValue = _viewModelState.value.toHomeUiState()
         )
 
-    private val _navigationEvent = MutableSharedFlow<HomeNavigationEvent>()
-    val navigationEvent = _navigationEvent.asSharedFlow()
+    private val _oneTimeEvent = MutableSharedFlow<HomeOneTimeEvent>()
+    val oneTimeEvent = _oneTimeEvent.asSharedFlow()
 
     init {
         viewModelScope.launch {
             getRecentlyAddedCoffeesFlowUseCase(amount = 5).collect { coffeeModels ->
-                viewModelState.update {
+                _viewModelState.update {
                     it.copy(recentlyAddedCoffees = coffeeModels.toUiState())
                 }
             }
         }
         viewModelScope.launch {
             getRecentlyAddedBrewsFlowUseCase(amount = 5).collect { brewModels ->
-                viewModelState.update {
+                _viewModelState.update {
                     it.copy(recentBrews = brewModels.toUiState())
                 }
             }
@@ -67,8 +67,8 @@ class HomeViewModel @Inject constructor(
 
     fun onAction(action: HomeAction) {
         when (action) {
-            is HomeAction.OnMenuClicked -> {}
-            is HomeAction.NavigateToBrewAssistant -> navigateToAssistant()
+            HomeAction.OnMenuClicked -> {}
+            HomeAction.NavigateToBrewAssistant -> navigateToAssistant()
             is HomeAction.NavigateToBrewDetails -> navigateToBrewDetails(action.brewId)
             is HomeAction.NavigateToCoffeeDetails -> navigateToCoffeeDetails(action.coffeeId)
         }
@@ -76,20 +76,19 @@ class HomeViewModel @Inject constructor(
 
     private fun navigateToAssistant() {
         viewModelScope.launch {
-            _navigationEvent.emit(HomeNavigationEvent.NavigateToBrewAssistant)
+            _oneTimeEvent.emit(HomeOneTimeEvent.NavigateToBrewAssistant)
         }
     }
 
     private fun navigateToBrewDetails(brewId: Long) {
         viewModelScope.launch {
-            _navigationEvent.emit(HomeNavigationEvent.NavigateToBrewDetails(brewId))
+            _oneTimeEvent.emit(HomeOneTimeEvent.NavigateToBrewDetails(brewId))
         }
     }
 
     private fun navigateToCoffeeDetails(coffeeId: Long) {
         viewModelScope.launch {
-            _navigationEvent.emit(HomeNavigationEvent.NavigateToCoffeeDetails(coffeeId))
+            _oneTimeEvent.emit(HomeOneTimeEvent.NavigateToCoffeeDetails(coffeeId))
         }
     }
-
 }

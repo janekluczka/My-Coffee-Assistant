@@ -42,22 +42,22 @@ class BrewDetailsViewModel @AssistedInject constructor(
     private val deleteBrewUseCase: DeleteBrewUseCase
 ) : ViewModel() {
 
-    private val viewModelState = MutableStateFlow(BrewDetailsViewModelState())
-    val uiState = viewModelState
+    private val _viewModelState = MutableStateFlow(BrewDetailsViewModelState())
+    val uiState = _viewModelState
         .map(BrewDetailsViewModelState::toBrewDetailsUiState)
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.Eagerly,
-            initialValue = viewModelState.value.toBrewDetailsUiState()
+            initialValue = _viewModelState.value.toBrewDetailsUiState()
         )
 
-    private val _navigationEvents = MutableSharedFlow<BrewDetailsNavigationEvent>()
-    val navigationEvents = _navigationEvents.asSharedFlow()
+    private val _oneTimeEvent = MutableSharedFlow<BrewDetailsOneTimeEvent>()
+    val oneTimeEvent = _oneTimeEvent.asSharedFlow()
 
     init {
         viewModelScope.launch {
             getBrewFlowUseCase(brewId = brewId).collect { brewModel ->
-                viewModelState.update {
+                _viewModelState.update {
                     it.copy(brew = brewModel?.toUiState())
                 }
             }
@@ -73,15 +73,15 @@ class BrewDetailsViewModel @AssistedInject constructor(
 
     private fun navigateUp() {
         viewModelScope.launch {
-            _navigationEvents.emit(BrewDetailsNavigationEvent.NavigateUp)
+            _oneTimeEvent.emit(BrewDetailsOneTimeEvent.NavigateUp)
         }
     }
 
     private fun deleteBrew() {
-        val brew = viewModelState.value.brew ?: return
+        val brew = _viewModelState.value.brew ?: return
         viewModelScope.launch {
             deleteBrewUseCase(brew.toModel())
-            _navigationEvents.emit(BrewDetailsNavigationEvent.NavigateUp)
+            _oneTimeEvent.emit(BrewDetailsOneTimeEvent.NavigateUp)
         }
     }
 

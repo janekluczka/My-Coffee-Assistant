@@ -263,7 +263,7 @@ private fun CoffeeDetailsTopBar(
                     }
                     IconButton(
                         onClick = {
-                            val action = CoffeeDetailsAction.OnEditClicked(coffeeId = uiState.coffee.coffeeId)
+                            val action = CoffeeDetailsAction.OnEditClicked
                             onAction(action)
                         },
                         enabled = !uiState.isLoading

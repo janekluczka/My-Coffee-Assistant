@@ -38,13 +38,13 @@ class RecipeDetailsViewModel @AssistedInject constructor(
     @Assisted private val recipeUiState: RecipeUiState
 ) : ViewModel() {
 
-    private val viewModelState = MutableStateFlow(RecipeDetailsViewModelState(recipe = recipeUiState))
-    val uiState = viewModelState
+    private val _viewModelState = MutableStateFlow(RecipeDetailsViewModelState(recipe = recipeUiState))
+    val uiState = _viewModelState
         .map(RecipeDetailsViewModelState::toRecipeDetailsUiState)
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.Eagerly,
-            initialValue = viewModelState.value.toRecipeDetailsUiState()
+            initialValue = _viewModelState.value.toRecipeDetailsUiState()
         )
 
     private val _oneTimeEvent = MutableSharedFlow<RecipeDetailsOneTimeEvent>()
@@ -66,24 +66,23 @@ class RecipeDetailsViewModel @AssistedInject constructor(
     }
 
     private fun showOpenYoutubeDialog() {
-        viewModelState.update {
+        _viewModelState.update {
             it.copy(showOpenYouTubeDialog = true)
         }
     }
 
     private fun hideOpenYouTubeDialog() {
-        viewModelState.update {
+        _viewModelState.update {
             it.copy(showOpenYouTubeDialog = false)
         }
     }
 
     private fun leaveApplication() {
-        viewModelState.update {
+        _viewModelState.update {
             it.copy(showOpenYouTubeDialog = false)
         }
         viewModelScope.launch {
             _oneTimeEvent.emit(RecipeDetailsOneTimeEvent.OpenBrowser(recipeUiState.videoUrl))
         }
     }
-
 }

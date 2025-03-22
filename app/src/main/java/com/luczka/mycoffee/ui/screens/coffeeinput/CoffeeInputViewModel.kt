@@ -63,8 +63,8 @@ class CoffeeInputViewModel @AssistedInject constructor(
     private val _uiState = MutableStateFlow(CoffeeInputUiState())
     val uiState: StateFlow<CoffeeInputUiState> = _uiState.asStateFlow()
 
-    private val _navigationEvents = MutableSharedFlow<CoffeeInputNavigationEvent>()
-    val navigationEvents = _navigationEvents.asSharedFlow()
+    private val _oneTimeEvent = MutableSharedFlow<CoffeeInputOneTimeEvent>()
+    val oneTimeEvent = _oneTimeEvent.asSharedFlow()
 
     init {
         if (coffeeId != null) {
@@ -84,20 +84,16 @@ class CoffeeInputViewModel @AssistedInject constructor(
 
     fun onAction(action: CoffeeInputAction) {
         when (action) {
-            is CoffeeInputAction.OnBackClicked -> back()
-            is CoffeeInputAction.NavigateUp -> navigateUp()
-            is CoffeeInputAction.OnAddImageClicked -> {}
-
-            is CoffeeInputAction.ShowBottomSheet -> showBottomSheet()
-            is CoffeeInputAction.HideBottomSheet -> hideBottomSheet()
-
-            is CoffeeInputAction.OnHideDiscardDialog -> hideDiscardDialog()
-            is CoffeeInputAction.OnShowScaInfoDialog -> showScaInfoDialog()
-            is CoffeeInputAction.OnHideScaInfoDialog -> hideScaInfoDialog()
-
+            CoffeeInputAction.OnBackClicked -> back()
+            CoffeeInputAction.NavigateUp -> navigateUp()
+            CoffeeInputAction.OnAddImageClicked -> {}
+            CoffeeInputAction.ShowBottomSheet -> showBottomSheet()
+            CoffeeInputAction.HideBottomSheet -> hideBottomSheet()
+            CoffeeInputAction.OnHideDiscardDialog -> hideDiscardDialog()
+            CoffeeInputAction.OnShowScaInfoDialog -> showScaInfoDialog()
+            CoffeeInputAction.OnHideScaInfoDialog -> hideScaInfoDialog()
             is CoffeeInputAction.OnImagesSelected -> updateImagesUris(action.uris)
             is CoffeeInputAction.OnImageClicked -> showImage(action.index)
-
             is CoffeeInputAction.OnRoasterOrBrandValueChanged -> updateBrand(action.brand)
             is CoffeeInputAction.OnOriginOrNameValueChanged -> updateName(action.name)
             is CoffeeInputAction.OnAmountValueChanged -> updateAmount(action.amount)
@@ -107,8 +103,7 @@ class CoffeeInputViewModel @AssistedInject constructor(
             is CoffeeInputAction.OnAltitudeValueChanged -> updateAltitude(action.altitude)
             is CoffeeInputAction.OnScaScoreValueChanged -> updateScaScore(action.scaScore)
             is CoffeeInputAction.OnAdditionalInformationValueChanged -> updateAdditionalInformation(action.additionalInformation)
-
-            is CoffeeInputAction.OnSaveClicked -> saveCoffee()
+            CoffeeInputAction.OnSaveClicked -> saveCoffee()
         }
     }
 
@@ -116,7 +111,7 @@ class CoffeeInputViewModel @AssistedInject constructor(
         val newOrUpdatedCoffeeUiState = _uiState.value.newOrUpdatedCoffeeUiState
         if (newOrUpdatedCoffeeUiState.isBlank()) {
             viewModelScope.launch {
-                _navigationEvents.emit(CoffeeInputNavigationEvent.NavigateUp)
+                _oneTimeEvent.emit(CoffeeInputOneTimeEvent.NavigateUp)
             }
         } else {
             _uiState.update {
@@ -133,7 +128,7 @@ class CoffeeInputViewModel @AssistedInject constructor(
             )
         }
         viewModelScope.launch {
-            _navigationEvents.emit(CoffeeInputNavigationEvent.NavigateUp)
+            _oneTimeEvent.emit(CoffeeInputOneTimeEvent.NavigateUp)
         }
     }
 
@@ -311,8 +306,7 @@ class CoffeeInputViewModel @AssistedInject constructor(
                 it.copy(isLoading = false)
             }
 
-            _navigationEvents.emit(CoffeeInputNavigationEvent.NavigateUp)
+            _oneTimeEvent.emit(CoffeeInputOneTimeEvent.NavigateUp)
         }
     }
-
 }

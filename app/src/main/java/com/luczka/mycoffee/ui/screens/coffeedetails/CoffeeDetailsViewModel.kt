@@ -55,22 +55,22 @@ class CoffeeDetailsViewModel @AssistedInject constructor(
     private val deleteCoffeeUseCase: DeleteCoffeeUseCase,
 ) : ViewModel() {
 
-    private val viewModelState = MutableStateFlow(CoffeeDetailsViewModelState())
-    val uiState = viewModelState
+    private val _viewModelState = MutableStateFlow(CoffeeDetailsViewModelState())
+    val uiState = _viewModelState
         .map(CoffeeDetailsViewModelState::toCoffeeDetailsUiState)
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.Eagerly,
-            initialValue = viewModelState.value.toCoffeeDetailsUiState()
+            initialValue = _viewModelState.value.toCoffeeDetailsUiState()
         )
 
-    private val _navigationEvents = MutableSharedFlow<CoffeeDetailsNavigationEvent>()
-    val navigationEvents = _navigationEvents.asSharedFlow()
+    private val _oneTimeEvent = MutableSharedFlow<CoffeeDetailsOneTimeEvent>()
+    val oneTimeEvent = _oneTimeEvent.asSharedFlow()
 
     init {
         viewModelScope.launch {
             getCoffeeFlowUseCase(coffeeId).collect { coffeeModel ->
-                viewModelState.update {
+                _viewModelState.update {
                     it.copy(coffeeUiState = coffeeModel?.toUiState())
                 }
             }
@@ -79,23 +79,23 @@ class CoffeeDetailsViewModel @AssistedInject constructor(
 
     fun onAction(action: CoffeeDetailsAction) {
         when (action) {
-            is CoffeeDetailsAction.NavigateUp -> navigateUp()
-            is CoffeeDetailsAction.OnFavouriteClicked -> updateFavourite()
-            is CoffeeDetailsAction.OnEditClicked -> navigateToEdit()
-            is CoffeeDetailsAction.ShowDeleteDialog -> showDeleteDialog()
-            is CoffeeDetailsAction.HideDeleteDialog -> hideDeleteDialog()
-            is CoffeeDetailsAction.OnDeleteClicked -> delete()
+            CoffeeDetailsAction.NavigateUp -> navigateUp()
+            CoffeeDetailsAction.OnFavouriteClicked -> updateFavourite()
+            CoffeeDetailsAction.OnEditClicked -> navigateToEdit()
+            CoffeeDetailsAction.ShowDeleteDialog -> showDeleteDialog()
+            CoffeeDetailsAction.HideDeleteDialog -> hideDeleteDialog()
+            CoffeeDetailsAction.OnDeleteClicked -> delete()
         }
     }
 
     private fun navigateUp() {
         viewModelScope.launch {
-            _navigationEvents.emit(CoffeeDetailsNavigationEvent.NavigateUp)
+            _oneTimeEvent.emit(CoffeeDetailsOneTimeEvent.NavigateUp)
         }
     }
 
     private fun updateFavourite() {
-        val coffeeUiState = viewModelState.value.coffeeUiState ?: return
+        val coffeeUiState = _viewModelState.value.coffeeUiState ?: return
         viewModelScope.launch {
             val updatedCoffeeUiState = coffeeUiState.copy(isFavourite = !coffeeUiState.isFavourite)
             updateCoffeeUseCase(coffeeModel = updatedCoffeeUiState.toModel())
@@ -103,29 +103,29 @@ class CoffeeDetailsViewModel @AssistedInject constructor(
     }
 
     private fun navigateToEdit() {
-        val coffeeUiState = viewModelState.value.coffeeUiState ?: return
+        val coffeeUiState = _viewModelState.value.coffeeUiState ?: return
         viewModelScope.launch {
-            _navigationEvents.emit(CoffeeDetailsNavigationEvent.NavigateToCoffeeInput(coffeeUiState.coffeeId))
+            _oneTimeEvent.emit(CoffeeDetailsOneTimeEvent.NavigateToCoffeeInput(coffeeUiState.coffeeId))
         }
     }
 
     private fun showDeleteDialog() {
-        viewModelState.update {
+        _viewModelState.update {
             it.copy(openDeleteDialog = true)
         }
     }
 
     private fun hideDeleteDialog() {
-        viewModelState.update {
+        _viewModelState.update {
             it.copy(openDeleteDialog = false)
         }
     }
 
     private fun delete() {
-        val coffeeUiState = viewModelState.value.coffeeUiState ?: return
+        val coffeeUiState = _viewModelState.value.coffeeUiState ?: return
 
         viewModelScope.launch {
-            viewModelState.update {
+            _viewModelState.update {
                 it.copy(
                     isLoading = true,
                     openDeleteDialog = false
@@ -134,12 +134,11 @@ class CoffeeDetailsViewModel @AssistedInject constructor(
 
             deleteCoffeeUseCase(coffeeModel = coffeeUiState.toModel())
 
-            viewModelState.update {
+            _viewModelState.update {
                 it.copy(isLoading = false)
             }
 
-            _navigationEvents.emit(CoffeeDetailsNavigationEvent.NavigateUp)
+            _oneTimeEvent.emit(CoffeeDetailsOneTimeEvent.NavigateUp)
         }
     }
-
 }

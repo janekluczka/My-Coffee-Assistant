@@ -62,33 +62,33 @@ class RecipesListViewModel @AssistedInject constructor(
     private val getRecipesUseCase: GetRecipesUseCase
 ) : ViewModel() {
 
-    private val viewModelState = MutableStateFlow(
+    private val _viewModelState = MutableStateFlow(
         RecipesListViewModelState(categoryUiState = categoryUiState,)
     )
-    val uiState = viewModelState
+    val uiState = _viewModelState
         .onStart { loadRecipes() }
         .map(RecipesListViewModelState::toRecipeListUiState)
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000L),
-            initialValue = viewModelState.value.toRecipeListUiState()
+            initialValue = _viewModelState.value.toRecipeListUiState()
         )
 
-    private val _navigationEvent = MutableSharedFlow<RecipeListNavigationEvent>()
-    val navigationEvent = _navigationEvent.asSharedFlow()
+    private val _oneTimeEvent = MutableSharedFlow<RecipeListOneTimeEvent>()
+    val oneTimeEvent = _oneTimeEvent.asSharedFlow()
 
     private fun loadRecipes() {
         viewModelScope.launch {
-            viewModelState.update {
+            _viewModelState.update {
                 it.copy(isLoading = true)
             }
 
-            val result = getRecipesUseCase(methodId = viewModelState.value.categoryUiState.id)
+            val result = getRecipesUseCase(methodId = _viewModelState.value.categoryUiState.id)
 
             when {
                 result.isSuccess -> {
                     val recipes = result.getOrNull()?.toUiState()
-                    viewModelState.update {
+                    _viewModelState.update {
                         it.copy(
                             isLoading = false,
                             recipes = recipes,
@@ -97,7 +97,7 @@ class RecipesListViewModel @AssistedInject constructor(
                 }
 
                 result.isFailure -> {
-                    viewModelState.update {
+                    _viewModelState.update {
                         it.copy(
                             isLoading = false,
                             isError = true
@@ -119,26 +119,25 @@ class RecipesListViewModel @AssistedInject constructor(
 
     private fun navigateUp() {
         viewModelScope.launch {
-            _navigationEvent.emit(RecipeListNavigationEvent.NavigateUp)
+            _oneTimeEvent.emit(RecipeListOneTimeEvent.NavigateUp)
         }
     }
 
     private fun navigateToRecipeDetails(recipeUiState: RecipeUiState) {
         viewModelScope.launch {
-            _navigationEvent.emit(RecipeListNavigationEvent.NavigateToRecipeDetails(recipeUiState))
+            _oneTimeEvent.emit(RecipeListOneTimeEvent.NavigateToRecipeDetails(recipeUiState))
         }
     }
 
     private fun showMethodInfoDialog() {
-        viewModelState.update {
+        _viewModelState.update {
             it.copy(openMethodInfoDialog = true)
         }
     }
 
     private fun hideMethodInfoDialog() {
-        viewModelState.update {
+        _viewModelState.update {
             it.copy(openMethodInfoDialog = false)
         }
     }
-
 }

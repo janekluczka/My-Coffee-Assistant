@@ -181,17 +181,17 @@ class BrewAssistantViewModel @Inject constructor(
     private val getCurrentCoffeesUseCase: GetCurrentCoffeesUseCase
 ) : ViewModel() {
 
-    private val viewModelState = MutableStateFlow(BrewAssistantViewModelState())
-    val uiState = viewModelState
+    private val _viewModelState = MutableStateFlow(BrewAssistantViewModelState())
+    val uiState = _viewModelState
         .map(BrewAssistantViewModelState::toAssistantUiState)
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.Eagerly,
-            initialValue = viewModelState.value.toAssistantUiState()
+            initialValue = _viewModelState.value.toAssistantUiState()
         )
 
-    private val _navigationEvents = MutableSharedFlow<BrewAssistantNavigationEvent>()
-    val navigationEvents = _navigationEvents.asSharedFlow()
+    private val _oneTimeEvent = MutableSharedFlow<BrewAssistantOneTimeEvent>()
+    val oneTimeEvent = _oneTimeEvent.asSharedFlow()
 
     private var timerJob: Job? = null
 
@@ -206,7 +206,7 @@ class BrewAssistantViewModel @Inject constructor(
                         .thenBy { it.amount }
                 )
                 .also { currentCoffees ->
-                    viewModelState.update { it.copy(currentCoffees = currentCoffees) }
+                    _viewModelState.update { it.copy(currentCoffees = currentCoffees) }
                 }
         }
     }
@@ -260,12 +260,12 @@ class BrewAssistantViewModel @Inject constructor(
     }
 
     private fun abort() {
-        if (viewModelState.value.selectedCoffees.isEmpty()) {
+        if (_viewModelState.value.selectedCoffees.isEmpty()) {
             viewModelScope.launch {
-                _navigationEvents.emit(BrewAssistantNavigationEvent.NavigateUp)
+                _oneTimeEvent.emit(BrewAssistantOneTimeEvent.NavigateUp)
             }
         } else {
-            viewModelState.update {
+            _viewModelState.update {
                 it.copy(showAbortDialog = true)
             }
         }
@@ -273,19 +273,19 @@ class BrewAssistantViewModel @Inject constructor(
 
     private fun back() {
         viewModelScope.launch {
-            viewModelState.update {
+            _viewModelState.update {
                 it.copy(
                     showAbortDialog = false,
                     showFinishDialog = false,
                     showBottomSheet = false
                 )
             }
-            _navigationEvents.emit(BrewAssistantNavigationEvent.NavigateUp)
+            _oneTimeEvent.emit(BrewAssistantOneTimeEvent.NavigateUp)
         }
     }
 
     private fun previous() {
-        val viewModelStateValue = viewModelState.value
+        val viewModelStateValue = _viewModelState.value
 
         val currentPage = viewModelStateValue.currentPage
         val selectedCoffees = viewModelStateValue.selectedCoffees
@@ -293,51 +293,51 @@ class BrewAssistantViewModel @Inject constructor(
         if (currentPage == 0) {
             if (selectedCoffees.isEmpty()) {
                 viewModelScope.launch {
-                    _navigationEvents.emit(BrewAssistantNavigationEvent.NavigateUp)
+                    _oneTimeEvent.emit(BrewAssistantOneTimeEvent.NavigateUp)
                 }
             } else {
-                viewModelState.update {
+                _viewModelState.update {
                     it.copy(showAbortDialog = true)
                 }
             }
         } else {
-            viewModelState.update {
+            _viewModelState.update {
                 it.copy(currentPage = currentPage - 1)
             }
         }
     }
 
     private fun next() {
-        val viewModelStateValue = viewModelState.value
+        val viewModelStateValue = _viewModelState.value
 
         val currentPage = viewModelStateValue.currentPage
         val pages = viewModelStateValue.pages
 
         if (currentPage == pages.lastIndex) {
-            viewModelState.update {
+            _viewModelState.update {
                 it.copy(showFinishDialog = true)
             }
         } else {
-            viewModelState.update {
+            _viewModelState.update {
                 it.copy(currentPage = currentPage + 1)
             }
         }
     }
 
     private fun hideBottomSheet() {
-        viewModelState.update {
+        _viewModelState.update {
             it.copy(showBottomSheet = false)
         }
     }
 
     private fun hideAbortDialog() {
-        viewModelState.update {
+        _viewModelState.update {
             it.copy(showAbortDialog = false)
         }
     }
 
     private fun hideFinishDialog() {
-        viewModelState.update {
+        _viewModelState.update {
             it.copy(showFinishDialog = false)
         }
     }
@@ -351,7 +351,7 @@ class BrewAssistantViewModel @Inject constructor(
             else -> 100
         }
 
-        val updatedSelectedCoffees = viewModelState.value.selectedCoffees.toMutableMap()
+        val updatedSelectedCoffees = _viewModelState.value.selectedCoffees.toMutableMap()
 
         if (updatedSelectedCoffees.containsKey(coffeeUiState)) {
             updatedSelectedCoffees.remove(coffeeUiState)
@@ -365,29 +365,29 @@ class BrewAssistantViewModel @Inject constructor(
             )
         }
 
-        viewModelState.update {
+        _viewModelState.update {
             it.copy(selectedCoffees = updatedSelectedCoffees)
         }
     }
 
     private fun updateAmountLeftPagerIndex(leftPagerPageIndex: Int) {
-        val amountSelectionUiState = viewModelState.value.defaultAmountDoubleVerticalPagerState
+        val amountSelectionUiState = _viewModelState.value.defaultAmountDoubleVerticalPagerState
         val updatedAmountSelectionUiState = amountSelectionUiState.copy(leftPagerPageIndex = leftPagerPageIndex)
-        viewModelState.update {
+        _viewModelState.update {
             it.copy(defaultAmountDoubleVerticalPagerState = updatedAmountSelectionUiState)
         }
     }
 
     private fun updateAmountRightPagerIndex(rightPagerPageIndex: Int) {
-        val amountSelectionUiState = viewModelState.value.defaultAmountDoubleVerticalPagerState
+        val amountSelectionUiState = _viewModelState.value.defaultAmountDoubleVerticalPagerState
         val updatedAmountSelectionUiState = amountSelectionUiState.copy(rightPagerPageIndex = rightPagerPageIndex)
-        viewModelState.update {
+        _viewModelState.update {
             it.copy(defaultAmountDoubleVerticalPagerState = updatedAmountSelectionUiState)
         }
     }
 
     private fun updateAmountLeftPagerIndex(key: CoffeeUiState, leftPagerPageIndex: Int) {
-        val selectedCoffees = viewModelState.value.selectedCoffees.toMutableMap()
+        val selectedCoffees = _viewModelState.value.selectedCoffees.toMutableMap()
 
         val amountDoubleVerticalPagerState = selectedCoffees[key] ?: return
 
@@ -418,11 +418,11 @@ class BrewAssistantViewModel @Inject constructor(
 
         selectedCoffees.replace(key, updatedAmountSelectionUiState)
 
-        viewModelState.update { it.copy(selectedCoffees = selectedCoffees) }
+        _viewModelState.update { it.copy(selectedCoffees = selectedCoffees) }
     }
 
     private fun updateAmountRightPagerIndex(key: CoffeeUiState, rightPagerPageIndex: Int) {
-        val selectedCoffees = viewModelState.value.selectedCoffees.toMutableMap()
+        val selectedCoffees = _viewModelState.value.selectedCoffees.toMutableMap()
 
         val amountSelectionUiState = selectedCoffees[key] ?: return
 
@@ -430,11 +430,11 @@ class BrewAssistantViewModel @Inject constructor(
 
         selectedCoffees.replace(key, updatedAmountSelectionUiState)
 
-        viewModelState.update { it.copy(selectedCoffees = selectedCoffees) }
+        _viewModelState.update { it.copy(selectedCoffees = selectedCoffees) }
     }
 
     private fun updateAmountSelectionValue(leftInputValue: String, rightInputValue: String) {
-        val amountSelectionUiState = viewModelState.value.defaultAmountDoubleVerticalPagerState
+        val amountSelectionUiState = _viewModelState.value.defaultAmountDoubleVerticalPagerState
 
         val integerPart = leftInputValue.toIntOrNull() ?: return
         val fractionalPart = rightInputValue.toIntOrNull() ?: return
@@ -444,11 +444,11 @@ class BrewAssistantViewModel @Inject constructor(
             rightPagerPageIndex = amountSelectionUiState.rightPagerItems.indexOf(fractionalPart)
         )
 
-        viewModelState.update { it.copy(defaultAmountDoubleVerticalPagerState = updatedAmountSelectionUiState) }
+        _viewModelState.update { it.copy(defaultAmountDoubleVerticalPagerState = updatedAmountSelectionUiState) }
     }
 
     private fun updateAmountSelectionValue(key: CoffeeUiState, leftInputValue: String, rightInputValue: String) {
-        val selectedCoffees = viewModelState.value.selectedCoffees.toMutableMap()
+        val selectedCoffees = _viewModelState.value.selectedCoffees.toMutableMap()
 
         val amountSelectionUiState = selectedCoffees[key] ?: return
 
@@ -482,27 +482,27 @@ class BrewAssistantViewModel @Inject constructor(
 
         selectedCoffees.replace(key, updatedAmountSelectionUiState)
 
-        viewModelState.update { it.copy(selectedCoffees = selectedCoffees) }
+        _viewModelState.update { it.copy(selectedCoffees = selectedCoffees) }
     }
 
     private fun updateCoffeeRatioIndex(coffeeRatioIndex: Int) {
-        val ratioSelectionUiState = viewModelState.value.ratioDoubleVerticalPagerState
+        val ratioSelectionUiState = _viewModelState.value.ratioDoubleVerticalPagerState
 
         val updatedRatioSelectionUiState = ratioSelectionUiState.copy(leftPagerPageIndex = coffeeRatioIndex)
 
-        viewModelState.update { it.copy(ratioDoubleVerticalPagerState = updatedRatioSelectionUiState) }
+        _viewModelState.update { it.copy(ratioDoubleVerticalPagerState = updatedRatioSelectionUiState) }
     }
 
     private fun updateWaterRatioIndex(waterRatioIndex: Int) {
-        val ratioSelectionUiState = viewModelState.value.ratioDoubleVerticalPagerState
+        val ratioSelectionUiState = _viewModelState.value.ratioDoubleVerticalPagerState
 
         val updatedRatioSelectionUiState = ratioSelectionUiState.copy(rightPagerPageIndex = waterRatioIndex)
 
-        viewModelState.update { it.copy(ratioDoubleVerticalPagerState = updatedRatioSelectionUiState) }
+        _viewModelState.update { it.copy(ratioDoubleVerticalPagerState = updatedRatioSelectionUiState) }
     }
 
     private fun updateRatioValues(coffeeRatioValue: String, waterRatioValue: String) {
-        val ratioSelectionUiState = viewModelState.value.ratioDoubleVerticalPagerState
+        val ratioSelectionUiState = _viewModelState.value.ratioDoubleVerticalPagerState
 
         val selectedCoffeeRatio = if (coffeeRatioValue.isNotBlank()) {
             coffeeRatioValue.toIntOrNull() ?: return
@@ -521,12 +521,12 @@ class BrewAssistantViewModel @Inject constructor(
             rightPagerPageIndex = ratioSelectionUiState.rightPagerItems.indexOf(selectedWaterRatio)
         )
 
-        viewModelState.update { it.copy(ratioDoubleVerticalPagerState = updatedRatioSelectionUiState) }
+        _viewModelState.update { it.copy(ratioDoubleVerticalPagerState = updatedRatioSelectionUiState) }
     }
 
     private fun resetTimer() {
         stopTimer()
-        viewModelState.update { state ->
+        _viewModelState.update { state ->
             state.copy(timeInSeconds = null)
         }
     }
@@ -541,19 +541,19 @@ class BrewAssistantViewModel @Inject constructor(
     }
 
     private fun startTimer() {
-        viewModelState.update {
+        _viewModelState.update {
             it.copy(isTimerRunning = true)
         }
 
         timerJob = viewModelScope.launch {
             while (true) {
-                if (viewModelState.value.timeInSeconds == null) {
-                    viewModelState.update {
+                if (_viewModelState.value.timeInSeconds == null) {
+                    _viewModelState.update {
                         it.copy(timeInSeconds = 0)
                     }
                 }
                 delay(1000)
-                viewModelState.update {
+                _viewModelState.update {
                     it.copy(timeInSeconds = (it.timeInSeconds ?: 0) + 1)
                 }
             }
@@ -561,7 +561,7 @@ class BrewAssistantViewModel @Inject constructor(
     }
 
     private fun stopTimer() {
-        viewModelState.update {
+        _viewModelState.update {
             it.copy(isTimerRunning = false)
         }
         timerJob?.cancel()
@@ -570,15 +570,15 @@ class BrewAssistantViewModel @Inject constructor(
 
     private fun finishBrew() {
         viewModelScope.launch {
-            val brewUiState = viewModelState.value.toBrewUiState()
-            val coffeeUiStateListToUpdate = viewModelState.value.toCoffeeUiStateListToUpdate()
+            val brewUiState = _viewModelState.value.toBrewUiState()
+            val coffeeUiStateListToUpdate = _viewModelState.value.toCoffeeUiStateListToUpdate()
 
 //            val brewId = myCoffeeDatabaseRepository.insertBrewAndUpdateCoffeeModels(
 //                brewModel = brewUiState.toModel(),
 //                coffeeModels = coffeeUiStateListToUpdate.map { it.toModel() }
 //            )
 
-            _navigationEvents.emit(BrewAssistantNavigationEvent.NavigateToBrewRating(brewId = 0L))
+            _oneTimeEvent.emit(BrewAssistantOneTimeEvent.NavigateToBrewRating(brewId = 0L))
         }
     }
 

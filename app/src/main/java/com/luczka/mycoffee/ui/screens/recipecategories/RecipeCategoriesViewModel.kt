@@ -52,22 +52,22 @@ class RecipeCategoriesViewModel @Inject constructor(
     private val getMethodsUseCase: GetMethodsUseCase
 ) : ViewModel() {
 
-    private val viewModelState = MutableStateFlow(RecipeCategoriesViewModelState(isLoading = true))
-    val uiState = viewModelState
+    private val _viewModelState = MutableStateFlow(RecipeCategoriesViewModelState(isLoading = true))
+    val uiState = _viewModelState
         .onStart { loadCategories() }
         .map(RecipeCategoriesViewModelState::toRecipeCategoriesUiState)
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000L),
-            initialValue = viewModelState.value.toRecipeCategoriesUiState()
+            initialValue = _viewModelState.value.toRecipeCategoriesUiState()
         )
 
-    private val _navigationEvent = MutableSharedFlow<RecipeCategoriesNavigationEvent>()
-    val navigationEvent = _navigationEvent.asSharedFlow()
+    private val _oneTimeEvent = MutableSharedFlow<RecipeCategoriesOneTimeEvent>()
+    val oneTimeEvent = _oneTimeEvent.asSharedFlow()
 
     private fun loadCategories() {
         viewModelScope.launch {
-            viewModelState.update {
+            _viewModelState.update {
                 it.copy(isLoading = true)
             }
 
@@ -80,7 +80,7 @@ class RecipeCategoriesViewModel @Inject constructor(
                         ?.toUiState()
                         ?.sorted()
 
-                    viewModelState.update {
+                    _viewModelState.update {
                         it.copy(
                             isLoading = false,
                             methods = methodUiStateList
@@ -89,7 +89,7 @@ class RecipeCategoriesViewModel @Inject constructor(
                 }
 
                 result.isFailure -> {
-                    viewModelState.update {
+                    _viewModelState.update {
                         it.copy(
                             isLoading = false,
                             isError = true
@@ -108,7 +108,7 @@ class RecipeCategoriesViewModel @Inject constructor(
 
     private fun navigateToRecipes(categoryUiState: CategoryUiState) {
         viewModelScope.launch {
-            _navigationEvent.emit(RecipeCategoriesNavigationEvent.NavigateToMethodDetails(categoryUiState))
+            _oneTimeEvent.emit(RecipeCategoriesOneTimeEvent.NavigateToMethodDetails(categoryUiState))
         }
     }
 }

@@ -53,17 +53,17 @@ class BrewsViewModel @Inject constructor(
     private val deleteBrewUseCase: DeleteBrewUseCase
 ) : ViewModel() {
 
-    private val viewModelState = MutableStateFlow(BrewsViewModelState())
-    val uiState = viewModelState
+    private val _viewModelState = MutableStateFlow(BrewsViewModelState())
+    val uiState = _viewModelState
         .map(BrewsViewModelState::toBrewsUiState)
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.Eagerly,
-            initialValue = viewModelState.value.toBrewsUiState()
+            initialValue = _viewModelState.value.toBrewsUiState()
         )
 
-    private val _navigationEvent = MutableSharedFlow<BrewsNavigationEvent>()
-    val navigationEvent = _navigationEvent.asSharedFlow()
+    private val _oneTimeEvent = MutableSharedFlow<BrewsOneTimeEvent>()
+    val oneTimeEvent = _oneTimeEvent.asSharedFlow()
 
     init {
         viewModelScope.launch {
@@ -74,7 +74,7 @@ class BrewsViewModel @Inject constructor(
                     }
                 }
                 .collect { swipeableListItemUiStates ->
-                    viewModelState.update {
+                    _viewModelState.update {
                         it.copy(brews = swipeableListItemUiStates)
                     }
                 }
@@ -83,9 +83,8 @@ class BrewsViewModel @Inject constructor(
 
     fun onAction(action: BrewsAction) {
         when (action) {
-            is BrewsAction.NavigateToAssistant -> navigateToAssistant()
+            BrewsAction.NavigateToAssistant -> navigateToAssistant()
             is BrewsAction.NavigateToBrewDetails -> navigateToBrewDetails(action.brewId)
-
             is BrewsAction.OnSelectedFilterChanged -> selectFilter(action.brewFilter)
             is BrewsAction.OnItemActionsExpanded -> collapseOtherItemsActions(action.brewId)
             is BrewsAction.OnItemActionsCollapsed -> collapseItemsActions(action.brewId)
@@ -95,24 +94,24 @@ class BrewsViewModel @Inject constructor(
 
     private fun navigateToAssistant() {
         viewModelScope.launch {
-            _navigationEvent.emit(BrewsNavigationEvent.NavigateToAssistant)
+            _oneTimeEvent.emit(BrewsOneTimeEvent.NavigateToAssistant)
         }
     }
 
     private fun navigateToBrewDetails(brewId: Long) {
         viewModelScope.launch {
-            _navigationEvent.emit(BrewsNavigationEvent.NavigateToBrewDetails(brewId))
+            _oneTimeEvent.emit(BrewsOneTimeEvent.NavigateToBrewDetails(brewId))
         }
     }
 
     private fun selectFilter(brewFilter: BrewFilterUiState) {
-        viewModelState.update {
+        _viewModelState.update {
             it.copy(selectedFilter = brewFilter)
         }
     }
 
     private fun collapseOtherItemsActions(expandedBrewId: Long?) {
-        viewModelState.update { currentState ->
+        _viewModelState.update { currentState ->
             currentState.copy(
                 brews = currentState.brews.map { itemState ->
                     when {
@@ -126,7 +125,7 @@ class BrewsViewModel @Inject constructor(
     }
 
     private fun collapseItemsActions(collapsedBrewId: Long) {
-        viewModelState.update { currentState ->
+        _viewModelState.update { currentState ->
             currentState.copy(
                 brews = currentState.brews.map { itemState ->
                     if (itemState.item.brewId == collapsedBrewId) {
@@ -140,11 +139,10 @@ class BrewsViewModel @Inject constructor(
     }
 
     private fun deleteBrew(brewId: Long) {
-        val swipeableListItemUiState = viewModelState.value.brews.find { it.item.brewId == brewId }
+        val swipeableListItemUiState = _viewModelState.value.brews.find { it.item.brewId == brewId }
         val brewUiState = swipeableListItemUiState?.item ?: return
         viewModelScope.launch {
             deleteBrewUseCase(brewUiState.toModel())
         }
     }
-
 }

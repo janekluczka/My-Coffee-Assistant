@@ -47,19 +47,19 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navOptions
 import androidx.navigation.toRoute
 import com.luczka.mycoffee.R
-import com.luczka.mycoffee.ui.screens.brewassistant.BrewAssistantNavigationEvent
+import com.luczka.mycoffee.ui.screens.brewassistant.BrewAssistantOneTimeEvent
 import com.luczka.mycoffee.ui.screens.brewassistant.BrewAssistantViewModel
 import com.luczka.mycoffee.ui.screens.brewassistant.screens.BrewAssistantMainScreen
-import com.luczka.mycoffee.ui.screens.brewdetails.BrewDetailsNavigationEvent
+import com.luczka.mycoffee.ui.screens.brewdetails.BrewDetailsOneTimeEvent
 import com.luczka.mycoffee.ui.screens.brewdetails.BrewDetailsScreen
 import com.luczka.mycoffee.ui.screens.brewdetails.BrewDetailsViewModel
 import com.luczka.mycoffee.ui.screens.brewdetails.BrewDetailsViewModelFactory
 import com.luczka.mycoffee.ui.screens.brewrating.AssistantRatingScreen
-import com.luczka.mycoffee.ui.screens.coffeedetails.CoffeeDetailsNavigationEvent
+import com.luczka.mycoffee.ui.screens.coffeedetails.CoffeeDetailsOneTimeEvent
 import com.luczka.mycoffee.ui.screens.coffeedetails.CoffeeDetailsScreen
 import com.luczka.mycoffee.ui.screens.coffeedetails.CoffeeDetailsViewModel
 import com.luczka.mycoffee.ui.screens.coffeedetails.CoffeeDetailsViewModelFactory
-import com.luczka.mycoffee.ui.screens.coffeeinput.CoffeeInputNavigationEvent
+import com.luczka.mycoffee.ui.screens.coffeeinput.CoffeeInputOneTimeEvent
 import com.luczka.mycoffee.ui.screens.coffeeinput.CoffeeInputScreen
 import com.luczka.mycoffee.ui.screens.coffeeinput.CoffeeInputViewModel
 import com.luczka.mycoffee.ui.screens.coffeeinput.CoffeeInputViewModelFactory
@@ -195,9 +195,9 @@ fun MyCoffeeMainNavHost(
                 val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
                 LaunchedEffect(Unit) {
-                    viewModel.navigationEvents.collect { brewDetailsNavigationEvent ->
-                        when (brewDetailsNavigationEvent) {
-                            BrewDetailsNavigationEvent.NavigateUp -> mainNavController.navigateUp()
+                    viewModel.oneTimeEvent.collect { event ->
+                        when (event) {
+                            BrewDetailsOneTimeEvent.NavigateUp -> mainNavController.navigateUp()
                         }
                     }
                 }
@@ -215,10 +215,10 @@ fun MyCoffeeMainNavHost(
                 val uiState by viewModel.uiState.collectAsState()
 
                 LaunchedEffect(Unit) {
-                    viewModel.navigationEvents.collect { brewAssistantNavigationEvent ->
-                        when (brewAssistantNavigationEvent) {
-                            BrewAssistantNavigationEvent.NavigateUp -> mainNavController.navigateUp()
-                            is BrewAssistantNavigationEvent.NavigateToBrewRating -> mainNavController.navigateToBrewRating(brewAssistantNavigationEvent.brewId)
+                    viewModel.oneTimeEvent.collect { event ->
+                        when (event) {
+                            BrewAssistantOneTimeEvent.NavigateUp -> mainNavController.navigateUp()
+                            is BrewAssistantOneTimeEvent.NavigateToBrewRating -> mainNavController.navigateToBrewRating(event.brewId)
                         }
                     }
                 }
@@ -246,10 +246,10 @@ fun MyCoffeeMainNavHost(
                 val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
                 LaunchedEffect(Unit) {
-                    viewModel.navigationEvents.collect { event ->
+                    viewModel.oneTimeEvent.collect { event ->
                         when (event) {
-                            CoffeeDetailsNavigationEvent.NavigateUp -> mainNavController.navigateUp()
-                            is CoffeeDetailsNavigationEvent.NavigateToCoffeeInput -> mainNavController.navigate(MainNavHostRoute.CoffeeInput(event.coffeeId))
+                            CoffeeDetailsOneTimeEvent.NavigateUp -> mainNavController.navigateUp()
+                            is CoffeeDetailsOneTimeEvent.NavigateToCoffeeInput -> mainNavController.navigate(MainNavHostRoute.CoffeeInput(event.coffeeId))
                         }
                     }
                 }
@@ -271,9 +271,9 @@ fun MyCoffeeMainNavHost(
                 val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
                 LaunchedEffect(Unit) {
-                    viewModel.navigationEvents.collect { event ->
+                    viewModel.oneTimeEvent.collect { event ->
                         when (event) {
-                            CoffeeInputNavigationEvent.NavigateUp -> mainNavController.navigateUp()
+                            CoffeeInputOneTimeEvent.NavigateUp -> mainNavController.navigateUp()
                         }
                     }
                 }
