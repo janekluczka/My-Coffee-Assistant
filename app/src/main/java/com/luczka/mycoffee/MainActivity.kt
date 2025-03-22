@@ -5,7 +5,9 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
-import com.luczka.mycoffee.ui.MyCoffeeContent
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
+import com.luczka.mycoffee.ui.navigation.MyCoffeeMainNavHost
 import com.luczka.mycoffee.ui.theme.MyCoffeeTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -20,8 +22,16 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             MyCoffeeTheme {
+                val mainNavController: NavHostController = rememberNavController()
+                val navController: NavHostController = rememberNavController()
+
                 val windowSize = calculateWindowSizeClass(this)
-                MyCoffeeContent(widthSizeClass = windowSize.widthSizeClass)
+
+                MyCoffeeMainNavHost(
+                    widthSizeClass =  windowSize.widthSizeClass,
+                    mainNavController = mainNavController,
+                    nestedNavController = navController
+                )
             }
         }
     }
