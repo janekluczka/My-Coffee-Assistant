@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.luczka.mycoffee.data.mappers.toUiState
 import com.luczka.mycoffee.domain.usecases.GetRecipesUseCase
-import com.luczka.mycoffee.ui.models.MethodUiState
+import com.luczka.mycoffee.ui.models.CategoryUiState
 import com.luczka.mycoffee.ui.models.RecipeUiState
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -21,7 +21,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 private data class RecipesListViewModelState(
-    val methodUiState: MethodUiState,
+    val categoryUiState: CategoryUiState,
     val isLoading: Boolean = false,
     val isError: Boolean = false,
     val errorMessage: String = "",
@@ -31,8 +31,8 @@ private data class RecipesListViewModelState(
     fun toRecipeListUiState(): RecipeListUiState {
         return if (recipes == null) {
             RecipeListUiState.NoRecipes(
-                methodUiState = methodUiState,
-                hasInfoButton = methodUiState.description.isNotBlank(),
+                categoryUiState = categoryUiState,
+                hasInfoButton = categoryUiState.description.isNotBlank(),
                 isLoading = isLoading,
                 isError = isError,
                 errorMessage = errorMessage,
@@ -40,8 +40,8 @@ private data class RecipesListViewModelState(
             )
         } else {
             RecipeListUiState.HasRecipes(
-                methodUiState = methodUiState,
-                hasInfoButton = methodUiState.description.isNotBlank(),
+                categoryUiState = categoryUiState,
+                hasInfoButton = categoryUiState.description.isNotBlank(),
                 isLoading = isLoading,
                 isError = isError,
                 recipes = recipes,
@@ -53,17 +53,17 @@ private data class RecipesListViewModelState(
 
 @AssistedFactory
 interface RecipeListViewModelFactory {
-    fun create(methodUiState: MethodUiState): RecipesListViewModel
+    fun create(categoryUiState: CategoryUiState): RecipesListViewModel
 }
 
 @HiltViewModel(assistedFactory = RecipeListViewModelFactory::class)
 class RecipesListViewModel @AssistedInject constructor(
-    @Assisted methodUiState: MethodUiState,
+    @Assisted categoryUiState: CategoryUiState,
     private val getRecipesUseCase: GetRecipesUseCase
 ) : ViewModel() {
 
     private val viewModelState = MutableStateFlow(
-        RecipesListViewModelState(methodUiState = methodUiState,)
+        RecipesListViewModelState(categoryUiState = categoryUiState,)
     )
     val uiState = viewModelState
         .onStart { loadRecipes() }
@@ -83,7 +83,7 @@ class RecipesListViewModel @AssistedInject constructor(
                 it.copy(isLoading = true)
             }
 
-            val result = getRecipesUseCase(methodId = viewModelState.value.methodUiState.id)
+            val result = getRecipesUseCase(methodId = viewModelState.value.categoryUiState.id)
 
             when {
                 result.isSuccess -> {

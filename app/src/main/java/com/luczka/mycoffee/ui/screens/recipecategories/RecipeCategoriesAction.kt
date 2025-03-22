@@ -1,7 +1,7 @@
 package com.luczka.mycoffee.ui.screens.recipecategories
 
-import com.luczka.mycoffee.ui.models.MethodUiState
+import com.luczka.mycoffee.ui.models.CategoryUiState
 
 sealed class RecipeCategoriesAction {
-    data class NavigateToRecipes(val methodUiState: MethodUiState) : RecipeCategoriesAction()
+    data class NavigateToRecipes(val categoryUiState: CategoryUiState) : RecipeCategoriesAction()
 }

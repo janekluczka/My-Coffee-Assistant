@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.luczka.mycoffee.domain.usecases.GetMethodsUseCase
 import com.luczka.mycoffee.ui.mappers.toUiState
-import com.luczka.mycoffee.ui.models.MethodUiState
+import com.luczka.mycoffee.ui.models.CategoryUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,11 +17,11 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-private data class MethodsViewModelState(
+private data class RecipeCategoriesViewModelState(
     val isLoading: Boolean = false,
     val isError: Boolean = false,
     val errorMessage: String = "",
-    val methods: List<MethodUiState>? = null
+    val methods: List<CategoryUiState>? = null
 ) {
     fun toRecipeCategoriesUiState(): RecipeCategoriesUiState {
         return when {
@@ -52,10 +52,10 @@ class RecipeCategoriesViewModel @Inject constructor(
     private val getMethodsUseCase: GetMethodsUseCase
 ) : ViewModel() {
 
-    private val viewModelState = MutableStateFlow(MethodsViewModelState(isLoading = true))
+    private val viewModelState = MutableStateFlow(RecipeCategoriesViewModelState(isLoading = true))
     val uiState = viewModelState
         .onStart { loadCategories() }
-        .map(MethodsViewModelState::toRecipeCategoriesUiState)
+        .map(RecipeCategoriesViewModelState::toRecipeCategoriesUiState)
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000L),
@@ -75,11 +75,15 @@ class RecipeCategoriesViewModel @Inject constructor(
 
             when {
                 result.isSuccess -> {
-                    val methodUiStateListSorted = result.getOrNull()?.toUiState()
+                    val methodUiStateList = result
+                        .getOrNull()
+                        ?.toUiState()
+                        ?.sorted()
+
                     viewModelState.update {
                         it.copy(
                             isLoading = false,
-                            methods = methodUiStateListSorted
+                            methods = methodUiStateList
                         )
                     }
                 }
@@ -98,14 +102,13 @@ class RecipeCategoriesViewModel @Inject constructor(
 
     fun onAction(action: RecipeCategoriesAction) {
         when (action) {
-            is RecipeCategoriesAction.NavigateToRecipes -> navigateToRecipes(action.methodUiState)
+            is RecipeCategoriesAction.NavigateToRecipes -> navigateToRecipes(action.categoryUiState)
         }
     }
 
-    private fun navigateToRecipes(methodUiState: MethodUiState) {
+    private fun navigateToRecipes(categoryUiState: CategoryUiState) {
         viewModelScope.launch {
-            _navigationEvent.emit(RecipeCategoriesNavigationEvent.NavigateToMethodDetails(methodUiState))
+            _navigationEvent.emit(RecipeCategoriesNavigationEvent.NavigateToMethodDetails(categoryUiState))
         }
     }
-
 }

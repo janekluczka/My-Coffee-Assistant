@@ -7,11 +7,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.luczka.mycoffee.R
-import com.luczka.mycoffee.ui.models.MethodUiState
+import com.luczka.mycoffee.ui.models.CategoryUiState
 
 @Composable
 fun MethodInfoDialog(
-    method: MethodUiState,
+    method: CategoryUiState,
     onDismiss: () -> Unit,
 ) {
     AlertDialog(

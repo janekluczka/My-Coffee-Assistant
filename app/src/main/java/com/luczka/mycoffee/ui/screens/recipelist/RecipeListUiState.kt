@@ -1,10 +1,10 @@
 package com.luczka.mycoffee.ui.screens.recipelist
 
-import com.luczka.mycoffee.ui.models.MethodUiState
+import com.luczka.mycoffee.ui.models.CategoryUiState
 import com.luczka.mycoffee.ui.models.RecipeUiState
 
 sealed interface RecipeListUiState {
-    val methodUiState: MethodUiState
+    val categoryUiState: CategoryUiState
     val hasInfoButton: Boolean
     val isLoading: Boolean
     val isError: Boolean
@@ -12,7 +12,7 @@ sealed interface RecipeListUiState {
     val openMethodInfoDialog: Boolean
 
     data class NoRecipes(
-        override val methodUiState: MethodUiState,
+        override val categoryUiState: CategoryUiState,
         override val hasInfoButton: Boolean,
         override val isLoading: Boolean,
         override val isError: Boolean,
@@ -22,7 +22,7 @@ sealed interface RecipeListUiState {
     ) : RecipeListUiState
 
     data class HasRecipes(
-        override val methodUiState: MethodUiState,
+        override val categoryUiState: CategoryUiState,
         override val hasInfoButton: Boolean,
         override val isLoading: Boolean,
         override val isError: Boolean,

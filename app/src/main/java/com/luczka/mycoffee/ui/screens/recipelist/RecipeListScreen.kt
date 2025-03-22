@@ -35,7 +35,7 @@ fun RecipesListScreen(
 ) {
     if (uiState.openMethodInfoDialog) {
         MethodInfoDialog(
-            method = uiState.methodUiState,
+            method = uiState.categoryUiState,
             onDismiss = {
                 val action = RecipeListAction.HideMethodInfoDialog
                 onAction(action)
@@ -58,7 +58,7 @@ fun RecipesListScreen(
                 },
                 title = {
                     Text(
-                        text = uiState.methodUiState.name,
+                        text = uiState.categoryUiState.name,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )

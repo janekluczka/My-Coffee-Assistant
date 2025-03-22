@@ -95,7 +95,7 @@ fun RecipeCategoriesScreen(
                     ) { methodCardUiState ->
                         MethodCard(
                             modifier = Modifier.animateItem(),
-                            methodUiState = methodCardUiState,
+                            categoryUiState = methodCardUiState,
                             onClick = {
                                 val action = RecipeCategoriesAction.NavigateToRecipes(methodCardUiState)
                                 onAction(action)

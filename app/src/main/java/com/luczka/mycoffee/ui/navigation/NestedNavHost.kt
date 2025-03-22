@@ -13,7 +13,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
-import com.luczka.mycoffee.ui.models.MethodUiState
+import com.luczka.mycoffee.ui.models.CategoryUiState
 import com.luczka.mycoffee.ui.models.RecipeUiState
 import com.luczka.mycoffee.ui.screens.brews.BrewsNavigationEvent
 import com.luczka.mycoffee.ui.screens.brews.BrewsScreen
@@ -133,7 +133,7 @@ fun MyCoffeeNestedNavHost(
             LaunchedEffect(Unit) {
                 viewModel.navigationEvent.collect { event ->
                     when (event) {
-                        is RecipeCategoriesNavigationEvent.NavigateToMethodDetails -> navController.navigateToRecipesList(event.methodUiState)
+                        is RecipeCategoriesNavigationEvent.NavigateToMethodDetails -> navController.navigateToRecipesList(event.categoryUiState)
                     }
                 }
             }
@@ -146,12 +146,12 @@ fun MyCoffeeNestedNavHost(
         }
         composable<NestedNavHostRoutes.Recipes.List>(
             typeMap = mapOf(
-                typeOf<MethodUiState>() to CustomNavTypes.MethodUiStateNavType
+                typeOf<CategoryUiState>() to CustomNavTypes.CategoryUiStateNavType
             )
         ) { backStackEntry ->
             val arguments = backStackEntry.toRoute<NestedNavHostRoutes.Recipes.List>()
             val viewModel = hiltViewModel<RecipesListViewModel, RecipeListViewModelFactory> { factory ->
-                factory.create(arguments.methodUiState)
+                factory.create(arguments.categoryUiState)
             }
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -198,8 +198,8 @@ fun MyCoffeeNestedNavHost(
     }
 }
 
-private fun NavHostController.navigateToRecipesList(methodUiState: MethodUiState) {
-    navigate(NestedNavHostRoutes.Recipes.List(methodUiState))
+private fun NavHostController.navigateToRecipesList(categoryUiState: CategoryUiState) {
+    navigate(NestedNavHostRoutes.Recipes.List(categoryUiState))
 }
 
 private fun NavHostController.navigateToRecipesDetails(recipeUiState: RecipeUiState) {

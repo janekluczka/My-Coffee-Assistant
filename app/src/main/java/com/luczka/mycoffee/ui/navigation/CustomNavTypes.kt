@@ -4,33 +4,33 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import androidx.navigation.NavType
-import com.luczka.mycoffee.ui.models.MethodUiState
+import com.luczka.mycoffee.ui.models.CategoryUiState
 import com.luczka.mycoffee.ui.models.RecipeUiState
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 object CustomNavTypes {
 
-    val MethodUiStateNavType = object : NavType<MethodUiState>(isNullableAllowed = false) {
-        override fun put(bundle: Bundle, key: String, value: MethodUiState) {
+    val CategoryUiStateNavType = object : NavType<CategoryUiState>(isNullableAllowed = false) {
+        override fun put(bundle: Bundle, key: String, value: CategoryUiState) {
             bundle.putParcelable(key, value)
         }
 
-        override fun get(bundle: Bundle, key: String): MethodUiState {
+        override fun get(bundle: Bundle, key: String): CategoryUiState {
             return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                bundle.getParcelable(key, MethodUiState::class.java)!!
+                bundle.getParcelable(key, CategoryUiState::class.java)!!
             } else {
                 @Suppress("DEPRECATION")
                 bundle.getParcelable(key)!!
             }
         }
 
-        override fun serializeAsValue(value: MethodUiState): String {
+        override fun serializeAsValue(value: CategoryUiState): String {
             return Uri.encode(Json.encodeToString(value))
         }
 
-        override fun parseValue(value: String): MethodUiState {
-            return Json.decodeFromString<MethodUiState>(value)
+        override fun parseValue(value: String): CategoryUiState {
+            return Json.decodeFromString<CategoryUiState>(value)
         }
     }
 
@@ -56,5 +56,4 @@ object CustomNavTypes {
             return Json.decodeFromString<RecipeUiState>(value)
         }
     }
-
 }

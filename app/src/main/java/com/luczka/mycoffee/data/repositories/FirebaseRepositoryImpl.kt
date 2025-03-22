@@ -4,7 +4,7 @@ import android.content.Context
 import android.util.Log
 import com.luczka.mycoffee.data.mappers.toModel
 import com.luczka.mycoffee.data.remote.FirebaseService
-import com.luczka.mycoffee.domain.models.MethodModel
+import com.luczka.mycoffee.domain.models.CategoryModel
 import com.luczka.mycoffee.domain.models.RecipeModel
 import com.luczka.mycoffee.domain.repositories.FirebaseRepository
 
@@ -19,12 +19,12 @@ class FirebaseRepositoryImpl(
 
     private val localeCode: String = context.resources.configuration.locales[0].language
 
-    override suspend fun getCategories(): Result<List<MethodModel>> {
+    override suspend fun getCategories(): Result<List<CategoryModel>> {
         return try {
-            val methods = firebaseService.getCategories()
+            val categories = firebaseService
+                .getCategories()
                 .toModel(localeCode)
-                .sortedBy { it.name }
-            Result.success(methods)
+            Result.success(categories)
         } catch (exception: Exception) {
             exception.message?.let { Log.d(TAG, it) }
             Result.failure(exception)

@@ -31,9 +31,9 @@ data class CoffeeUiState(
     fun isBlank(): Boolean {
         if (coffeeId != 0L) return false
         if (coffeeImages.isNotEmpty()) return false
-        if (roasterOrBrand != "") return false
-        if (originOrName != "") return false
-        if (amount != "") return false
+        if (roasterOrBrand.isNotBlank()) return false
+        if (originOrName.isNotBlank()) return false
+        if (amount.isNotBlank()) return false
         if (roast != null) return false
         if (process != null) return false
         if (plantation != null) return false
@@ -45,5 +45,4 @@ data class CoffeeUiState(
         if (addedOn != null) return false
         return true
     }
-
 }

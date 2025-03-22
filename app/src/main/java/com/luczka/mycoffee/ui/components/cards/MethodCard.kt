@@ -14,13 +14,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.luczka.mycoffee.ui.models.MethodUiState
+import com.luczka.mycoffee.ui.models.CategoryUiState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MethodCard(
     modifier: Modifier = Modifier,
-    methodUiState: MethodUiState,
+    categoryUiState: CategoryUiState,
     onClick: () -> Unit
 ) {
     OutlinedCard(
@@ -35,7 +35,7 @@ fun MethodCard(
                 .padding(16.dp),
         ) {
             Text(
-                text = methodUiState.name,
+                text = categoryUiState.name,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
                 style = MaterialTheme.typography.titleMedium
@@ -47,9 +47,9 @@ fun MethodCard(
 @Preview
 @Composable
 fun MethodCardPreview() {
-    val methodUiState = MethodUiState(name = "Aeropress")
+    val categoryUiState = CategoryUiState(name = "Aeropress")
     MethodCard(
-        methodUiState = methodUiState,
+        categoryUiState = categoryUiState,
         onClick = {}
     )
 }

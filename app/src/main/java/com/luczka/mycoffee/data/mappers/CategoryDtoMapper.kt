@@ -1,16 +1,16 @@
 package com.luczka.mycoffee.data.mappers
 
 import com.luczka.mycoffee.data.remote.dto.CategoryDto
-import com.luczka.mycoffee.domain.models.MethodModel
+import com.luczka.mycoffee.domain.models.CategoryModel
 
-fun CategoryDto.toModel(localeCode: String) : MethodModel {
-    return MethodModel(
+fun CategoryDto.toModel(localeCode: String) : CategoryModel {
+    return CategoryModel(
         id = id,
         name = localizedName[localeCode] ?: defaultName,
         description = description
     )
 }
 
-fun List<CategoryDto>.toModel(localeCode: String) : List<MethodModel> {
+fun List<CategoryDto>.toModel(localeCode: String) : List<CategoryModel> {
     return this.map { it.toModel(localeCode) }
 }

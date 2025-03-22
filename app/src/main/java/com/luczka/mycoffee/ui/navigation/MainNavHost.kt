@@ -67,35 +67,7 @@ import com.luczka.mycoffee.ui.screens.equipmentinput.EquipmentInputAction
 import com.luczka.mycoffee.ui.screens.equipmentinput.EquipmentInputScreen
 import kotlinx.coroutines.launch
 
-val topLevelRoutes = listOf(
-    TopLevelRoute(
-        route = NestedNavHostRoutes.Home,
-        stringRes = R.string.tab_home,
-        drawableRes = R.drawable.ic_home_24_fill_0_weight_300_grade_0_opticalsize_24
-    ),
-    TopLevelRoute(
-        route = NestedNavHostRoutes.Brews,
-        stringRes = R.string.tab_history,
-        drawableRes = R.drawable.ic_history_24_fill_0_weight_300_grade_0_opticalsize_24
-    ),
-    TopLevelRoute(
-        route = NestedNavHostRoutes.Coffees,
-        stringRes = R.string.tab_coffees,
-        drawableRes = R.drawable.ic_browse_24_fill_0_weight_300_grade_0_opticalsize_24
-    ),
-//            TopLevelRoute(
-//                route = Equipment,
-//                stringRes = R.string.tab_equipment,
-//                drawableRes = R.drawable.ic_coffee_maker_24_fill_0_weight_300_grade_0_opticalsize_24
-//            ),
-    TopLevelRoute(
-        route = NestedNavHostRoutes.Recipes.Categories,
-        stringRes = R.string.tab_recipes,
-        drawableRes = R.drawable.ic_list_alt_24_fill_0_weight_300_grade_0_opticalsize_24
-    )
-)
-
-val drawerRoutes = listOf(
+private val drawerRoutes = listOf(
     TopLevelRoute(
         route = NestedNavHostRoutes.Home,
         stringRes = R.string.tab_home,
