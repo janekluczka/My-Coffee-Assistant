@@ -3,7 +3,7 @@ package com.luczka.mycoffee.ui.screens.recipelist
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.luczka.mycoffee.R
-import com.luczka.mycoffee.data.mappers.toUiState
+import com.luczka.mycoffee.ui.mappers.toUiState
 import com.luczka.mycoffee.domain.usecases.GetRecipesUseCase
 import com.luczka.mycoffee.ui.models.CategoryUiState
 import com.luczka.mycoffee.ui.models.RecipeUiState

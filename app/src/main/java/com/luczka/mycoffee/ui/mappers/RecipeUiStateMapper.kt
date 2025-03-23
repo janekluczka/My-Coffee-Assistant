@@ -1,7 +1,6 @@
-package com.luczka.mycoffee.data.mappers
+package com.luczka.mycoffee.ui.mappers
 
 import com.luczka.mycoffee.domain.models.RecipeModel
-import com.luczka.mycoffee.ui.mappers.toUiState
 import com.luczka.mycoffee.ui.models.RecipeUiState
 
 /**

@@ -5,11 +5,12 @@ import androidx.room.Room
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.ktx.app
-import com.luczka.mycoffee.data.database.MyCoffeeDao
-import com.luczka.mycoffee.data.database.MyCoffeeDatabase
-import com.luczka.mycoffee.data.repositories.FirebaseRepositoryImpl
+import com.luczka.mycoffee.data.local.ImageManager
+import com.luczka.mycoffee.data.local.MyCoffeeDao
+import com.luczka.mycoffee.data.local.MyCoffeeDatabase
 import com.luczka.mycoffee.data.remote.FirebaseService
-import com.luczka.mycoffee.data.repositories.MyCoffeeDatabaseRepositoryImpl
+import com.luczka.mycoffee.data.repository.FirebaseRepositoryImpl
+import com.luczka.mycoffee.data.repository.MyCoffeeDatabaseRepositoryImpl
 import com.luczka.mycoffee.domain.repositories.FirebaseRepository
 import com.luczka.mycoffee.domain.repositories.MyCoffeeDatabaseRepository
 import dagger.Module
@@ -43,6 +44,22 @@ object AppModule {
 
     @Provides
     @Singleton
+    fun providesImageManager(@ApplicationContext context: Context): ImageManager {
+        return ImageManager(context)
+    }
+
+    @Provides
+    @Singleton
+    fun providesMyCoffeeDatabaseRepository(
+        @ApplicationContext context: Context,
+        myCoffeeDao: MyCoffeeDao,
+        imageManager: ImageManager
+    ): MyCoffeeDatabaseRepository {
+        return MyCoffeeDatabaseRepositoryImpl(myCoffeeDao, imageManager)
+    }
+
+    @Provides
+    @Singleton
     fun providesFirebaseFirestore(): FirebaseFirestore {
         return FirebaseFirestore.getInstance(Firebase.app)
     }
@@ -56,20 +73,10 @@ object AppModule {
     }
 
     @Provides
-    @Singleton
-    fun providesMyCoffeeDatabaseRepository(
-        @ApplicationContext context: Context,
-        myCoffeeDao: MyCoffeeDao
-    ): MyCoffeeDatabaseRepository {
-        return MyCoffeeDatabaseRepositoryImpl(context, myCoffeeDao)
-    }
-
-    @Provides
     fun providesFirebaseRepository(
         @ApplicationContext context: Context,
         firebaseService: FirebaseService
     ): FirebaseRepository {
         return FirebaseRepositoryImpl(context, firebaseService)
     }
-
 }
