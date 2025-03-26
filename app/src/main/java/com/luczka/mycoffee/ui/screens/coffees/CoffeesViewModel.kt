@@ -9,6 +9,11 @@ import com.luczka.mycoffee.ui.mappers.toModel
 import com.luczka.mycoffee.ui.mappers.toUiState
 import com.luczka.mycoffee.ui.models.CoffeeUiState
 import com.luczka.mycoffee.ui.models.SwipeableListItemUiState
+import com.luczka.mycoffee.ui.screens.coffees.filter.CoffeeFilterStrategy
+import com.luczka.mycoffee.ui.screens.coffees.filter.FilterAllStrategy
+import com.luczka.mycoffee.ui.screens.coffees.filter.FilterCurrentStrategy
+import com.luczka.mycoffee.ui.screens.coffees.filter.FilterFavouritesStrategy
+import com.luczka.mycoffee.ui.screens.coffees.filter.FilterLowStrategy
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,18 +27,34 @@ import javax.inject.Inject
 
 private data class CoffeesViewModelState(
     val coffees: List<SwipeableListItemUiState<CoffeeUiState>> = emptyList(),
-    val selectedCoffeeFilter: CoffeeFilterUiState = CoffeeFilterUiState.All,
-    val filteredCoffees: List<SwipeableListItemUiState<CoffeeUiState>> = emptyList()
+    private val currentFilterStrategy: CoffeeFilterStrategy = FilterAllStrategy()
 ) {
-    fun toCoffeesUiState(): CoffeesUiState {
-        return if (coffees.isEmpty()) {
-            CoffeesUiState.NoCoffees
-        } else {
-            CoffeesUiState.HasCoffees(
-                selectedCoffeeFilter = selectedCoffeeFilter,
-                coffees = filteredCoffees,
-            )
+    val selectedCoffeeFilter: CoffeeFilterUiState
+        get() = when (currentFilterStrategy) {
+            is FilterAllStrategy -> CoffeeFilterUiState.All
+            is FilterCurrentStrategy -> CoffeeFilterUiState.Current
+            is FilterFavouritesStrategy -> CoffeeFilterUiState.Favourites
+            is FilterLowStrategy -> CoffeeFilterUiState.Low
+            else -> CoffeeFilterUiState.All
         }
+
+    fun toCoffeesUiState(): CoffeesUiState {
+        if (coffees.isEmpty()) return CoffeesUiState.NoCoffees
+
+        return CoffeesUiState.HasCoffees(
+            selectedCoffeeFilter = selectedCoffeeFilter,
+            coffees = currentFilterStrategy.filter(coffees),
+        )
+    }
+
+    fun updateFilterStrategy(filter: CoffeeFilterUiState): CoffeesViewModelState {
+        val newStrategy: CoffeeFilterStrategy = when (filter) {
+            CoffeeFilterUiState.All -> FilterAllStrategy()
+            CoffeeFilterUiState.Current -> FilterCurrentStrategy()
+            CoffeeFilterUiState.Favourites -> FilterFavouritesStrategy()
+            CoffeeFilterUiState.Low -> FilterLowStrategy()
+        }
+        return copy(currentFilterStrategy = newStrategy)
     }
 }
 
@@ -112,62 +133,26 @@ class CoffeesViewModel @Inject constructor(
 
     private fun selectedFilterChanged(coffeeFilterUiState: CoffeeFilterUiState) {
         _viewModelState.update {
-            val filteredCoffees = when (coffeeFilterUiState) {
-                CoffeeFilterUiState.Current -> {
-                    it.coffees.filter { swipeableCoffeeListItemUiState ->
-                        val amountFloat = swipeableCoffeeListItemUiState.item.amount.toFloatOrNull()
-                        amountFloat != null && amountFloat >= 0.0f
-                    }
-                }
-
-                CoffeeFilterUiState.All -> {
-                    it.coffees
-                }
-
-                CoffeeFilterUiState.Favourites -> {
-                    it.coffees.filter { swipeableCoffeeListItemUiState ->
-                        swipeableCoffeeListItemUiState.item.isFavourite
-                    }
-                }
-
-                CoffeeFilterUiState.Low -> {
-                    it.coffees.filter { swipeableCoffeeListItemUiState ->
-                        val amountFloat = swipeableCoffeeListItemUiState.item.amount.toFloatOrNull()
-                        amountFloat != null && amountFloat <= 100.0f && amountFloat >= 0.0f
-                    }
-                }
-            }
-
-            it.copy(
-                selectedCoffeeFilter = coffeeFilterUiState,
-                filteredCoffees = filteredCoffees
-            )
+            it.updateFilterStrategy(coffeeFilterUiState)
         }
     }
 
+    private fun collapseOtherItemsActions(coffeeId: Long?) {
+        updateItemActionsVisibility(itemId = coffeeId, isRevealed = true)
+    }
 
-    private fun collapseOtherItemsActions(expandedCoffeeId: Long?) {
-        _viewModelState.update { currentState ->
-            currentState.copy(
-                coffees = currentState.coffees.map { itemState ->
+    private fun collapseItemsActions(coffeeId: Long) {
+        updateItemActionsVisibility(itemId = coffeeId, isRevealed = false)
+    }
+
+    private fun updateItemActionsVisibility(itemId: Long?, isRevealed: Boolean) {
+        _viewModelState.update { viewModelState ->
+            viewModelState.copy(
+                coffees = viewModelState.coffees.map { swipeableListItemUiState ->
                     when {
-                        itemState.item.coffeeId == expandedCoffeeId -> itemState.copy(isRevealed = true)
-                        itemState.isRevealed -> itemState.copy(isRevealed = false)
-                        else -> itemState
-                    }
-                }
-            )
-        }
-    }
-
-    private fun collapseItemsActions(collapsedCoffeeId: Long) {
-        _viewModelState.update { currentState ->
-            currentState.copy(
-                coffees = currentState.coffees.map { itemState ->
-                    if (itemState.item.coffeeId == collapsedCoffeeId) {
-                        itemState.copy(isRevealed = false)
-                    } else {
-                        itemState
+                        itemId != null && swipeableListItemUiState.item.coffeeId == itemId -> swipeableListItemUiState.copy(isRevealed = isRevealed)
+                        !isRevealed && swipeableListItemUiState.isRevealed -> swipeableListItemUiState.copy(isRevealed = false)
+                        else -> swipeableListItemUiState
                     }
                 }
             )
