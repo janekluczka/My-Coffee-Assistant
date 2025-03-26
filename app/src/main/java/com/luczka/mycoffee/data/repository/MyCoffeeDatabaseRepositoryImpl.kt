@@ -65,10 +65,10 @@ class MyCoffeeDatabaseRepositoryImpl(
     }
 
     override suspend fun deleteCoffee(coffeeModel: CoffeeModel) {
-        myCoffeeDao.deleteCoffee(coffeeEntity = coffeeModel.toEntity())
         coffeeModel.coffeeImages.forEach { coffeeImageModel ->
             imageManager.deleteImageFromInternalStorage(coffeeImageModel.filename)
         }
+        myCoffeeDao.deleteCoffee(coffeeEntity = coffeeModel.toEntity())
     }
 
     override suspend fun insertBrewAndUpdateCoffeeModels(
