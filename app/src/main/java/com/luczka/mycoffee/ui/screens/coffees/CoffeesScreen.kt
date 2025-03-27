@@ -95,7 +95,7 @@ fun CoffeesScreen(
                 },
                 elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp),
                 onClick = {
-                    val action = CoffeesAction.NavigateToAddCoffee
+                    val action = CoffeesAction.OnAddCoffeeClicked
                     onAction(action)
                 },
                 expanded = fabExpanded
@@ -173,7 +173,7 @@ private fun HasCoffeesScreen(
 
     BackHandler {
         if (uiState.selectedCoffeeFilter != CoffeeFilterUiState.All) {
-            val action = CoffeesAction.OnSelectedFilterChanged(CoffeeFilterUiState.All)
+            val action = CoffeesAction.OnFilterClicked(CoffeeFilterUiState.All)
             onAction(action)
 
             val currentFilterNotVisible = filterListState.firstVisibleItemIndex != 0
@@ -185,7 +185,7 @@ private fun HasCoffeesScreen(
                 }
             }
         } else {
-            val action = CoffeesAction.NavigateUp
+            val action = CoffeesAction.OnBackClicked
             onAction(action)
         }
     }
@@ -204,7 +204,7 @@ private fun HasCoffeesScreen(
                 MyCoffeeFilterChip(
                     selected = uiState.selectedCoffeeFilter == coffeeFilterUiState,
                     onClick = {
-                        val action = CoffeesAction.OnSelectedFilterChanged(coffeeFilterUiState)
+                        val action = CoffeesAction.OnFilterClicked(coffeeFilterUiState)
                         onAction(action)
                     },
                     label = {
@@ -223,7 +223,6 @@ private fun HasCoffeesScreen(
                 key = { it.item.coffeeId }
             ) { swipeableCoffeeListItemUiState ->
                 val coffeeUiState = swipeableCoffeeListItemUiState.item
-                val coffeeId = coffeeUiState.coffeeId
 
                 var openDeleteDialog by rememberSaveable { mutableStateOf(false) }
 
@@ -235,7 +234,7 @@ private fun HasCoffeesScreen(
                         },
                         onPositive = {
                             openDeleteDialog = false
-                            val action = CoffeesAction.OnDeleteItemClicked(coffeeId = coffeeId)
+                            val action = CoffeesAction.OnItemDeleteClicked(coffeeUiState)
                             onAction(action)
                         }
                     )
@@ -246,7 +245,7 @@ private fun HasCoffeesScreen(
                     actions = {
                         FilledTonalIconButton(
                             onClick = {
-                                val action = CoffeesAction.OnFavouriteItemClicked(coffeeId = coffeeId)
+                                val action = CoffeesAction.OnItemIsFavouriteClicked(coffeeUiState)
                                 onAction(action)
                             },
                         ) {
@@ -258,7 +257,7 @@ private fun HasCoffeesScreen(
                         }
                         FilledTonalIconButton(
                             onClick = {
-                                val action = CoffeesAction.OnEditClicked(coffeeId = coffeeId)
+                                val action = CoffeesAction.OnEditClicked(coffeeId = coffeeUiState.coffeeId)
                                 onAction(action)
                             },
                         ) {
@@ -273,11 +272,11 @@ private fun HasCoffeesScreen(
                         }
                     },
                     onExpanded = {
-                        val action = CoffeesAction.OnItemActionsExpanded(coffeeId = coffeeId)
+                        val action = CoffeesAction.OnItemActionsExpanded(coffeeId = coffeeUiState.coffeeId)
                         onAction(action)
                     },
                     onCollapsed = {
-                        val action = CoffeesAction.OnItemActionsCollapsed(coffeeId = coffeeId)
+                        val action = CoffeesAction.OnItemActionsCollapsed(coffeeId = coffeeUiState.coffeeId)
                         onAction(action)
                     }
                 ) {
@@ -285,7 +284,7 @@ private fun HasCoffeesScreen(
                         modifier = Modifier.animateItem(),
                         coffeeUiState = swipeableCoffeeListItemUiState.item,
                         onClick = {
-                            val action = CoffeesAction.NavigateToCoffeeDetails(coffeeId = coffeeId)
+                            val action = CoffeesAction.OnCoffeeClicked(coffeeId = coffeeUiState.coffeeId)
                             onAction(action)
                         }
                     )

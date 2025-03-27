@@ -65,6 +65,8 @@ interface MyCoffeeDao {
     @Delete
     suspend fun deleteCoffee(coffeeEntity: CoffeeEntity)
 
+    @Query("DELETE FROM CoffeeEntity WHERE coffeeId = :coffeeId")
+    suspend fun deleteCoffee(coffeeId: Long)
 
     @Transaction
     suspend fun insertBrewWithBrewedCoffees(
