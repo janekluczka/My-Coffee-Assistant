@@ -29,7 +29,7 @@ import javax.inject.Inject
 private data class CoffeesViewModelState(
     val coffees: List<CoffeeUiState> = emptyList(),
     val selectedCoffeeFilter: CoffeeFilterUiState = CoffeeFilterUiState.All,
-    val filteredCoffees : List<SwipeableListItemUiState<CoffeeUiState>> = emptyList(),
+    val filteredCoffees: List<SwipeableListItemUiState<CoffeeUiState>> = emptyList(),
 ) {
     fun toCoffeesUiState(): CoffeesUiState {
         if (coffees.isEmpty()) return CoffeesUiState.NoCoffees
@@ -81,31 +81,35 @@ class CoffeesViewModel @Inject constructor(
             is CoffeesAction.OnCoffeeClicked -> navigateToCoffeeDetails(action.coffeeId)
             is CoffeesAction.OnFilterClicked -> filterChanged(action.filter)
             is CoffeesAction.OnItemActionsExpanded -> collapseOtherItemsActions(action.coffeeId)
-            is CoffeesAction.OnItemActionsCollapsed -> collapseItemActions(action.coffeeId)
+            is CoffeesAction.OnItemActionsCollapsed -> collapseItemsActions(action.coffeeId)
             is CoffeesAction.OnItemIsFavouriteClicked -> updateIsFavorite(action.coffeeUiState)
             is CoffeesAction.OnItemDeleteClicked -> deleteCoffee(action.coffeeUiState)
         }
     }
 
     private fun navigateUp() {
+        collapseAllItemsActions()
         viewModelScope.launch {
             _oneTimeEvent.emit(CoffeesOneTimeEvent.NavigateUp)
         }
     }
 
     private fun navigateToAddCoffee() {
+        collapseAllItemsActions()
         viewModelScope.launch {
             _oneTimeEvent.emit(CoffeesOneTimeEvent.NavigateToAddCoffee)
         }
     }
 
     private fun navigateToEdit(coffeeId: Long) {
+        collapseAllItemsActions()
         viewModelScope.launch {
             _oneTimeEvent.emit(CoffeesOneTimeEvent.NavigateToEditCoffee(coffeeId))
         }
     }
 
     private fun navigateToCoffeeDetails(coffeeId: Long) {
+        collapseAllItemsActions()
         viewModelScope.launch {
             _oneTimeEvent.emit(CoffeesOneTimeEvent.NavigateToCoffeeDetails(coffeeId))
         }
@@ -150,21 +154,39 @@ class CoffeesViewModel @Inject constructor(
         return filterStrategy.filter(coffees)
     }
 
-    private fun collapseOtherItemsActions(coffeeId: Long?) {
-        updateItemActionsVisibility(itemId = coffeeId, isRevealed = true)
-    }
-
-    private fun collapseItemActions(coffeeId: Long) {
-        updateItemActionsVisibility(itemId = coffeeId, isRevealed = false)
-    }
-
-    private fun updateItemActionsVisibility(itemId: Long?, isRevealed: Boolean) {
+    private fun collapseAllItemsActions() {
         _viewModelState.update { viewModelState ->
             viewModelState.copy(
                 filteredCoffees = viewModelState.filteredCoffees.map { swipeableListItemUiState ->
                     when {
-                        itemId != null && swipeableListItemUiState.item.coffeeId == itemId -> swipeableListItemUiState.copy(isRevealed = isRevealed)
-                        !isRevealed && swipeableListItemUiState.isRevealed -> swipeableListItemUiState.copy(isRevealed = false)
+                        swipeableListItemUiState.isRevealed -> swipeableListItemUiState.copy(isRevealed = false)
+                        else -> swipeableListItemUiState
+                    }
+                }
+            )
+        }
+    }
+
+    private fun collapseOtherItemsActions(coffeeId: Long?) {
+        _viewModelState.update { viewModelState ->
+            viewModelState.copy(
+                filteredCoffees = viewModelState.filteredCoffees.map { swipeableListItemUiState ->
+                    when {
+                        swipeableListItemUiState.item.coffeeId == coffeeId -> swipeableListItemUiState.copy(isRevealed = true)
+                        swipeableListItemUiState.isRevealed -> swipeableListItemUiState.copy(isRevealed = false)
+                        else -> swipeableListItemUiState
+                    }
+                }
+            )
+        }
+    }
+
+    private fun collapseItemsActions(coffeeId: Long) {
+        _viewModelState.update { viewModelState ->
+            viewModelState.copy(
+                filteredCoffees = viewModelState.filteredCoffees.map { swipeableListItemUiState ->
+                    when {
+                        swipeableListItemUiState.item.coffeeId == coffeeId -> swipeableListItemUiState.copy(isRevealed = false)
                         else -> swipeableListItemUiState
                     }
                 }

@@ -50,17 +50,19 @@ fun CoffeeDetailsScreen(
     onAction: (CoffeeDetailsAction) -> Unit
 ) {
     if (uiState is CoffeeDetailsUiState.HasCoffee) {
-        DeleteCoffeeDialog(
-            coffeeUiState = uiState.coffee,
-            onNegative = {
-                val action = CoffeeDetailsAction.HideDeleteDialog
-                onAction(action)
-            },
-            onPositive = {
-                val action = CoffeeDetailsAction.OnDeleteClicked
-                onAction(action)
-            }
-        )
+        if(uiState.openDeleteDialog) {
+            DeleteCoffeeDialog(
+                coffeeUiState = uiState.coffee,
+                onNegative = {
+                    val action = CoffeeDetailsAction.HideDeleteDialog
+                    onAction(action)
+                },
+                onPositive = {
+                    val action = CoffeeDetailsAction.OnDeleteClicked
+                    onAction(action)
+                }
+            )
+        }
     }
 
     Scaffold(
