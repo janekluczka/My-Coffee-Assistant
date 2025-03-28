@@ -36,6 +36,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
 import com.luczka.mycoffee.R
@@ -49,6 +50,7 @@ private object DoubleVerticalPagerDefaults {
     val BeyondViewportPageCount = 25
     val maxFullVisiblePages = 2
     val PageSpacing = 8.dp
+    val LineHeightMultiplier = 1.5f
 }
 
 private object DoubleVerticalPagerCardDefaults {
@@ -62,7 +64,7 @@ private object DoubleVerticalPagerCardDefaults {
 fun DoubleVerticalPager(
     doubleVerticalPagerState: DoubleVerticalPagerState,
     textStyle: TextStyle = MaterialTheme.typography.displayLarge.copy(
-        fontFamily = MyCoffeeTypography.redditMonoFontFamily
+        fontFamily = MyCoffeeTypography.redditMonoFontFamily,
     ),
     maxFullVisiblePages: Int = DoubleVerticalPagerDefaults.maxFullVisiblePages,
     pageSpacing: Dp = DoubleVerticalPagerDefaults.PageSpacing,
@@ -92,7 +94,14 @@ fun DoubleVerticalPager(
         pagerSnapDistance = PagerSnapDistance.atMost(doubleVerticalPagerState.rightPagerItems.size)
     )
 
-    val textLineHeight = with(density) { textStyle.lineHeight.toDp() }
+    val textLineHeight = with(density) {
+        val lineHeightSp = if (textStyle.lineHeight != TextUnit.Unspecified) {
+            textStyle.lineHeight
+        } else {
+            textStyle.fontSize * DoubleVerticalPagerDefaults.LineHeightMultiplier
+        }
+        lineHeightSp.toDp()
+    }
     val textTopPadding = DoubleVerticalPagerCardDefaults.TextTopPadding
     val textBottomPadding = DoubleVerticalPagerCardDefaults.TextBottomPadding
 
@@ -267,13 +276,16 @@ private fun DoubleVerticalPagerCard(
                 .wrapContentWidth()
                 .fillMaxHeight()
         ) {
-            Text(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .padding(textPadding),
-                text = text.toString(),
-                style = style
-            )
+            Box(
+                modifier = Modifier.fillMaxHeight(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    modifier = Modifier.padding(textPadding),
+                    text = text.toString(),
+                    style = style
+                )
+            }
         }
     }
 }
