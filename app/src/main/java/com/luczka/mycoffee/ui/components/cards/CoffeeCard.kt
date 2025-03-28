@@ -144,13 +144,13 @@ fun CoffeeCard(
 
 @Preview
 @Composable
-fun LightThemeVerticalCoffeeCardPreview() {
+private fun LightThemeVerticalCoffeeCardPreview() {
     VerticalCoffeeCardPreview(false)
 }
 
 @Preview
 @Composable
-fun DarkThemeVerticalCoffeeCardPreview() {
+private fun DarkThemeVerticalCoffeeCardPreview() {
     VerticalCoffeeCardPreview(true)
 }
 

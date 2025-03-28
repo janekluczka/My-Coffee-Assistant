@@ -46,7 +46,7 @@ fun MethodCard(
 
 @Preview
 @Composable
-fun MethodCardPreview() {
+private fun MethodCardPreview() {
     val categoryUiState = CategoryUiState(name = "Aeropress")
     MethodCard(
         categoryUiState = categoryUiState,

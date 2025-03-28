@@ -86,25 +86,25 @@ fun BrewAssistantSelectionListItem(
 
 @Preview
 @Composable
-fun CoffeeSelectionListItemNotSelectedLightPreview() {
+private fun CoffeeSelectionListItemNotSelectedLightPreview() {
     CoffeeSelectionListItemPreview(darkTheme = false, isSelected = false)
 }
 
 @Preview
 @Composable
-fun CoffeeSelectionListItemSelectedLightPreview() {
+private fun CoffeeSelectionListItemSelectedLightPreview() {
     CoffeeSelectionListItemPreview(darkTheme = false, isSelected = true)
 }
 
 @Preview
 @Composable
-fun CoffeeSelectionListItemNotSelectedDarkPreview() {
+private fun CoffeeSelectionListItemNotSelectedDarkPreview() {
     CoffeeSelectionListItemPreview(darkTheme = true, isSelected = false)
 }
 
 @Preview
 @Composable
-fun CoffeeSelectionListItemSelectedDarkPreview() {
+private fun CoffeeSelectionListItemSelectedDarkPreview() {
     CoffeeSelectionListItemPreview(darkTheme = true, isSelected = true)
 }
 

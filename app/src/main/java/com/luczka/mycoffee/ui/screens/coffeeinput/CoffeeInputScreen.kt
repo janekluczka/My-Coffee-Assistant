@@ -787,7 +787,7 @@ private fun CoffeeInputImageCard(
 
 @Preview(device = "id:pixel_6")
 @Composable
-fun AddCoffeeScreenLightThemePreview() {
+private fun AddCoffeeScreenLightThemePreview() {
     val coffeeInputUiState = CoffeeInputUiState()
     MyCoffeeTheme {
         CoffeeInputScreen(uiState = coffeeInputUiState, onAction = {})
@@ -796,7 +796,7 @@ fun AddCoffeeScreenLightThemePreview() {
 
 @Preview(device = "id:pixel_6")
 @Composable
-fun AddCoffeeScreenDarkThemePreview() {
+private fun AddCoffeeScreenDarkThemePreview() {
     val coffeeInputUiState = CoffeeInputUiState()
     MyCoffeeTheme(darkTheme = true) {
         CoffeeInputScreen(uiState = coffeeInputUiState, onAction = {})

@@ -230,7 +230,7 @@ fun DoubleVerticalPager(
 
 @Preview
 @Composable
-fun DoubleVerticalPagerPreview() {
+private fun DoubleVerticalPagerPreview() {
     MyCoffeeTheme {
         val leftPagerItems = (1..10).toList()
         val rightPagerItems = (1..10).toList()

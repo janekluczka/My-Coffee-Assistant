@@ -39,25 +39,25 @@ fun BrewingStepListItem(brewingStepUiState: BrewingStepUiState) {
 
 @Preview
 @Composable
-fun LightThemeBrewingStepListItemPreview() {
+private fun LightThemeBrewingStepListItemPreview() {
     BrewingStepListItemPreview(darkTheme = false)
 }
 
 @Preview
 @Composable
-fun LightThemeBrewingStepListItemWithoutTrailingContentPreview() {
+private fun LightThemeBrewingStepListItemWithoutTrailingContentPreview() {
     BrewingStepListItemWithoutTrailingContentPreview(darkTheme = false)
 }
 
 @Preview
 @Composable
-fun DarkThemeBrewingStepListItemPreview() {
+private fun DarkThemeBrewingStepListItemPreview() {
     BrewingStepListItemPreview(darkTheme = true)
 }
 
 @Preview
 @Composable
-fun DarkThemeBrewingStepListItemWithoutTrailingContentPreview() {
+private fun DarkThemeBrewingStepListItemWithoutTrailingContentPreview() {
     BrewingStepListItemWithoutTrailingContentPreview(darkTheme = true)
 }
 

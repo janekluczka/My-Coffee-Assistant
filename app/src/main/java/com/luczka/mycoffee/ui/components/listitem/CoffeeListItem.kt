@@ -102,13 +102,13 @@ fun CoffeesListItem(
 
 @Preview
 @Composable
-fun CoffeeListItemLightPreview() {
+private fun CoffeeListItemLightPreview() {
     CoffeeListItemPreview(darkTheme = false)
 }
 
 @Preview
 @Composable
-fun CoffeeListItemDarkPreview() {
+private fun CoffeeListItemDarkPreview() {
     CoffeeListItemPreview(darkTheme = true)
 }
 
