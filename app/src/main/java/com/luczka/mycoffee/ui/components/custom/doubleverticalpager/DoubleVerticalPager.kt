@@ -7,15 +7,19 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.pager.PageSize
 import androidx.compose.foundation.pager.PagerDefaults
 import androidx.compose.foundation.pager.PagerSnapDistance
 import androidx.compose.foundation.pager.VerticalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material3.Card
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -39,6 +43,20 @@ import com.luczka.mycoffee.ui.components.icons.KeyboardIcon
 import com.luczka.mycoffee.ui.theme.MyCoffeeTheme
 import com.luczka.mycoffee.ui.theme.MyCoffeeTypography
 import kotlinx.coroutines.launch
+
+@Suppress("MayBeConstant")
+private object DoubleVerticalPagerDefaults {
+    val BeyondViewportPageCount = 25
+    val maxFullVisiblePages = 2
+    val PageSpacing = 8.dp
+}
+
+private object DoubleVerticalPagerCardDefaults {
+    val TextTopPadding = 8.dp
+    val TextStartPadding = 16.dp
+    val TextEndPadding = 16.dp
+    val TextBottomPadding = 8.dp
+}
 
 @Composable
 fun DoubleVerticalPager(
@@ -228,6 +246,38 @@ fun DoubleVerticalPager(
     }
 }
 
+@Composable
+private fun DoubleVerticalPagerCard(
+    contentAlignment: Alignment,
+    style: TextStyle,
+    text: Int,
+    textPadding: PaddingValues = PaddingValues(
+        top = DoubleVerticalPagerCardDefaults.TextTopPadding,
+        bottom = DoubleVerticalPagerCardDefaults.TextBottomPadding,
+        start = DoubleVerticalPagerCardDefaults.TextStartPadding,
+        end = DoubleVerticalPagerCardDefaults.TextEndPadding
+    )
+) {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = contentAlignment
+    ) {
+        Card(
+            modifier = Modifier
+                .wrapContentWidth()
+                .fillMaxHeight()
+        ) {
+            Text(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .padding(textPadding),
+                text = text.toString(),
+                style = style
+            )
+        }
+    }
+}
+
 @Preview
 @Composable
 private fun DoubleVerticalPagerPreview() {
@@ -248,3 +298,4 @@ private fun DoubleVerticalPagerPreview() {
         )
     }
 }
+
