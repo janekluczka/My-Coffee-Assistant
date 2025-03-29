@@ -22,6 +22,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.luczka.mycoffee.R
+import com.luczka.mycoffee.ui.components.custom.doubleverticalpager.DoubleVerticalPager
+import com.luczka.mycoffee.ui.components.custom.doubleverticalpager.DoubleVerticalPagerInputDialog
+import com.luczka.mycoffee.ui.components.custom.doubleverticalpager.DoubleVerticalPagerState
 import com.luczka.mycoffee.ui.components.icons.KeyboardIcon
 import com.luczka.mycoffee.ui.components.icons.PauseCircleIcon
 import com.luczka.mycoffee.ui.components.icons.PlayCircleIcon
@@ -31,9 +34,7 @@ import com.luczka.mycoffee.ui.screens.brewassistant.BrewAssistantAction
 import com.luczka.mycoffee.ui.screens.brewassistant.BrewAssistantUiState
 import com.luczka.mycoffee.ui.screens.brewassistant.components.BrewAssistantParametersExpandableListItem
 import com.luczka.mycoffee.ui.screens.brewassistant.components.BrewAssistantParametersListItem
-import com.luczka.mycoffee.ui.components.custom.doubleverticalpager.DoubleVerticalPager
-import com.luczka.mycoffee.ui.components.custom.doubleverticalpager.DoubleVerticalPagerState
-import com.luczka.mycoffee.ui.components.custom.doubleverticalpager.DoubleVerticalPagerInputDialog
+import com.luczka.mycoffee.ui.theme.MyCoffeeTypography
 
 @Composable
 fun BrewAssistantParametersScreen(
@@ -331,7 +332,10 @@ private fun RatioSelectionListItemWithPicker(
             doubleVerticalPagerState = ratioDoubleVerticalPagerState,
             onLeftPagerIndexChanged = onUpdateLeftPager,
             onRightPagerIndexChanged = onUpdateRightPager,
-            onShowInputDialog = onOpenDialog
+//            onShowInputDialog = onOpenDialog,
+            textStyle = MaterialTheme.typography.displayLarge.copy(
+                fontFamily = MyCoffeeTypography.redditMonoFontFamily,
+            )
         )
     }
 }
@@ -362,7 +366,7 @@ private fun AmountSelectionListItemWithPicker(
             doubleVerticalPagerState = amountDoubleVerticalPagerState,
             onLeftPagerIndexChanged = onUpdateLeftPager,
             onRightPagerIndexChanged = onUpdateRightPager,
-            onShowInputDialog = onOpenDialog
+//            onShowInputDialog = onOpenDialog
         )
     }
 }
@@ -403,7 +407,10 @@ private fun AmountSelectionListItemWithPicker(
             onRightPagerIndexChanged = { decimalPartIndex ->
                 onUpdateCoffeeAmountSelectionDecimalPart(selectedCoffee, decimalPartIndex)
             },
-            onShowInputDialog = onOpenDialog
+//            onShowInputDialog = onOpenDialog,
+            textStyle = MaterialTheme.typography.displayLarge.copy(
+                fontFamily = MyCoffeeTypography.redditMonoFontFamily,
+            )
         )
     }
 }

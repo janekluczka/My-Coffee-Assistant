@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.pager.PageSize
 import androidx.compose.foundation.pager.PagerDefaults
@@ -34,6 +35,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
@@ -51,6 +53,7 @@ private object DoubleVerticalPagerDefaults {
     val maxFullVisiblePages = 2
     val PageSpacing = 8.dp
     val LineHeightMultiplier = 1.5f
+    val ScrollAnimationDuration = 500
 }
 
 private object DoubleVerticalPagerCardDefaults {
@@ -63,14 +66,13 @@ private object DoubleVerticalPagerCardDefaults {
 @Composable
 fun DoubleVerticalPager(
     doubleVerticalPagerState: DoubleVerticalPagerState,
-    textStyle: TextStyle = MaterialTheme.typography.displayLarge.copy(
-        fontFamily = MyCoffeeTypography.redditMonoFontFamily,
-    ),
+    textStyle: TextStyle = MaterialTheme.typography.displayLarge,
     maxFullVisiblePages: Int = DoubleVerticalPagerDefaults.maxFullVisiblePages,
     pageSpacing: Dp = DoubleVerticalPagerDefaults.PageSpacing,
-    onLeftPagerIndexChanged: (Int) -> Unit,
-    onRightPagerIndexChanged: (Int) -> Unit,
-    onShowInputDialog: (() -> Unit)? = null
+    onLeftPagerIndexChanged: (Int) -> Unit = {},
+    onRightPagerIndexChanged: (Int) -> Unit = {},
+    iconButtonIcon: (@Composable () -> Unit)? = null,
+    onIconButtonClick: (() -> Unit) = {},
 ) {
     val density = LocalDensity.current
 
@@ -124,7 +126,7 @@ fun DoubleVerticalPager(
             coroutineScope.launch {
                 leftPagerState.animateScrollToPage(
                     page = doubleVerticalPagerState.leftPagerPageIndex,
-                    animationSpec = tween(500)
+                    animationSpec = tween(DoubleVerticalPagerDefaults.ScrollAnimationDuration)
                 )
             }
         }
@@ -135,7 +137,7 @@ fun DoubleVerticalPager(
             coroutineScope.launch {
                 rightPagerState.animateScrollToPage(
                     page = doubleVerticalPagerState.rightPagerPageIndex,
-                    animationSpec = tween(500)
+                    animationSpec = tween(DoubleVerticalPagerDefaults.ScrollAnimationDuration)
                 )
             }
         }
@@ -153,31 +155,36 @@ fun DoubleVerticalPager(
         }
     }
 
-    Box(contentAlignment = Alignment.BottomStart) {
+    Box(
+        modifier = Modifier.height(pagerSize),
+        contentAlignment = Alignment.BottomStart
+    ) {
         Box(modifier = Modifier.padding(horizontal = 16.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                VerticalPager(
-                    state = leftPagerState,
-                    pageSize = pageSize,
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .height(pagerSize)
-                        .weight(1f),
-                    beyondViewportPageCount = DoubleVerticalPagerDefaults.BeyondViewportPageCount,
-                    flingBehavior = leftPagerFling,
-                    key = { it },
-                    contentPadding = contentPadding,
-                    pageSpacing = pageSpacing,
-                    reverseLayout = true,
-                ) { page ->
-                    DoubleVerticalPagerCard(
-                        contentAlignment = Alignment.CenterEnd,
-                        style = textStyle,
-                        text = doubleVerticalPagerState.leftPagerItems[page]
-                    )
+                        .weight(1f)
+                        .fillMaxWidth(),
+                    contentAlignment = Alignment.CenterEnd
+                ) {
+                    VerticalPager(
+                        state = leftPagerState,
+                        pageSize = pageSize,
+                        modifier = Modifier.wrapContentWidth(),
+                        beyondViewportPageCount = DoubleVerticalPagerDefaults.BeyondViewportPageCount,
+                        flingBehavior = leftPagerFling,
+                        key = { it },
+                        contentPadding = contentPadding,
+                        horizontalAlignment = Alignment.End,
+                        pageSpacing = pageSpacing,
+                        reverseLayout = true,
+//                        pageNestedScrollConnection = // TODO: Remove default nested scroll connection
+                    ) { page ->
+                        DoubleVerticalPagerCard(
+                            style = textStyle,
+                            text = doubleVerticalPagerState.leftPagerItems[page]
+                        )
+                    }
                 }
                 Text(
                     text = stringResource(id = doubleVerticalPagerState.separatorRes),
@@ -189,75 +196,76 @@ fun DoubleVerticalPager(
                     lineHeight = textStyle.lineHeight,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                VerticalPager(
-                    state = rightPagerState,
-                    pageSize = pageSize,
+                Box(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .height(pagerSize)
-                        .weight(1f),
-                    beyondViewportPageCount = DoubleVerticalPagerDefaults.BeyondViewportPageCount,
-                    flingBehavior = rightPagerFling,
-                    key = { it },
-                    contentPadding = contentPadding,
-                    pageSpacing = pageSpacing,
-                    reverseLayout = true,
-                ) { page ->
-                    DoubleVerticalPagerCard(
-                        contentAlignment = Alignment.CenterStart,
-                        style = textStyle,
-                        text = doubleVerticalPagerState.rightPagerItems[page]
-                    )
+                        .weight(1f)
+                        .fillMaxWidth(),
+                    contentAlignment = Alignment.CenterStart
+                ) {
+                    VerticalPager(
+                        state = rightPagerState,
+                        pageSize = pageSize,
+                        modifier = Modifier.wrapContentWidth(),
+                        beyondViewportPageCount = DoubleVerticalPagerDefaults.BeyondViewportPageCount,
+                        flingBehavior = rightPagerFling,
+                        key = { it },
+                        contentPadding = contentPadding,
+                        horizontalAlignment = Alignment.Start,
+                        pageSpacing = pageSpacing,
+                        reverseLayout = true,
+//                        pageNestedScrollConnection = // TODO: Remove default nested scroll connection
+                    ) { page ->
+                        DoubleVerticalPagerCard(
+                            style = textStyle,
+                            text = doubleVerticalPagerState.rightPagerItems[page]
+                        )
+                    }
                 }
             }
-            Column(
+        }
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(pagerSize),
-                verticalArrangement = Arrangement.SpaceBetween
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(bottomHalfTextHeight)
-                        .background(
-                            brush = Brush.verticalGradient(
-                                colors = listOf(
-                                    MaterialTheme.colorScheme.surface.copy(alpha = 0.5f),
-                                    MaterialTheme.colorScheme.surface.copy(alpha = 0.0f)
-                                )
+                    .height(bottomHalfTextHeight)
+                    .background(
+                        brush = Brush.verticalGradient(
+                            colors = listOf(
+                                MaterialTheme.colorScheme.surface.copy(alpha = 0.5f),
+                                MaterialTheme.colorScheme.surface.copy(alpha = 0.0f)
                             )
                         )
-                )
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(topHalfTextHeight)
-                        .background(
-                            brush = Brush.verticalGradient(
-                                colors = listOf(
-                                    MaterialTheme.colorScheme.surface.copy(alpha = 0.0f),
-                                    MaterialTheme.colorScheme.surface.copy(alpha = 0.5f)
-                                )
+                    )
+            )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(topHalfTextHeight)
+                    .background(
+                        brush = Brush.verticalGradient(
+                            colors = listOf(
+                                MaterialTheme.colorScheme.surface.copy(alpha = 0.0f),
+                                MaterialTheme.colorScheme.surface.copy(alpha = 0.5f)
                             )
                         )
-                )
-            }
+                    )
+            )
         }
-        if (onShowInputDialog != null) {
+        iconButtonIcon?.let {
             IconButton(
                 modifier = Modifier.padding(start = 12.dp, bottom = 4.dp),
-                onClick = onShowInputDialog
-            ) {
-                KeyboardIcon()
-            }
+                onClick = onIconButtonClick,
+                content = it
+            )
         }
     }
 }
 
 @Composable
 private fun DoubleVerticalPagerCard(
-    contentAlignment: Alignment,
     style: TextStyle,
     text: Int,
     textPadding: PaddingValues = PaddingValues(
@@ -267,25 +275,18 @@ private fun DoubleVerticalPagerCard(
         end = DoubleVerticalPagerCardDefaults.TextEndPadding
     )
 ) {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = contentAlignment
-    ) {
-        Card(
-            modifier = Modifier
-                .wrapContentWidth()
-                .fillMaxHeight()
+    Card(modifier = Modifier.wrapContentSize()) {
+        Box(
+            modifier = Modifier.fillMaxHeight(),
+            contentAlignment = Alignment.Center
         ) {
-            Box(
-                modifier = Modifier.fillMaxHeight(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    modifier = Modifier.padding(textPadding),
-                    text = text.toString(),
-                    style = style
-                )
-            }
+            Text(
+                modifier = Modifier.padding(textPadding),
+                text = text.toString(),
+                style = style,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
         }
     }
 }
@@ -293,21 +294,44 @@ private fun DoubleVerticalPagerCard(
 @Preview
 @Composable
 private fun DoubleVerticalPagerPreview() {
+    val leftPagerItems = (1..10).toList()
+    val rightPagerItems = (1..10).toList()
+    val doubleVerticalPagerState = DoubleVerticalPagerState(
+        leftPagerItems = leftPagerItems,
+        rightPagerItems = rightPagerItems,
+        leftPagerPageIndex = leftPagerItems.lastIndex,
+        rightPagerPageIndex = 0,
+        separatorRes = R.string.separator_amount
+    )
     MyCoffeeTheme {
-        val leftPagerItems = (1..10).toList()
-        val rightPagerItems = (1..10).toList()
         DoubleVerticalPager(
-            doubleVerticalPagerState = DoubleVerticalPagerState(
-                leftPagerItems = leftPagerItems,
-                rightPagerItems = rightPagerItems,
-                leftPagerPageIndex = leftPagerItems.lastIndex,
-                rightPagerPageIndex = 0,
-                separatorRes = R.string.separator_amount
-            ),
-            onLeftPagerIndexChanged = {},
-            onRightPagerIndexChanged = {},
-            onShowInputDialog = {}
+            doubleVerticalPagerState = doubleVerticalPagerState,
+            textStyle = MaterialTheme.typography.displayLarge.copy(
+                fontFamily = MyCoffeeTypography.redditMonoFontFamily,
+            )
         )
     }
 }
 
+@Preview
+@Composable
+private fun DoubleVerticalPagerWithButtonPreview() {
+    val leftPagerItems = (1..10).toList()
+    val rightPagerItems = (1..10).toList()
+    val doubleVerticalPagerState = DoubleVerticalPagerState(
+        leftPagerItems = leftPagerItems,
+        rightPagerItems = rightPagerItems,
+        leftPagerPageIndex = leftPagerItems.lastIndex,
+        rightPagerPageIndex = 0,
+        separatorRes = R.string.separator_amount
+    )
+    MyCoffeeTheme {
+        DoubleVerticalPager(
+            doubleVerticalPagerState = doubleVerticalPagerState,
+            iconButtonIcon = { KeyboardIcon() },
+            textStyle = MaterialTheme.typography.displayLarge.copy(
+                fontFamily = MyCoffeeTypography.redditMonoFontFamily,
+            )
+        )
+    }
+}
