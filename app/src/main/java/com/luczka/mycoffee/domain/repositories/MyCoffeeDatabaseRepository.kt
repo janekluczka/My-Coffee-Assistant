@@ -14,11 +14,11 @@ interface MyCoffeeDatabaseRepository {
 
     fun getAllCoffeesFlow() : Flow<List<CoffeeModel>>
 
+    suspend fun getAllCoffees() : List<CoffeeModel>
+
+    fun getFavouriteCoffeesFlow(): Flow<List<CoffeeModel>>
+
     fun getRecentlyAddedCoffeesFlow(amount: Int): Flow<List<CoffeeModel>>
-
-    fun getCurrentCoffeesFlow(): Flow<List<CoffeeModel>>
-
-    suspend fun getCurrentCoffees() : List<CoffeeModel>
 
     suspend fun updateCoffee(coffeeModel: CoffeeModel)
 
@@ -26,10 +26,7 @@ interface MyCoffeeDatabaseRepository {
 
     suspend fun deleteCoffee(coffeeModel: CoffeeModel)
 
-    suspend fun insertBrewAndUpdateCoffeeModels(
-        brewModel: BrewModel,
-        coffeeModels: List<CoffeeModel>
-    ) : Long
+    suspend fun insertBrew(brewModel: BrewModel) : Long
 
     // TODO: Add suspend fun getBrew(brewId: Long): BrewModel?
 

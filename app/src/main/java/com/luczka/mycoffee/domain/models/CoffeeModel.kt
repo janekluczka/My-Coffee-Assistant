@@ -7,7 +7,6 @@ data class CoffeeModel(
     val coffeeImages: List<CoffeeImageModel>,
     val brand: String,
     val name: String,
-    val amount: Float,
     val roast: RoastModel?,
     val process: ProcessModel?,
     val plantation: String?,

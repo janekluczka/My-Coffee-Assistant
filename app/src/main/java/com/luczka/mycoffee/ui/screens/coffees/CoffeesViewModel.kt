@@ -2,24 +2,21 @@ package com.luczka.mycoffee.ui.screens.coffees
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.luczka.mycoffee.domain.models.CoffeeModel
 import com.luczka.mycoffee.domain.usecases.DeleteCoffeeUseCase
-import com.luczka.mycoffee.domain.usecases.GetAllCoffeesFlowUseCase
+import com.luczka.mycoffee.domain.usecases.GetCoffeesDataUseCase
 import com.luczka.mycoffee.domain.usecases.UpdateCoffeeUseCase
 import com.luczka.mycoffee.ui.mappers.toModel
 import com.luczka.mycoffee.ui.mappers.toUiState
 import com.luczka.mycoffee.ui.models.CoffeeUiState
 import com.luczka.mycoffee.ui.models.SwipeableListItemUiState
-import com.luczka.mycoffee.ui.screens.coffees.filter.CoffeeFilterStrategy
-import com.luczka.mycoffee.ui.screens.coffees.filter.FilterAllStrategy
-import com.luczka.mycoffee.ui.screens.coffees.filter.FilterCurrentStrategy
-import com.luczka.mycoffee.ui.screens.coffees.filter.FilterFavouritesStrategy
-import com.luczka.mycoffee.ui.screens.coffees.filter.FilterLowStrategy
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -27,23 +24,24 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 private data class CoffeesViewModelState(
-    val coffees: List<CoffeeUiState> = emptyList(),
+    val hasCoffees: Boolean = false,
     val selectedCoffeeFilter: CoffeeFilterUiState = CoffeeFilterUiState.All,
     val filteredCoffees: List<SwipeableListItemUiState<CoffeeUiState>> = emptyList(),
 ) {
     fun toCoffeesUiState(): CoffeesUiState {
-        if (coffees.isEmpty()) return CoffeesUiState.NoCoffees
-
-        return CoffeesUiState.HasCoffees(
+        if (hasCoffees) return CoffeesUiState.HasCoffees(
             selectedCoffeeFilter = selectedCoffeeFilter,
             coffees = filteredCoffees
         )
+
+        return CoffeesUiState.NoCoffees
     }
 }
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class CoffeesViewModel @Inject constructor(
-    private val getAllCoffeesFlowUseCase: GetAllCoffeesFlowUseCase,
+    private val getCoffeesDataUseCase: GetCoffeesDataUseCase,
     private val updateCoffeeUseCase: UpdateCoffeeUseCase,
     private val deleteCoffeeUseCase: DeleteCoffeeUseCase
 ) : ViewModel() {
@@ -61,17 +59,31 @@ class CoffeesViewModel @Inject constructor(
     val oneTimeEvent = _oneTimeEvent.asSharedFlow()
 
     init {
+        observeCoffeesWhenFilterChanges()
+    }
+
+    private fun observeCoffeesWhenFilterChanges() {
         viewModelScope.launch {
-            getAllCoffeesFlowUseCase()
-                .map(List<CoffeeModel>::toUiState)
-                .collect {
-                    updateCoffeesAndFilter(
-                        coffees = it,
-                        filter = null
-                    )
+            _viewModelState
+                .map { viewModelState ->
+                    viewModelState.selectedCoffeeFilter
+                }
+                .distinctUntilChanged()
+                .flatMapLatest { coffeeFilterUiState ->
+                    getCoffeesDataUseCase(coffeeFilterUiState.toModel())
+                }
+                .collect { coffeesDataModel ->
+                    val filteredCoffees = coffeesDataModel.filteredCoffees.map { SwipeableListItemUiState(item = it.toUiState()) }
+                    _viewModelState.update { state ->
+                        state.copy(
+                            hasCoffees = coffeesDataModel.hasAny,
+                            filteredCoffees = filteredCoffees
+                        )
+                    }
                 }
         }
     }
+
 
     fun onAction(action: CoffeesAction) {
         when (action) {
@@ -116,42 +128,9 @@ class CoffeesViewModel @Inject constructor(
     }
 
     private fun filterChanged(coffeeFilterUiState: CoffeeFilterUiState) {
-        updateCoffeesAndFilter(
-            coffees = null,
-            filter = coffeeFilterUiState
-        )
-    }
-
-    private fun updateCoffeesAndFilter(
-        coffees: List<CoffeeUiState>?,
-        filter: CoffeeFilterUiState?
-    ) {
         _viewModelState.update { viewModelState ->
-            val updatedCoffees = coffees ?: viewModelState.coffees
-            val updatedFilter = filter ?: viewModelState.selectedCoffeeFilter
-            val filteredCoffees = filterCoffees(
-                coffees = updatedCoffees,
-                filter = updatedFilter
-            )
-            viewModelState.copy(
-                coffees = updatedCoffees,
-                selectedCoffeeFilter = updatedFilter,
-                filteredCoffees = filteredCoffees.map { coffeeUiState -> SwipeableListItemUiState(item = coffeeUiState) }
-            )
+            viewModelState.copy(selectedCoffeeFilter = coffeeFilterUiState)
         }
-    }
-
-    private fun filterCoffees(
-        coffees: List<CoffeeUiState>,
-        filter: CoffeeFilterUiState
-    ): List<CoffeeUiState> {
-        val filterStrategy: CoffeeFilterStrategy = when (filter) {
-            CoffeeFilterUiState.All -> FilterAllStrategy()
-            CoffeeFilterUiState.Current -> FilterCurrentStrategy()
-            CoffeeFilterUiState.Favourites -> FilterFavouritesStrategy()
-            CoffeeFilterUiState.Low -> FilterLowStrategy()
-        }
-        return filterStrategy.filter(coffees)
     }
 
     private fun collapseAllItemsActions() {

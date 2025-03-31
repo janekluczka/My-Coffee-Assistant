@@ -48,16 +48,16 @@ interface MyCoffeeDao {
     fun getAllCoffeesWithImagesFlow(): Flow<List<CoffeeWithCoffeeImagesRelation>>
 
     @Transaction
+    @Query("SELECT * FROM CoffeeEntity ORDER BY addedOn, coffeeId DESC")
+    suspend fun getAllCoffeesWithImages(): List<CoffeeWithCoffeeImagesRelation>
+
+    @Transaction
+    @Query("SELECT * FROM CoffeeEntity WHERE isFavourite = 1 ORDER BY addedOn, coffeeId DESC")
+    fun getFavouriteCoffeesWithImagesFlow(): Flow<List<CoffeeWithCoffeeImagesRelation>>
+
+    @Transaction
     @Query("SELECT * FROM CoffeeEntity ORDER BY addedOn, coffeeId DESC LIMIT :amount")
     fun getRecentlyAddedCoffeesWithImagesFlow(amount: Int): Flow<List<CoffeeWithCoffeeImagesRelation>>
-
-    @Transaction
-    @Query("SELECT * FROM CoffeeEntity WHERE amount > 0 ORDER BY name, brand, coffeeId ASC")
-    fun getCurrentCoffeesWithImagesFlow(): Flow<List<CoffeeWithCoffeeImagesRelation>>
-
-    @Transaction
-    @Query("SELECT * FROM CoffeeEntity WHERE amount > 0 ORDER BY name, brand, coffeeId ASC")
-    suspend fun getCurrentCoffeesWithImages(): List<CoffeeWithCoffeeImagesRelation>
 
     @Update
     suspend fun updateCoffee(coffeeEntity: CoffeeEntity)

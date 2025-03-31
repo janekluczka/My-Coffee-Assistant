@@ -29,7 +29,7 @@ import com.luczka.mycoffee.data.local.entity.TastingNoteCategory
         TastingNoteCategory::class,
         TastingNote::class
     ],
-    version = 36,
+    version = 37,
     exportSchema = false
 )
 @TypeConverters(

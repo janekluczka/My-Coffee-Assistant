@@ -22,7 +22,6 @@ sealed class CoffeeInputAction {
 
     data class OnRoasterOrBrandValueChanged(val brand: String) : CoffeeInputAction()
     data class OnOriginOrNameValueChanged(val name: String) : CoffeeInputAction()
-    data class OnAmountValueChanged(val amount: String) : CoffeeInputAction()
     data class OnRoastClicked(val roast: RoastUiState) : CoffeeInputAction()
     data class OnProcessClicked(val process: ProcessUiState) : CoffeeInputAction()
     data class OnPlantationValueChanged(val plantation: String) : CoffeeInputAction()

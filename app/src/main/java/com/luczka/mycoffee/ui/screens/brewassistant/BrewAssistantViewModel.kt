@@ -4,7 +4,7 @@ import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.luczka.mycoffee.R
-import com.luczka.mycoffee.domain.usecases.GetCurrentCoffeesUseCase
+import com.luczka.mycoffee.domain.usecases.GetAllCoffeesUseCase
 import com.luczka.mycoffee.ui.components.custom.doubleverticalpager.DoubleVerticalPagerState
 import com.luczka.mycoffee.ui.mappers.toUiState
 import com.luczka.mycoffee.ui.models.BrewUiState
@@ -144,21 +144,6 @@ private data class BrewAssistantViewModelState(
         )
     }
 
-    fun toCoffeeUiStateListToUpdate(): List<CoffeeUiState> {
-        return selectedCoffees.map { (coffeeUiState, amountDoubleVerticalPagerState) ->
-            val selectedCoffeeAmount = coffeeUiState.amount.toFloatOrNull() ?: 0f
-
-            val integerPart = amountDoubleVerticalPagerState.currentLeftPagerItem()
-            val fractionalPart = amountDoubleVerticalPagerState.currentRightPagerItem()
-
-            val selectedAmount = "$integerPart.$fractionalPart".toFloatOrNull() ?: 0f
-            val updatedAmount = selectedCoffeeAmount - selectedAmount
-            val adjustedUpdatedAmount = if (updatedAmount <= 0) 0f else updatedAmount
-
-            coffeeUiState.copy(amount = adjustedUpdatedAmount.toString())
-        }
-    }
-
     private fun sumSelectedAmounts(): Float {
         return if (selectedCoffees.isEmpty()) {
             val integerPart = defaultAmountDoubleVerticalPagerState.currentLeftPagerItem()
@@ -178,7 +163,7 @@ private data class BrewAssistantViewModelState(
 
 @HiltViewModel
 class BrewAssistantViewModel @Inject constructor(
-    private val getCurrentCoffeesUseCase: GetCurrentCoffeesUseCase
+    private val getAllCoffeesUseCase: GetAllCoffeesUseCase
 ) : ViewModel() {
 
     private val _viewModelState = MutableStateFlow(BrewAssistantViewModelState())
@@ -197,13 +182,13 @@ class BrewAssistantViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            getCurrentCoffeesUseCase()
+            getAllCoffeesUseCase()
                 .toUiState()
                 .sortedWith(
                     compareBy<CoffeeUiState> { !it.isFavourite }
                         .thenBy { it.originOrName }
                         .thenBy { it.roasterOrBrand }
-                        .thenBy { it.amount }
+                        .thenBy { it.coffeeId }
                 )
                 .also { currentCoffees ->
                     _viewModelState.update { it.copy(currentCoffees = currentCoffees) }
@@ -343,13 +328,8 @@ class BrewAssistantViewModel @Inject constructor(
     }
 
     private fun selectCoffee(coffeeUiState: CoffeeUiState) {
-        val selectedCoffeeAmount = coffeeUiState.amount.toFloatOrNull()?.toInt()
 
-        val maxLeftPagerIndex = when {
-            selectedCoffeeAmount == null -> 0
-            selectedCoffeeAmount < 100 -> selectedCoffeeAmount
-            else -> 100
-        }
+        val maxLeftPagerIndex = 100
 
         val updatedSelectedCoffees = _viewModelState.value.selectedCoffees.toMutableMap()
 
@@ -394,7 +374,7 @@ class BrewAssistantViewModel @Inject constructor(
         val integerPart = amountDoubleVerticalPagerState.currentLeftPagerItem()
         val fractionalPart = amountDoubleVerticalPagerState.currentRightPagerItem()
 
-        val maxAmount = key.amount
+        val maxAmount = "100.0"
         val selectedAmount = "$integerPart.$fractionalPart"
 
         val maxAmountFloat = maxAmount.toFloatOrNull() ?: return
@@ -455,7 +435,7 @@ class BrewAssistantViewModel @Inject constructor(
         val integerPart = leftInputValue.toIntOrNull() ?: return
         val fractionalPart = rightInputValue.toIntOrNull() ?: return
 
-        val maxAmount = key.amount
+        val maxAmount = "100.0"
         val selectedAmount = "$integerPart.$fractionalPart"
 
         val maxAmountFloat = maxAmount.toFloatOrNull() ?: return
@@ -571,7 +551,6 @@ class BrewAssistantViewModel @Inject constructor(
     private fun finishBrew() {
         viewModelScope.launch {
             val brewUiState = _viewModelState.value.toBrewUiState()
-            val coffeeUiStateListToUpdate = _viewModelState.value.toCoffeeUiStateListToUpdate()
 
 //            val brewId = myCoffeeDatabaseRepository.insertBrewAndUpdateCoffeeModels(
 //                brewModel = brewUiState.toModel(),
@@ -581,5 +560,4 @@ class BrewAssistantViewModel @Inject constructor(
             _oneTimeEvent.emit(BrewAssistantOneTimeEvent.NavigateToBrewRating(brewId = 0L))
         }
     }
-
 }

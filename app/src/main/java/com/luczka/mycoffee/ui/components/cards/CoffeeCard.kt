@@ -26,7 +26,6 @@ import androidx.compose.ui.unit.dp
 import androidx.core.text.buildSpannedString
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import com.luczka.mycoffee.R
 import com.luczka.mycoffee.ui.components.icons.FavoriteIcon
 import com.luczka.mycoffee.ui.models.CoffeeUiState
 import com.luczka.mycoffee.ui.models.RoastUiState
@@ -44,15 +43,11 @@ fun CoffeeCard(
     val context = LocalContext.current
 
     val supportingText = buildSpannedString {
-        append(stringResource(R.string.format_coffee_amount_grams, coffeeUiState.amount))
-        coffeeUiState.roast?.let { roastUiState ->
-            append(" • ")
-            append(stringResource(roastUiState.stringRes))
-        }
-        coffeeUiState.process?.let { processUiState ->
-            append(" • ")
-            append(stringResource(processUiState.stringRes))
-        }
+        val parts = listOfNotNull(
+            coffeeUiState.roast?.let { stringResource(it.stringRes) },
+            coffeeUiState.process?.let { stringResource(it.stringRes) }
+        )
+        append(parts.joinToString(separator = " • "))
     }.toString()
 
     OutlinedCard(
@@ -161,7 +156,6 @@ private fun VerticalCoffeeCardPreview(darkTheme: Boolean) {
         coffeeId = 1,
         originOrName = "salwador finca",
         roasterOrBrand = "monko.",
-        amount = "250.0",
         roast = RoastUiState.Medium,
         isFavourite = true
     )

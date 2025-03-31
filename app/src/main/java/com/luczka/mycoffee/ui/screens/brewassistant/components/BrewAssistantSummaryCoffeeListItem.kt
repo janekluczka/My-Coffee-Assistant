@@ -10,15 +10,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
@@ -32,6 +27,7 @@ fun AssistantSummaryCoffeeListItem(
     selectedAmount: String? = null
 ) {
     val context = LocalContext.current
+
     ListItem(
         leadingContent = {
             Surface(
@@ -66,21 +62,7 @@ fun AssistantSummaryCoffeeListItem(
             )
         },
         supportingContent = {
-            Text(text = buildCoffeeAmountTakenString(coffeeUiState, selectedAmount))
+            selectedAmount?.let { Text(text = stringResource(id = R.string.format_coffee_amount_grams, it)) }
         }
     )
-}
-
-@Composable
-private fun buildCoffeeAmountTakenString(
-    coffeeUiState: CoffeeUiState,
-    selectedAmount: String?
-) = buildAnnotatedString {
-    append(stringResource(id = R.string.format_coffee_amount_grams, coffeeUiState.amount))
-    selectedAmount?.let { amount ->
-        append(" ")
-        withStyle(style = SpanStyle(color = Color(0xFFDC362E), fontWeight = FontWeight.SemiBold)) {
-            append(stringResource(id = R.string.assistant_taken_amount, amount))
-        }
-    }
 }

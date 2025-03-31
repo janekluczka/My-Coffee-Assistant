@@ -41,18 +41,19 @@ class MyCoffeeDatabaseRepositoryImpl(
             .map { it.toModel() }
     }
 
+    override suspend fun getAllCoffees(): List<CoffeeModel> {
+        return myCoffeeDao.getAllCoffeesWithImages()
+            .toModel()
+    }
+
+    override fun getFavouriteCoffeesFlow(): Flow<List<CoffeeModel>> {
+        return myCoffeeDao.getFavouriteCoffeesWithImagesFlow()
+            .map { it.toModel() }
+    }
+
     override fun getRecentlyAddedCoffeesFlow(amount: Int): Flow<List<CoffeeModel>> {
         return myCoffeeDao.getRecentlyAddedCoffeesWithImagesFlow(amount)
             .map { it.toModel() }
-    }
-
-    override fun getCurrentCoffeesFlow(): Flow<List<CoffeeModel>> {
-        return myCoffeeDao.getCurrentCoffeesWithImagesFlow()
-            .map { it.toModel() }
-    }
-
-    override suspend fun getCurrentCoffees(): List<CoffeeModel> {
-        return myCoffeeDao.getCurrentCoffeesWithImages().toModel()
     }
 
     override suspend fun updateCoffee(coffeeModel: CoffeeModel) {
@@ -71,16 +72,11 @@ class MyCoffeeDatabaseRepositoryImpl(
         myCoffeeDao.deleteCoffee(coffeeEntity = coffeeModel.toEntity())
     }
 
-    override suspend fun insertBrewAndUpdateCoffeeModels(
-        brewModel: BrewModel,
-        coffeeModels: List<CoffeeModel>
-    ): Long {
+    override suspend fun insertBrew(brewModel: BrewModel): Long {
         val brewId = myCoffeeDao.insertBrewWithBrewedCoffees(
             brewEntity = brewModel.toEntity(),
             brewCoffeeCrossRefs = brewModel.brewedCoffees.map { it.toEntity() }
         )
-        // TODO: Update ammounts
-
         return brewId
     }
 

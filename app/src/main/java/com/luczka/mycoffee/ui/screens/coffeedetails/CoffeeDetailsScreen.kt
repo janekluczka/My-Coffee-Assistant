@@ -143,12 +143,6 @@ private fun CoffeeDetailsList(uiState: CoffeeDetailsUiState.HasCoffee) {
             )
         }
         item {
-            CoffeeDetailListItem(
-                supportingText = stringResource(id = R.string.amount),
-                headlineText = uiState.coffee.amount + " " + stringResource(id = R.string.unit_gram_short)
-            )
-        }
-        item {
             Column {
                 Text(
                     modifier = Modifier.padding(horizontal = 16.dp),

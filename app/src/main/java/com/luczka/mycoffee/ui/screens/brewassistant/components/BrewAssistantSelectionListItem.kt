@@ -18,9 +18,9 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.text.buildSpannedString
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import com.luczka.mycoffee.R
 import com.luczka.mycoffee.ui.models.CoffeeUiState
 import com.luczka.mycoffee.ui.theme.MyCoffeeTheme
 import java.io.File
@@ -32,6 +32,14 @@ fun BrewAssistantSelectionListItem(
     onClick: (CoffeeUiState) -> Unit
 ) {
     val context = LocalContext.current
+
+    val supportingText = buildSpannedString {
+        val parts = listOfNotNull(
+            coffeeUiState.roast?.let { stringResource(it.stringRes) },
+            coffeeUiState.process?.let { stringResource(it.stringRes) }
+        )
+        append(parts.joinToString(separator = " • "))
+    }.toString()
 
     ListItem(
         modifier = Modifier
@@ -68,12 +76,7 @@ fun BrewAssistantSelectionListItem(
             )
         },
         supportingContent = {
-            Text(
-                text = stringResource(
-                    id = R.string.format_coffee_amount_grams,
-                    coffeeUiState.amount
-                )
-            )
+            Text(text = supportingText)
         },
         trailingContent = {
             Checkbox(
@@ -113,7 +116,6 @@ private fun CoffeeSelectionListItemPreview(darkTheme: Boolean, isSelected: Boole
     val coffeeUiState = CoffeeUiState(
         originOrName = "Kolumbia",
         roasterOrBrand = "Mała Czarna",
-        amount = "250"
     )
     MyCoffeeTheme(darkTheme = darkTheme) {
         BrewAssistantSelectionListItem(

@@ -6,10 +6,11 @@ import com.luczka.mycoffee.domain.usecases.DeleteBrewUseCase
 import com.luczka.mycoffee.domain.usecases.DeleteCoffeeUseCase
 import com.luczka.mycoffee.domain.usecases.GetAllBrewsFlowUseCase
 import com.luczka.mycoffee.domain.usecases.GetAllCoffeesFlowUseCase
+import com.luczka.mycoffee.domain.usecases.GetAllCoffeesUseCase
 import com.luczka.mycoffee.domain.usecases.GetBrewFlowUseCase
 import com.luczka.mycoffee.domain.usecases.GetCategoriesUseCase
 import com.luczka.mycoffee.domain.usecases.GetCoffeeFlowUseCase
-import com.luczka.mycoffee.domain.usecases.GetCurrentCoffeesUseCase
+import com.luczka.mycoffee.domain.usecases.GetCoffeesDataUseCase
 import com.luczka.mycoffee.domain.usecases.GetRecentlyAddedBrewsFlowUseCase
 import com.luczka.mycoffee.domain.usecases.GetRecentlyAddedCoffeesFlowUseCase
 import com.luczka.mycoffee.domain.usecases.GetRecipesUseCase
@@ -39,8 +40,13 @@ object UseCasesModule {
     }
 
     @Provides
-    fun providesGetCurrentCoffeesUseCase(myCoffeeDatabaseRepository: MyCoffeeDatabaseRepository): GetCurrentCoffeesUseCase {
-        return GetCurrentCoffeesUseCase(myCoffeeDatabaseRepository)
+    fun providesGetAllCoffeesUseCase(myCoffeeDatabaseRepository: MyCoffeeDatabaseRepository): GetAllCoffeesUseCase {
+        return GetAllCoffeesUseCase(myCoffeeDatabaseRepository)
+    }
+
+    @Provides
+    fun providesGetCoffeesDataUseCase(myCoffeeDatabaseRepository: MyCoffeeDatabaseRepository): GetCoffeesDataUseCase {
+        return GetCoffeesDataUseCase(myCoffeeDatabaseRepository)
     }
 
     @Provides

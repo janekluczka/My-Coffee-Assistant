@@ -7,7 +7,6 @@ data class CoffeeUiState(
     val coffeeImages: List<CoffeeImageUiState> = emptyList(),
     val roasterOrBrand: String = "",
     val originOrName: String = "",
-    val amount: String = "",
     val process: ProcessUiState? = null,
     val roast: RoastUiState? = null,
     val plantation: String? = null,
@@ -23,7 +22,6 @@ data class CoffeeUiState(
         return compareBy<CoffeeUiState>(
             { it.originOrName },
             { it.roasterOrBrand },
-            { it.amount },
             { it.coffeeId }
         ).compare(this, other)
     }
@@ -33,7 +31,6 @@ data class CoffeeUiState(
         if (coffeeImages.isNotEmpty()) return false
         if (roasterOrBrand.isNotBlank()) return false
         if (originOrName.isNotBlank()) return false
-        if (amount.isNotBlank()) return false
         if (roast != null) return false
         if (process != null) return false
         if (plantation != null) return false

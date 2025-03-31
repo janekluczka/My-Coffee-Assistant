@@ -78,13 +78,6 @@ fun SelectedCoffeeCard(
                     overflow = TextOverflow.Ellipsis
                 )
                 Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text(
-                        text = stringResource(
-                            id = R.string.format_coffee_amount_grams,
-                            coffeeUiState.amount,
-                        ),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
                     selectedAmount?.let { amount ->
                         Text(
                             text = stringResource(

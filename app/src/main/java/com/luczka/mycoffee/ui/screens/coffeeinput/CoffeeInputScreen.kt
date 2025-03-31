@@ -514,23 +514,6 @@ private fun AddCoffeeContent(
                 )
             }
             item {
-                FilteredMyCoffeeOutlinedTextField(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 24.dp),
-                    value = uiState.newOrUpdatedCoffeeUiState.amount,
-                    onValueChange = {
-                        val action = CoffeeInputAction.OnAmountValueChanged(it)
-                        onAction(action)
-                    },
-                    regex = Regex("([0-9]+([.][0-9]?)?|[.][0-9])"),
-                    label = { Text(text = stringResource(id = R.string.amount)) },
-                    placeholder = { Text(text = stringResource(id = R.string.placeholder_text_amount)) },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                )
-            }
-            item {
                 Text(
                     modifier = Modifier.padding(horizontal = 24.dp),
                     text = stringResource(id = R.string.roast),

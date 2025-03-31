@@ -96,7 +96,6 @@ class CoffeeInputViewModel @AssistedInject constructor(
             is CoffeeInputAction.OnImageClicked -> showImage(action.index)
             is CoffeeInputAction.OnRoasterOrBrandValueChanged -> updateBrand(action.brand)
             is CoffeeInputAction.OnOriginOrNameValueChanged -> updateName(action.name)
-            is CoffeeInputAction.OnAmountValueChanged -> updateAmount(action.amount)
             is CoffeeInputAction.OnRoastClicked -> updateRoast(action.roast)
             is CoffeeInputAction.OnProcessClicked -> updateProcess(action.process)
             is CoffeeInputAction.OnPlantationValueChanged -> updatePlantation(action.plantation)
@@ -204,12 +203,6 @@ class CoffeeInputViewModel @AssistedInject constructor(
                 newOrUpdatedCoffeeUiState = it.newOrUpdatedCoffeeUiState.copy(originOrName = name),
                 isOriginOrNameError = name.isBlank()
             )
-        }
-    }
-
-    private fun updateAmount(amount: String) {
-        _uiState.update {
-            it.copy(newOrUpdatedCoffeeUiState = it.newOrUpdatedCoffeeUiState.copy(amount = amount))
         }
     }
 
