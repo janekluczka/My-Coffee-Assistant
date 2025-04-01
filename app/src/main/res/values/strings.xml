@@ -108,8 +108,8 @@
     <!--  Dialogs  -->
     <string name="dialog_delete_coffee_title">Delete?</string>
     <string name="dialog_delete_coffee_text">%1$s %2$s will be deleted and gone forever</string>
-    <string name="dialog_discard_coffee_changes_title">Discard?</string>
-    <string name="dialog_discard_coffee_changes_text">Coffee has not been added yet.</string>
+    <string name="dialog_discard_new_coffee_title">Discard?</string>
+    <string name="dialog_discard_new_coffee_text">Coffee has not been added yet.</string>
     <string name="dialog_abort_brew_title">Abort brew?</string>
     <string name="dialog_abort_brew_text">You have not finished your brew. Are you sure you want to abort it?</string>
     <string name="dialog_method_info_title">What is %1$s?</string>

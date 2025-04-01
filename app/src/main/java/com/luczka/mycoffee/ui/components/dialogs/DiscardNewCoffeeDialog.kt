@@ -1,4 +1,4 @@
-package com.luczka.mycoffee.ui.screens.coffeeinput.dialogs
+package com.luczka.mycoffee.ui.components.dialogs
 
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
@@ -11,13 +11,13 @@ import com.luczka.mycoffee.R
 import com.luczka.mycoffee.ui.theme.MyCoffeeTheme
 
 @Composable
-fun CoffeeInputDiscardDialog(
+fun DiscardNewCoffeeDialog(
     onPositive: () -> Unit,
     onNegative: () -> Unit
 ) {
     AlertDialog(
-        title = { Text(text = stringResource(id = R.string.dialog_discard_coffee_changes_title)) },
-        text = { Text(text = stringResource(id = R.string.dialog_discard_coffee_changes_text)) },
+        title = { Text(text = stringResource(id = R.string.dialog_discard_new_coffee_title)) },
+        text = { Text(text = stringResource(id = R.string.dialog_discard_new_coffee_text)) },
         onDismissRequest = onNegative,
         dismissButton = {
             TextButton(onClick = onNegative) {
@@ -35,8 +35,8 @@ fun CoffeeInputDiscardDialog(
 
 @Preview
 @Composable
-private fun DiscardDialogPreview() {
+private fun DiscardNewCoffeeDialogPreview() {
     MyCoffeeTheme {
-        CoffeeInputDiscardDialog(onPositive = {}, onNegative = {})
+        DiscardNewCoffeeDialog(onPositive = {}, onNegative = {})
     }
 }

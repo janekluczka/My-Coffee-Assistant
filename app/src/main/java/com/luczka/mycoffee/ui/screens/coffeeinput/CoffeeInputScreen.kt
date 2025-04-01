@@ -90,8 +90,8 @@ import com.luczka.mycoffee.ui.components.icons.PhotoLibraryIcon
 import com.luczka.mycoffee.ui.components.textfields.FilteredMyCoffeeOutlinedTextField
 import com.luczka.mycoffee.ui.components.textfields.MyCoffeeOutlinedTextField
 import com.luczka.mycoffee.ui.models.CoffeeImageUiState
-import com.luczka.mycoffee.ui.screens.coffeeinput.dialogs.CoffeeInputDiscardDialog
-import com.luczka.mycoffee.ui.screens.coffeeinput.dialogs.CoffeeInputScaInfoDialog
+import com.luczka.mycoffee.ui.components.dialogs.DiscardNewCoffeeDialog
+import com.luczka.mycoffee.ui.components.dialogs.CoffeeInputScaInfoDialog
 import com.luczka.mycoffee.ui.theme.MyCoffeeTheme
 import kotlinx.coroutines.launch
 import java.io.File
@@ -165,7 +165,7 @@ fun CoffeeInputScreen(
     }
 
     if (uiState.openDiscardDialog) {
-        CoffeeInputDiscardDialog(
+        DiscardNewCoffeeDialog(
             onNegative = {
                 val action = CoffeeInputAction.OnHideDiscardDialog
                 onAction(action)
