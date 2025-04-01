@@ -74,8 +74,6 @@ fun DoubleVerticalPager(
     iconButtonIcon: (@Composable () -> Unit)? = null,
     onIconButtonClick: (() -> Unit) = {},
 ) {
-    val density = LocalDensity.current
-
     val coroutineScope = rememberCoroutineScope()
 
     val leftPagerState = rememberPagerState(
@@ -96,7 +94,7 @@ fun DoubleVerticalPager(
         pagerSnapDistance = PagerSnapDistance.atMost(doubleVerticalPagerState.rightPagerItems.size)
     )
 
-    val textLineHeight = with(density) {
+    val textLineHeight = with(LocalDensity.current) {
         val lineHeightSp = if (textStyle.lineHeight != TextUnit.Unspecified) {
             textStyle.lineHeight
         } else {
@@ -144,14 +142,14 @@ fun DoubleVerticalPager(
     }
 
     LaunchedEffect(leftPagerState) {
-        snapshotFlow { leftPagerState.currentPage }.collect { pageIndex ->
-            onLeftPagerIndexChanged(pageIndex)
+        snapshotFlow { leftPagerState.currentPage }.collect { leftPageIndex ->
+            onLeftPagerIndexChanged(leftPageIndex)
         }
     }
 
     LaunchedEffect(rightPagerState) {
-        snapshotFlow { rightPagerState.currentPage }.collect { pageIndex ->
-            onRightPagerIndexChanged(pageIndex)
+        snapshotFlow { rightPagerState.currentPage }.collect { rightPageIndex ->
+            onRightPagerIndexChanged(rightPageIndex)
         }
     }
 
@@ -159,67 +157,68 @@ fun DoubleVerticalPager(
         modifier = Modifier.height(pagerSize),
         contentAlignment = Alignment.BottomStart
     ) {
-        Box(modifier = Modifier.padding(horizontal = 16.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth(),
-                    contentAlignment = Alignment.CenterEnd
-                ) {
-                    VerticalPager(
-                        state = leftPagerState,
-                        pageSize = pageSize,
-                        modifier = Modifier.wrapContentWidth(),
-                        beyondViewportPageCount = DoubleVerticalPagerDefaults.BeyondViewportPageCount,
-                        flingBehavior = leftPagerFling,
-                        key = { it },
-                        contentPadding = contentPadding,
-                        horizontalAlignment = Alignment.End,
-                        pageSpacing = pageSpacing,
-                        reverseLayout = true,
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth(),
+                contentAlignment = Alignment.CenterEnd
+            ) {
+                VerticalPager(
+                    state = leftPagerState,
+                    pageSize = pageSize,
+                    modifier = Modifier.wrapContentWidth(),
+                    beyondViewportPageCount = DoubleVerticalPagerDefaults.BeyondViewportPageCount,
+                    flingBehavior = leftPagerFling,
+                    key = { it },
+                    contentPadding = contentPadding,
+                    horizontalAlignment = Alignment.End,
+                    pageSpacing = pageSpacing,
+                    reverseLayout = true,
 //                        pageNestedScrollConnection = // TODO: Remove default nested scroll connection
-                    ) { page ->
-                        DoubleVerticalPagerCard(
-                            style = textStyle,
-                            text = doubleVerticalPagerState.leftPagerItems[page]
-                        )
-                    }
+                ) { page ->
+                    DoubleVerticalPagerCard(
+                        style = textStyle,
+                        text = doubleVerticalPagerState.leftPagerItems[page]
+                    )
                 }
-                Text(
-                    text = stringResource(id = doubleVerticalPagerState.separatorRes),
-                    style = textStyle,
-                    modifier = Modifier
-                        .padding(contentPadding)
-                        .width(24.dp),
-                    textAlign = TextAlign.Center,
-                    lineHeight = textStyle.lineHeight,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth(),
-                    contentAlignment = Alignment.CenterStart
-                ) {
-                    VerticalPager(
-                        state = rightPagerState,
-                        pageSize = pageSize,
-                        modifier = Modifier.wrapContentWidth(),
-                        beyondViewportPageCount = DoubleVerticalPagerDefaults.BeyondViewportPageCount,
-                        flingBehavior = rightPagerFling,
-                        key = { it },
-                        contentPadding = contentPadding,
-                        horizontalAlignment = Alignment.Start,
-                        pageSpacing = pageSpacing,
-                        reverseLayout = true,
+            }
+            Text(
+                text = stringResource(id = doubleVerticalPagerState.separatorRes),
+                style = textStyle,
+                modifier = Modifier
+                    .padding(contentPadding)
+                    .width(24.dp),
+                textAlign = TextAlign.Center,
+                lineHeight = textStyle.lineHeight,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth(),
+                contentAlignment = Alignment.CenterStart
+            ) {
+                VerticalPager(
+                    state = rightPagerState,
+                    pageSize = pageSize,
+                    modifier = Modifier.wrapContentWidth(),
+                    beyondViewportPageCount = DoubleVerticalPagerDefaults.BeyondViewportPageCount,
+                    flingBehavior = rightPagerFling,
+                    key = { it },
+                    contentPadding = contentPadding,
+                    horizontalAlignment = Alignment.Start,
+                    pageSpacing = pageSpacing,
+                    reverseLayout = true,
 //                        pageNestedScrollConnection = // TODO: Remove default nested scroll connection
-                    ) { page ->
-                        DoubleVerticalPagerCard(
-                            style = textStyle,
-                            text = doubleVerticalPagerState.rightPagerItems[page]
-                        )
-                    }
+                ) { page ->
+                    DoubleVerticalPagerCard(
+                        style = textStyle,
+                        text = doubleVerticalPagerState.rightPagerItems[page]
+                    )
                 }
             }
         }

@@ -14,6 +14,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.luczka.mycoffee.R
+import com.luczka.mycoffee.ui.components.icons.PercentIcon
+import com.luczka.mycoffee.ui.components.icons.ScaleIcon
+import com.luczka.mycoffee.ui.components.icons.TimerIcon
+import com.luczka.mycoffee.ui.components.icons.WaterDropIcon
 import com.luczka.mycoffee.ui.screens.brewassistant.BrewAssistantAction
 import com.luczka.mycoffee.ui.screens.brewassistant.BrewAssistantUiState
 import com.luczka.mycoffee.ui.screens.brewassistant.components.AssistantSummaryCoffeeListItem
@@ -45,12 +49,10 @@ fun BrewAssistantSummaryScreen(
             is BrewAssistantUiState.CoffeeSelected -> {
                 item {
                     Text(
-                        modifier = Modifier.padding(
-                            top = 24.dp,
-                            start = 16.dp,
-                            end = 16.dp,
-                            bottom = 8.dp
-                        ),
+                        modifier = Modifier
+                            .padding(top = 24.dp)
+                            .padding(horizontal = 16.dp)
+                            .padding(bottom = 8.dp),
                         text = if (uiState.selectedCoffees.size > 1) {
                             stringResource(id = R.string.selected_coffees)
                         } else {
@@ -81,12 +83,10 @@ fun BrewAssistantSummaryScreen(
         }
         item {
             Text(
-                modifier = Modifier.padding(
-                    top = 24.dp,
-                    start = 16.dp,
-                    end = 16.dp,
-                    bottom = 8.dp
-                ),
+                modifier = Modifier
+                    .padding(top = 24.dp)
+                    .padding(horizontal = 16.dp)
+                    .padding(bottom = 8.dp),
                 text = stringResource(id = R.string.assistant_selected_parameters),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -96,7 +96,9 @@ fun BrewAssistantSummaryScreen(
         item {
             Column {
                 BrewAssistantSummaryParametersListItem(
-                    index = 0,
+                    icon = {
+                        PercentIcon()
+                    },
                     headlineText = stringResource(id = R.string.ratio),
                     trailingText = stringResource(
                         id = R.string.format_ratio,
@@ -105,7 +107,9 @@ fun BrewAssistantSummaryScreen(
                     )
                 )
                 BrewAssistantSummaryParametersListItem(
-                    index = 1,
+                    icon = {
+                        ScaleIcon()
+                    },
                     headlineText = stringResource(id = R.string.coffee),
                     trailingText = stringResource(
                         id = R.string.format_coffee_amount_grams,
@@ -113,7 +117,9 @@ fun BrewAssistantSummaryScreen(
                     )
                 )
                 BrewAssistantSummaryParametersListItem(
-                    index = 2,
+                    icon = {
+                        WaterDropIcon()
+                    },
                     headlineText = stringResource(id = R.string.water),
                     trailingText = stringResource(
                         id = R.string.format_coffee_amount_grams,
@@ -121,6 +127,27 @@ fun BrewAssistantSummaryScreen(
                     )
                 )
             }
+        }
+        item {
+            Text(
+                modifier = Modifier
+                    .padding(top = 24.dp)
+                    .padding(horizontal = 16.dp)
+                    .padding(bottom = 8.dp),
+                text = "Brewing time",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+            )
+        }
+        item {
+            BrewAssistantSummaryParametersListItem(
+                icon = {
+                    TimerIcon()
+                },
+                headlineText = "Time",
+                trailingText = uiState.formattedTime
+            )
         }
     }
 }

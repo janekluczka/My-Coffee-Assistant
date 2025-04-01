@@ -1,7 +1,6 @@
 package com.luczka.mycoffee.ui.screens.brewassistant.screens
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -27,22 +26,26 @@ fun AssistantSelectionScreen(
     uiState: BrewAssistantUiState,
     onAction: (BrewAssistantAction) -> Unit
 ) {
-    when (uiState.currentCoffees.size) {
-        0 -> {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(vertical = 16.dp),
-            ) {
-                Text(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    text = stringResource(id = R.string.brew_assistant_selection_screen_title),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    style = MaterialTheme.typography.headlineSmall
-                )
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(vertical = 16.dp)
+    ) {
+        item {
+            Text(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                text = stringResource(id = R.string.brew_assistant_selection_screen_title),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                style = MaterialTheme.typography.headlineSmall
+            )
+        }
+
+        if(uiState.currentCoffees.isEmpty()) {
+            item {
                 Box(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(vertical = 16.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
@@ -52,56 +55,39 @@ fun AssistantSelectionScreen(
                     )
                 }
             }
-        }
-
-        else -> {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(vertical = 16.dp)
-            ) {
-                item {
-                    Text(
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        text = stringResource(id = R.string.brew_assistant_selection_screen_title),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        style = MaterialTheme.typography.headlineSmall
-                    )
-                }
-                item {
-                    Text(
-                        modifier = Modifier.padding(
-                            top = 24.dp,
-                            start = 16.dp,
-                            end = 16.dp,
-                            bottom = 8.dp
-                        ),
-                        text = "Available coffees",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        textAlign = TextAlign.Center,
-                    )
-                }
-                items(
-                    items = uiState.currentCoffees,
-                    key = { it.coffeeId }
-                ) { coffeeUiState ->
-                    BrewAssistantSelectionListItem(
-                        coffeeUiState = coffeeUiState,
-                        isSelected = when (uiState) {
-                            is BrewAssistantUiState.NoneSelected -> false
-                            is BrewAssistantUiState.CoffeeSelected -> uiState.selectedCoffees.containsKey(coffeeUiState)
-                        },
-                        onClick = {
-                            onAction(BrewAssistantAction.OnSelectedCoffeeChanged(it))
-                        }
-                    )
-                }
+        } else {
+            item {
+                Text(
+                    modifier = Modifier
+                        .padding(top = 24.dp)
+                        .padding(horizontal = 16.dp)
+                        .padding(bottom = 8.dp),
+                    text = "Available coffees",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                )
+            }
+            items(
+                items = uiState.currentCoffees,
+                key = { it.coffeeId }
+            ) { coffeeUiState ->
+                BrewAssistantSelectionListItem(
+                    coffeeUiState = coffeeUiState,
+                    isSelected = when (uiState) {
+                        is BrewAssistantUiState.NoneSelected -> false
+                        is BrewAssistantUiState.CoffeeSelected -> uiState.selectedCoffees.containsKey(coffeeUiState)
+                    },
+                    onClick = {
+                        onAction(BrewAssistantAction.OnSelectedCoffeeChanged(it))
+                    }
+                )
             }
         }
     }
 }
 
+// TODO: Fix preview
 //@Preview
 //@Composable
 //fun AssistantSelectionScreenPreview() {

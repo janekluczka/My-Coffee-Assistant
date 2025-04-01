@@ -23,12 +23,15 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.luczka.mycoffee.R
 import com.luczka.mycoffee.ui.components.custom.doubleverticalpager.DoubleVerticalPager
-import com.luczka.mycoffee.ui.components.custom.doubleverticalpager.DoubleVerticalPagerInputDialog
 import com.luczka.mycoffee.ui.components.custom.doubleverticalpager.DoubleVerticalPagerState
 import com.luczka.mycoffee.ui.components.icons.KeyboardIcon
 import com.luczka.mycoffee.ui.components.icons.PauseCircleIcon
+import com.luczka.mycoffee.ui.components.icons.PercentIcon
 import com.luczka.mycoffee.ui.components.icons.PlayCircleIcon
+import com.luczka.mycoffee.ui.components.icons.ScaleIcon
 import com.luczka.mycoffee.ui.components.icons.StopCircleIcon
+import com.luczka.mycoffee.ui.components.icons.TimerIcon
+import com.luczka.mycoffee.ui.components.icons.WaterDropIcon
 import com.luczka.mycoffee.ui.models.CoffeeUiState
 import com.luczka.mycoffee.ui.screens.brewassistant.BrewAssistantAction
 import com.luczka.mycoffee.ui.screens.brewassistant.BrewAssistantUiState
@@ -49,19 +52,17 @@ fun BrewAssistantParametersScreen(
             Text(
                 modifier = Modifier.padding(horizontal = 16.dp),
                 text = stringResource(id = R.string.brew_assistant_parameters_screen_title),
-                maxLines = 1,
+                maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
                 style = MaterialTheme.typography.headlineSmall
             )
         }
         item {
             Text(
-                modifier = Modifier.padding(
-                    top = 24.dp,
-                    start = 16.dp,
-                    end = 16.dp,
-                    bottom = 8.dp
-                ),
+                modifier = Modifier
+                    .padding(top = 24.dp)
+                    .padding(horizontal = 16.dp)
+                    .padding(bottom = 8.dp),
                 text = "Recipe (optional)",
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -80,12 +81,10 @@ fun BrewAssistantParametersScreen(
         }
         item {
             Text(
-                modifier = Modifier.padding(
-                    top = 24.dp,
-                    start = 16.dp,
-                    end = 16.dp,
-                    bottom = 8.dp
-                ),
+                modifier = Modifier
+                    .padding(top = 24.dp)
+                    .padding(horizontal = 16.dp)
+                    .padding(bottom = 8.dp),
                 text = "Brew parameters",
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -93,25 +92,11 @@ fun BrewAssistantParametersScreen(
             )
         }
         item {
-            var openPicker by rememberSaveable { mutableStateOf(true) }
-            var openDialog by rememberSaveable { mutableStateOf(false) }
+            var openPicker by rememberSaveable { mutableStateOf(false) } // TODO: Move state to uiState
+            var openDialog by rememberSaveable { mutableStateOf(false) } // TODO: Move state to uiState
 
             if (openDialog) {
-                DoubleVerticalPagerInputDialog(
-                    doubleVerticalPagerState = uiState.ratioSelectionUiState,
-                    titleText = stringResource(R.string.dialog_double_vertical_pager_input_title_ratio),
-                    onNegative = {
-                        openDialog = false
-                    },
-                    onPositive = { coffeeRatio, waterRatio ->
-                        openDialog = false
-                        val action = BrewAssistantAction.OnRatioSelectionCoffeeAndWaterValueChanged(
-                            leftInputValue = coffeeRatio,
-                            rightInputValue = waterRatio
-                        )
-                        onAction(action)
-                    }
-                )
+                // TODO: Add ratio dialog
             }
 
             RatioSelectionListItemWithPicker(
@@ -120,111 +105,69 @@ fun BrewAssistantParametersScreen(
                 onClick = {
                     openPicker = !openPicker
                 },
-                onUpdateLeftPager = { index ->
+                onLeftPagerIndexChanged = { index ->
                     val action = BrewAssistantAction.OnRatioSelectionCoffeeIndexChanged(leftPagerPageIndex = index)
                     onAction(action)
                 },
-                onUpdateRightPager = { index ->
+                onRightPagerIndexChanged = { index ->
                     val action = BrewAssistantAction.OnRatioSelectionWaterIndexChanged(rightPagerPageIndex = index)
                     onAction(action)
-                },
-                onOpenDialog = {
-                    openDialog = true
                 }
             )
         }
         when (uiState) {
             is BrewAssistantUiState.NoneSelected -> {
                 item {
-                    var openAmountPicker by rememberSaveable { mutableStateOf(false) }
-                    var openAmountDialog by rememberSaveable { mutableStateOf(false) }
+                    var openAmountPicker by rememberSaveable { mutableStateOf(false) } // TODO: Move state to uiState
+                    var openAmountDialog by rememberSaveable { mutableStateOf(false) } // TODO: Move state to uiState
 
                     if (openAmountDialog) {
-                        DoubleVerticalPagerInputDialog(
-                            doubleVerticalPagerState = uiState.defaultAmountDoubleVerticalPagerState,
-                            titleText = stringResource(R.string.dialog_title_select_amount),
-                            onNegative = {
-                                openAmountDialog = false
-                            },
-                            onPositive = { leftInputValue, rightInputValue ->
-                                openAmountDialog = false
-                                val action = BrewAssistantAction.OnAmountSelectionIntegerAndFractionalPartsValueChanged(
-                                    key = null,
-                                    leftInputValue = leftInputValue,
-                                    rightInputValue = rightInputValue
-                                )
-                                onAction(action)
-                            },
-                        )
+                        // TODO: Add Coffee amount dialog
                     }
 
                     AmountSelectionListItemWithPicker(
+                        selectedCoffee = null,
                         amountDoubleVerticalPagerState = uiState.defaultAmountDoubleVerticalPagerState,
                         openPicker = openAmountPicker,
                         onClick = {
                             openAmountPicker = !openAmountPicker
                         },
-                        onUpdateLeftPager = { index ->
+                        onLeftPagerIndexChanged = { index ->
                             val action = BrewAssistantAction.OnAmountSelectionIntegerPartIndexChanged(key = null, leftPagerPageIndex = index)
                             onAction(action)
                         },
-                        onUpdateRightPager = { index ->
+                        onRightPagerIndexChanged = { index ->
                             val action = BrewAssistantAction.OnAmountSelectionFractionalPartIndexChanged(key = null, rightPagerPageIndex = index)
                             onAction(action)
-                        },
-                        onOpenDialog = {
-                            openAmountDialog = true
                         }
                     )
                 }
             }
 
             is BrewAssistantUiState.CoffeeSelected -> {
-                uiState.selectedCoffees.entries.forEachIndexed { index, entry ->
+                uiState.selectedCoffees.forEach { (selectedCoffee, amountDoubleVerticalPagerState) ->
                     item {
-                        val selectedCoffee = entry.key
-                        val amountDoubleVerticalPagerState = entry.value
-
-                        var openAmountPicker by rememberSaveable { mutableStateOf(false) }
-                        var openAmountDialog by rememberSaveable { mutableStateOf(false) }
+                        var openAmountPicker by rememberSaveable { mutableStateOf(false) } // TODO: Move state to uiState
+                        var openAmountDialog by rememberSaveable { mutableStateOf(false) } // TODO: Move state to uiState
 
                         if (openAmountDialog) {
-                            DoubleVerticalPagerInputDialog(
-                                doubleVerticalPagerState = amountDoubleVerticalPagerState,
-                                titleText = stringResource(R.string.dialog_title_select_amount),
-                                onNegative = {
-                                    openAmountDialog = false
-                                },
-                                onPositive = { leftInputValue, rightInputValue ->
-                                    openAmountDialog = false
-                                    val action = BrewAssistantAction.OnAmountSelectionIntegerAndFractionalPartsValueChanged(
-                                        key = selectedCoffee,
-                                        leftInputValue = leftInputValue,
-                                        rightInputValue = rightInputValue
-                                    )
-                                    onAction(action)
-                                },
-                            )
+                            // TODO: Add Coffee amount dialog
                         }
 
                         AmountSelectionListItemWithPicker(
-                            index = index + 1,
                             selectedCoffee = selectedCoffee,
                             amountDoubleVerticalPagerState = amountDoubleVerticalPagerState,
-                            openAmountPicker = openAmountPicker,
+                            openPicker = openAmountPicker,
                             onClick = {
                                 openAmountPicker = !openAmountPicker
                             },
-                            onUpdateCoffeeAmountSelectionIntegerPart = { key, index ->
-                                val action = BrewAssistantAction.OnAmountSelectionIntegerPartIndexChanged(key = key, leftPagerPageIndex = index)
+                            onLeftPagerIndexChanged = { index ->
+                                val action = BrewAssistantAction.OnAmountSelectionIntegerPartIndexChanged(key = selectedCoffee, leftPagerPageIndex = index)
                                 onAction(action)
                             },
-                            onUpdateCoffeeAmountSelectionDecimalPart = { key, index ->
-                                val action = BrewAssistantAction.OnAmountSelectionFractionalPartIndexChanged(key = key, rightPagerPageIndex = index)
+                            onRightPagerIndexChanged = { index ->
+                                val action = BrewAssistantAction.OnAmountSelectionFractionalPartIndexChanged(key = selectedCoffee, rightPagerPageIndex = index)
                                 onAction(action)
-                            },
-                            onOpenDialog = {
-                                openAmountDialog = true
                             }
                         )
                     }
@@ -232,13 +175,10 @@ fun BrewAssistantParametersScreen(
             }
         }
         item {
-            val index = when (uiState) {
-                is BrewAssistantUiState.NoneSelected -> 3
-                is BrewAssistantUiState.CoffeeSelected -> uiState.selectedCoffees.size + 2
-            }
-
             BrewAssistantParametersListItem(
-                index = index,
+                icon = {
+                    WaterDropIcon()
+                },
                 overlineText = stringResource(id = R.string.water),
                 headlineText = stringResource(
                     id = R.string.format_coffee_amount_grams,
@@ -248,12 +188,10 @@ fun BrewAssistantParametersScreen(
         }
         item {
             Text(
-                modifier = Modifier.padding(
-                    top = 24.dp,
-                    start = 16.dp,
-                    end = 16.dp,
-                    bottom = 8.dp
-                ),
+                modifier = Modifier
+                    .padding(top = 24.dp)
+                    .padding(horizontal = 16.dp)
+                    .padding(bottom = 8.dp),
                 text = "Brewing time (optional)",
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -261,15 +199,16 @@ fun BrewAssistantParametersScreen(
             )
         }
         item {
-            var openTimerDialog by rememberSaveable { mutableStateOf(false) }
+            var openTimerDialog by rememberSaveable { mutableStateOf(false) } // TODO: Move state to uiState
 
-            val index = when (uiState) {
-                is BrewAssistantUiState.NoneSelected -> 4
-                is BrewAssistantUiState.CoffeeSelected -> uiState.selectedCoffees.size + 3
+            if (openTimerDialog) {
+                // TODO: Add timer dialog
             }
 
             BrewAssistantParametersListItem(
-                index = index,
+                icon = {
+                    TimerIcon()
+                },
                 overlineText = "Time",
                 headlineText = uiState.formattedTime,
                 trailingContent = {
@@ -313,104 +252,66 @@ private fun RatioSelectionListItemWithPicker(
     ratioDoubleVerticalPagerState: DoubleVerticalPagerState,
     openPicker: Boolean,
     onClick: () -> Unit,
-    onUpdateLeftPager: (Int) -> Unit,
-    onUpdateRightPager: (Int) -> Unit,
-    onOpenDialog: () -> Unit
+    onLeftPagerIndexChanged: (Int) -> Unit,
+    onRightPagerIndexChanged: (Int) -> Unit
 ) {
+    val coffeeRatio = ratioDoubleVerticalPagerState.currentLeftPagerItem()
+    val waterRatio = ratioDoubleVerticalPagerState.currentRightPagerItem()
+
     BrewAssistantParametersExpandableListItem(
         onClick = onClick,
-        index = 1,
+        icon = {
+            PercentIcon()
+        },
         overlineText = stringResource(id = R.string.ratio),
-        headlineText = stringResource(
-            id = R.string.format_ratio,
-            ratioDoubleVerticalPagerState.currentLeftPagerItem(),
-            ratioDoubleVerticalPagerState.currentRightPagerItem(),
-        ),
+        headlineText = stringResource(id = R.string.format_ratio, coffeeRatio, waterRatio),
         expanded = openPicker
     ) {
         DoubleVerticalPager(
             doubleVerticalPagerState = ratioDoubleVerticalPagerState,
-            onLeftPagerIndexChanged = onUpdateLeftPager,
-            onRightPagerIndexChanged = onUpdateRightPager,
-//            onShowInputDialog = onOpenDialog,
             textStyle = MaterialTheme.typography.displayLarge.copy(
                 fontFamily = MyCoffeeTypography.redditMonoFontFamily,
-            )
+            ),
+            onLeftPagerIndexChanged = onLeftPagerIndexChanged,
+            onRightPagerIndexChanged = onRightPagerIndexChanged
         )
     }
 }
 
 @Composable
 private fun AmountSelectionListItemWithPicker(
+    selectedCoffee: CoffeeUiState?,
     amountDoubleVerticalPagerState: DoubleVerticalPagerState,
     openPicker: Boolean,
     onClick: () -> Unit,
-    onUpdateLeftPager: (Int) -> Unit,
-    onUpdateRightPager: (Int) -> Unit,
-    onOpenDialog: () -> Unit
+    onLeftPagerIndexChanged: (Int) -> Unit,
+    onRightPagerIndexChanged: (Int) -> Unit
 ) {
     val integerPart = amountDoubleVerticalPagerState.currentLeftPagerItem()
     val fractionalPart = amountDoubleVerticalPagerState.currentRightPagerItem()
+
+    val overlineText = if (selectedCoffee == null) {
+        stringResource(id = R.string.coffee)
+    } else {
+        stringResource(id = R.string.format_coffee_name_coma_brand, selectedCoffee.originOrName, selectedCoffee.roasterOrBrand)
+    }
+
     BrewAssistantParametersExpandableListItem(
         onClick = onClick,
-        index = 2,
-        overlineText = stringResource(id = R.string.coffee),
-        headlineText = stringResource(
-            id = R.string.format_coffee_integer_part_decimal_part_grams,
-            integerPart,
-            fractionalPart
-        ),
+        icon = {
+            ScaleIcon()
+        },
+        overlineText = overlineText,
+        headlineText = stringResource(id = R.string.format_coffee_integer_part_decimal_part_grams, integerPart, fractionalPart),
         expanded = openPicker
     ) {
         DoubleVerticalPager(
             doubleVerticalPagerState = amountDoubleVerticalPagerState,
-            onLeftPagerIndexChanged = onUpdateLeftPager,
-            onRightPagerIndexChanged = onUpdateRightPager,
-//            onShowInputDialog = onOpenDialog
-        )
-    }
-}
-
-@Composable
-private fun AmountSelectionListItemWithPicker(
-    index: Int,
-    selectedCoffee: CoffeeUiState,
-    amountDoubleVerticalPagerState: DoubleVerticalPagerState,
-    openAmountPicker: Boolean,
-    onClick: () -> Unit,
-    onUpdateCoffeeAmountSelectionIntegerPart: (CoffeeUiState, Int) -> Unit,
-    onUpdateCoffeeAmountSelectionDecimalPart: (CoffeeUiState, Int) -> Unit,
-    onOpenDialog: (() -> Unit)?
-) {
-    val integerPart = amountDoubleVerticalPagerState.currentLeftPagerItem()
-    val fractionalPart = amountDoubleVerticalPagerState.currentRightPagerItem()
-    BrewAssistantParametersExpandableListItem(
-        onClick = onClick,
-        index = index,
-        overlineText = stringResource(
-            id = R.string.format_coffee_name_coma_brand,
-            selectedCoffee.originOrName,
-            selectedCoffee.roasterOrBrand
-        ),
-        headlineText = stringResource(
-            id = R.string.format_coffee_integer_part_decimal_part_grams,
-            integerPart,
-            fractionalPart
-        ),
-        expanded = openAmountPicker
-    ) {
-        DoubleVerticalPager(
-            doubleVerticalPagerState = amountDoubleVerticalPagerState,
-            onLeftPagerIndexChanged = { integerPartIndex ->
-                onUpdateCoffeeAmountSelectionIntegerPart(selectedCoffee, integerPartIndex)
-            },
-            onRightPagerIndexChanged = { decimalPartIndex ->
-                onUpdateCoffeeAmountSelectionDecimalPart(selectedCoffee, decimalPartIndex)
-            },
-//            onShowInputDialog = onOpenDialog,
             textStyle = MaterialTheme.typography.displayLarge.copy(
                 fontFamily = MyCoffeeTypography.redditMonoFontFamily,
-            )
+            ),
+            onLeftPagerIndexChanged = onLeftPagerIndexChanged,
+            onRightPagerIndexChanged = onRightPagerIndexChanged
         )
     }
 }

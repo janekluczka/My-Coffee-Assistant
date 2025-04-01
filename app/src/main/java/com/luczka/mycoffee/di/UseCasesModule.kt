@@ -14,6 +14,7 @@ import com.luczka.mycoffee.domain.usecases.GetCoffeesDataUseCase
 import com.luczka.mycoffee.domain.usecases.GetRecentlyAddedBrewsFlowUseCase
 import com.luczka.mycoffee.domain.usecases.GetRecentlyAddedCoffeesFlowUseCase
 import com.luczka.mycoffee.domain.usecases.GetRecipesUseCase
+import com.luczka.mycoffee.domain.usecases.InsertBrewUseCase
 import com.luczka.mycoffee.domain.usecases.UpdateCoffeeUseCase
 import dagger.Module
 import dagger.Provides
@@ -57,6 +58,11 @@ object UseCasesModule {
     @Provides
     fun providesDeleteCoffeeUseCase(myCoffeeDatabaseRepository: MyCoffeeDatabaseRepository): DeleteCoffeeUseCase {
         return DeleteCoffeeUseCase(myCoffeeDatabaseRepository)
+    }
+
+    @Provides
+    fun providesInsertBrewUseCase(myCoffeeDatabaseRepository: MyCoffeeDatabaseRepository): InsertBrewUseCase {
+        return InsertBrewUseCase(myCoffeeDatabaseRepository)
     }
 
     @Provides

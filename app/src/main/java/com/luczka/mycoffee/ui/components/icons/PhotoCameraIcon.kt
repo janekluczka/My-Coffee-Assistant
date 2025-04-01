@@ -20,4 +20,3 @@ fun PhotoCameraIcon(
         tint = tint
     )
 }
-

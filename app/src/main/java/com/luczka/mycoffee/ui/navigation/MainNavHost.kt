@@ -44,7 +44,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.navOptions
 import androidx.navigation.toRoute
 import com.luczka.mycoffee.R
 import com.luczka.mycoffee.ui.screens.brewassistant.BrewAssistantOneTimeEvent
@@ -249,7 +248,7 @@ fun MyCoffeeMainNavHost(
                     viewModel.oneTimeEvent.collect { event ->
                         when (event) {
                             CoffeeDetailsOneTimeEvent.NavigateUp -> mainNavController.navigateUp()
-                            is CoffeeDetailsOneTimeEvent.NavigateToCoffeeInput -> mainNavController.navigate(MainNavHostRoute.CoffeeInput(event.coffeeId))
+                            is CoffeeDetailsOneTimeEvent.NavigateToCoffeeInput -> mainNavController.navigateToCoffeeInput(event.coffeeId)
                         }
                     }
                 }
@@ -323,9 +322,7 @@ private fun NavHostController.navigateToBrewAssistant() {
 
 private fun NavHostController.navigateToBrewRating(brewId: Long) {
     navigate(MainNavHostRoute.BrewRating(brewId)) {
-        navOptions {
-            popUpTo(MainNavHostRoute.BrewAssistant) { inclusive = true }
-        }
+        popUpTo(MainNavHostRoute.BrewAssistant) { inclusive = true }
     }
 }
 

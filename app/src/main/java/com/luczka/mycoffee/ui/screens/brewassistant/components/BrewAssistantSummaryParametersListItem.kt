@@ -14,7 +14,7 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun BrewAssistantSummaryParametersListItem(
-    index: Int,
+    icon: (@Composable () -> Unit),
     headlineText: String,
     trailingText: String
 ) {
@@ -26,7 +26,7 @@ fun BrewAssistantSummaryParametersListItem(
                     .background(MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp)),
                 contentAlignment = Alignment.Center
             ) {
-                Text(text = "${index + 1}")
+                icon()
             }
         },
         headlineContent = { Text(text = headlineText) },

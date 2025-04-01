@@ -73,11 +73,10 @@ class MyCoffeeDatabaseRepositoryImpl(
     }
 
     override suspend fun insertBrew(brewModel: BrewModel): Long {
-        val brewId = myCoffeeDao.insertBrewWithBrewedCoffees(
+        return myCoffeeDao.insertBrewWithBrewedCoffees(
             brewEntity = brewModel.toEntity(),
             brewCoffeeCrossRefs = brewModel.brewedCoffees.map { it.toEntity() }
         )
-        return brewId
     }
 
     override suspend fun getAllBrewsFlow(): Flow<List<BrewModel>> {

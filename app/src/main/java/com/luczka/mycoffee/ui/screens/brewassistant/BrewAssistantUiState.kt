@@ -67,7 +67,7 @@ sealed interface BrewAssistantUiState {
             rightPagerItems = (1..100).toList(),
             leftPagerPageIndex = 0,
             rightPagerPageIndex = 0,
-            separatorRes = R.string.separator_ratio
+            separatorRes = R.string.separator_ratio,
         ),
         override val waterAmount: String = "0.0",
         override val isTimerRunning: Boolean = false,

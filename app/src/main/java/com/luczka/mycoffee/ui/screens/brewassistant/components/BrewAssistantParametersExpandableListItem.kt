@@ -13,7 +13,7 @@ import com.luczka.mycoffee.ui.components.icons.ArrowDropUpIcon
 @Composable
 fun BrewAssistantParametersExpandableListItem(
     onClick: () -> Unit,
-    index: Int,
+    icon: (@Composable () -> Unit),
     overlineText: String,
     headlineText: String,
     expanded: Boolean,
@@ -21,7 +21,7 @@ fun BrewAssistantParametersExpandableListItem(
 ) {
     BrewAssistantParametersListItem(
         modifier = Modifier.clickable(onClick = onClick),
-        index = index,
+        icon = icon,
         overlineText = overlineText,
         headlineText = headlineText,
         trailingContent = {

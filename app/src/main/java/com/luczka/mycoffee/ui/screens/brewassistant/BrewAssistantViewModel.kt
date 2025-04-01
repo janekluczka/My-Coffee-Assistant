@@ -5,7 +5,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.luczka.mycoffee.R
 import com.luczka.mycoffee.domain.usecases.GetAllCoffeesUseCase
+import com.luczka.mycoffee.domain.usecases.InsertBrewUseCase
 import com.luczka.mycoffee.ui.components.custom.doubleverticalpager.DoubleVerticalPagerState
+import com.luczka.mycoffee.ui.mappers.toModel
 import com.luczka.mycoffee.ui.mappers.toUiState
 import com.luczka.mycoffee.ui.models.BrewUiState
 import com.luczka.mycoffee.ui.models.BrewedCoffeeUiState
@@ -50,7 +52,7 @@ private data class BrewAssistantViewModelState(
     val assistantRecipeCategoryUiStates: List<AssistantRecipeCategoryUiState> = emptyList(),
     val selectedRecipe: AssistantRecipeUiState? = null,
     val defaultAmountDoubleVerticalPagerState: DoubleVerticalPagerState = DoubleVerticalPagerState(
-        leftPagerItems = (0..100).toList(),
+        leftPagerItems = (0..199).toList(),
         rightPagerItems = (0..9).toList(),
         leftPagerPageIndex = 0,
         rightPagerPageIndex = 0,
@@ -163,7 +165,8 @@ private data class BrewAssistantViewModelState(
 
 @HiltViewModel
 class BrewAssistantViewModel @Inject constructor(
-    private val getAllCoffeesUseCase: GetAllCoffeesUseCase
+    private val getAllCoffeesUseCase: GetAllCoffeesUseCase,
+    private val insertBrewUseCase: InsertBrewUseCase
 ) : ViewModel() {
 
     private val _viewModelState = MutableStateFlow(BrewAssistantViewModelState())
@@ -328,20 +331,17 @@ class BrewAssistantViewModel @Inject constructor(
     }
 
     private fun selectCoffee(coffeeUiState: CoffeeUiState) {
-
-        val maxLeftPagerIndex = 100
-
         val updatedSelectedCoffees = _viewModelState.value.selectedCoffees.toMutableMap()
 
         if (updatedSelectedCoffees.containsKey(coffeeUiState)) {
             updatedSelectedCoffees.remove(coffeeUiState)
         } else {
             updatedSelectedCoffees[coffeeUiState] = DoubleVerticalPagerState(
-                leftPagerItems = (0..maxLeftPagerIndex).toList(),
+                leftPagerItems = (0..199).toList(),
                 rightPagerItems = (0..9).toList(),
                 leftPagerPageIndex = 0,
                 rightPagerPageIndex = 0,
-                separatorRes = R.string.separator_amount
+                separatorRes = R.string.separator_amount,
             )
         }
 
@@ -351,16 +351,20 @@ class BrewAssistantViewModel @Inject constructor(
     }
 
     private fun updateAmountLeftPagerIndex(leftPagerPageIndex: Int) {
-        val amountSelectionUiState = _viewModelState.value.defaultAmountDoubleVerticalPagerState
-        val updatedAmountSelectionUiState = amountSelectionUiState.copy(leftPagerPageIndex = leftPagerPageIndex)
+        val amountDoubleVerticalPagerState = _viewModelState.value.defaultAmountDoubleVerticalPagerState
+
+        val updatedAmountSelectionUiState = amountDoubleVerticalPagerState.copy(leftPagerPageIndex = leftPagerPageIndex)
+
         _viewModelState.update {
             it.copy(defaultAmountDoubleVerticalPagerState = updatedAmountSelectionUiState)
         }
     }
 
     private fun updateAmountRightPagerIndex(rightPagerPageIndex: Int) {
-        val amountSelectionUiState = _viewModelState.value.defaultAmountDoubleVerticalPagerState
-        val updatedAmountSelectionUiState = amountSelectionUiState.copy(rightPagerPageIndex = rightPagerPageIndex)
+        val amountDoubleVerticalPagerState = _viewModelState.value.defaultAmountDoubleVerticalPagerState
+
+        val updatedAmountSelectionUiState = amountDoubleVerticalPagerState.copy(rightPagerPageIndex = rightPagerPageIndex)
+
         _viewModelState.update {
             it.copy(defaultAmountDoubleVerticalPagerState = updatedAmountSelectionUiState)
         }
@@ -371,30 +375,7 @@ class BrewAssistantViewModel @Inject constructor(
 
         val amountDoubleVerticalPagerState = selectedCoffees[key] ?: return
 
-        val integerPart = amountDoubleVerticalPagerState.currentLeftPagerItem()
-        val fractionalPart = amountDoubleVerticalPagerState.currentRightPagerItem()
-
-        val maxAmount = "100.0"
-        val selectedAmount = "$integerPart.$fractionalPart"
-
-        val maxAmountFloat = maxAmount.toFloatOrNull() ?: return
-        val selectedAmountFloat = selectedAmount.toFloatOrNull() ?: return
-
-        val updatedAmountSelectionUiState = if (selectedAmountFloat > maxAmountFloat) {
-            val selectedAmountFractionalPart = selectedAmount.split(".")[1].toIntOrNull() ?: return
-            val maxAmountFractionalPart = maxAmount.split(".")[1].toIntOrNull() ?: return
-
-            val fractionalPartIndexOffset = selectedAmountFractionalPart - maxAmountFractionalPart
-
-            val adjustedFractionalPartIndex = amountDoubleVerticalPagerState.leftPagerPageIndex - fractionalPartIndexOffset
-
-            amountDoubleVerticalPagerState.copy(
-                leftPagerPageIndex = leftPagerPageIndex,
-                rightPagerPageIndex = adjustedFractionalPartIndex,
-            )
-        } else {
-            amountDoubleVerticalPagerState.copy(leftPagerPageIndex = leftPagerPageIndex)
-        }
+        val updatedAmountSelectionUiState = amountDoubleVerticalPagerState.copy(leftPagerPageIndex = leftPagerPageIndex)
 
         selectedCoffees.replace(key, updatedAmountSelectionUiState)
 
@@ -435,30 +416,10 @@ class BrewAssistantViewModel @Inject constructor(
         val integerPart = leftInputValue.toIntOrNull() ?: return
         val fractionalPart = rightInputValue.toIntOrNull() ?: return
 
-        val maxAmount = "100.0"
-        val selectedAmount = "$integerPart.$fractionalPart"
-
-        val maxAmountFloat = maxAmount.toFloatOrNull() ?: return
-        val selectedAmountFloat = selectedAmount.toFloatOrNull() ?: return
-
-        val updatedAmountSelectionUiState = if (selectedAmountFloat > maxAmountFloat) {
-            val selectedAmountFractionalPart = selectedAmount.split(".")[1].toIntOrNull() ?: return
-            val maxAmountFractionalPart = maxAmount.split(".")[1].toIntOrNull() ?: return
-
-            val fractionalPartIndexOffset = selectedAmountFractionalPart - maxAmountFractionalPart
-
-            val adjustedFractionalPartIndex = amountSelectionUiState.leftPagerPageIndex - fractionalPartIndexOffset
-
-            amountSelectionUiState.copy(
-                leftPagerPageIndex = amountSelectionUiState.leftPagerItems.indexOf(integerPart),
-                rightPagerPageIndex = adjustedFractionalPartIndex,
-            )
-        } else {
-            amountSelectionUiState.copy(
-                leftPagerPageIndex = amountSelectionUiState.leftPagerItems.indexOf(integerPart),
-                rightPagerPageIndex = amountSelectionUiState.rightPagerItems.indexOf(fractionalPart)
-            )
-        }
+        val updatedAmountSelectionUiState = amountSelectionUiState.copy(
+            leftPagerPageIndex = amountSelectionUiState.leftPagerItems.indexOf(integerPart),
+            rightPagerPageIndex = amountSelectionUiState.rightPagerItems.indexOf(fractionalPart)
+        )
 
         selectedCoffees.replace(key, updatedAmountSelectionUiState)
 
@@ -551,13 +512,8 @@ class BrewAssistantViewModel @Inject constructor(
     private fun finishBrew() {
         viewModelScope.launch {
             val brewUiState = _viewModelState.value.toBrewUiState()
-
-//            val brewId = myCoffeeDatabaseRepository.insertBrewAndUpdateCoffeeModels(
-//                brewModel = brewUiState.toModel(),
-//                coffeeModels = coffeeUiStateListToUpdate.map { it.toModel() }
-//            )
-
-            _oneTimeEvent.emit(BrewAssistantOneTimeEvent.NavigateToBrewRating(brewId = 0L))
+            val brewId = insertBrewUseCase(brewModel = brewUiState.toModel())
+            _oneTimeEvent.emit(BrewAssistantOneTimeEvent.NavigateToBrewRating(brewId = brewId))
         }
     }
 }

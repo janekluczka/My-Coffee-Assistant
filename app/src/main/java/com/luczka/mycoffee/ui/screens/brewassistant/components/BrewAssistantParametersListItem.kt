@@ -19,7 +19,7 @@ import com.luczka.mycoffee.ui.theme.MyCoffeeTypography
 @Composable
 fun BrewAssistantParametersListItem(
     modifier: Modifier = Modifier,
-    index: Int,
+    icon: (@Composable () -> Unit),
     overlineText: String,
     headlineText: String,
     trailingContent: @Composable (() -> Unit)? = null,
@@ -36,7 +36,7 @@ fun BrewAssistantParametersListItem(
                     .background(MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp)),
                 contentAlignment = Alignment.Center
             ) {
-                Text(text = "$index")
+                icon()
             }
         },
         overlineContent = {
