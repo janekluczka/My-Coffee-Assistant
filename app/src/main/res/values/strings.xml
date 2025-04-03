@@ -140,6 +140,7 @@
     <!--  Format separators  -->
     <string name="separator_amount">.</string>
     <string name="separator_ratio">:</string>
+    <string name="separator_time">:</string>
 
     <!--  Recipe categories  -->
     <string name="recipe_category_aeropress">Aeropress</string>

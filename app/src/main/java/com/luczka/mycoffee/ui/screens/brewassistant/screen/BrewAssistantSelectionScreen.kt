@@ -1,4 +1,4 @@
-package com.luczka.mycoffee.ui.screens.brewassistant.screens
+package com.luczka.mycoffee.ui.screens.brewassistant.screen
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -18,8 +18,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.luczka.mycoffee.R
 import com.luczka.mycoffee.ui.screens.brewassistant.BrewAssistantAction
-import com.luczka.mycoffee.ui.screens.brewassistant.BrewAssistantUiState
-import com.luczka.mycoffee.ui.screens.brewassistant.components.BrewAssistantSelectionListItem
+import com.luczka.mycoffee.ui.screens.brewassistant.state.BrewAssistantUiState
+import com.luczka.mycoffee.ui.screens.brewassistant.component.BrewAssistantSelectionListItem
 
 @Composable
 fun AssistantSelectionScreen(

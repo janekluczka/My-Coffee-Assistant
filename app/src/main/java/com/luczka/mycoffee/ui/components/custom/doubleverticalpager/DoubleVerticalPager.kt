@@ -1,5 +1,6 @@
 package com.luczka.mycoffee.ui.components.custom.doubleverticalpager
 
+import android.util.Log
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -45,6 +46,8 @@ import com.luczka.mycoffee.R
 import com.luczka.mycoffee.ui.components.icons.KeyboardIcon
 import com.luczka.mycoffee.ui.theme.MyCoffeeTheme
 import com.luczka.mycoffee.ui.theme.MyCoffeeTypography
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 
 @Suppress("MayBeConstant")
@@ -67,6 +70,7 @@ private object DoubleVerticalPagerCardDefaults {
 fun DoubleVerticalPager(
     doubleVerticalPagerState: DoubleVerticalPagerState,
     textStyle: TextStyle = MaterialTheme.typography.displayLarge,
+    userScrollEnabled: Boolean = true,
     maxFullVisiblePages: Int = DoubleVerticalPagerDefaults.maxFullVisiblePages,
     pageSpacing: Dp = DoubleVerticalPagerDefaults.PageSpacing,
     onLeftPagerIndexChanged: (Int) -> Unit = {},
@@ -142,15 +146,25 @@ fun DoubleVerticalPager(
     }
 
     LaunchedEffect(leftPagerState) {
-        snapshotFlow { leftPagerState.currentPage }.collect { leftPageIndex ->
-            onLeftPagerIndexChanged(leftPageIndex)
-        }
+        snapshotFlow { leftPagerState.currentPage }
+            .distinctUntilChanged()
+            .collectLatest { leftPageIndex ->
+                Log.d(javaClass.simpleName, "Left pager page collected: $leftPageIndex")
+                if (userScrollEnabled) {
+                    onLeftPagerIndexChanged(leftPageIndex)
+                }
+            }
     }
 
     LaunchedEffect(rightPagerState) {
-        snapshotFlow { rightPagerState.currentPage }.collect { rightPageIndex ->
-            onRightPagerIndexChanged(rightPageIndex)
-        }
+        snapshotFlow { rightPagerState.currentPage }
+            .distinctUntilChanged()
+            .collectLatest { rightPageIndex ->
+                Log.d(javaClass.simpleName, "Right pager page collected (changed): $rightPageIndex")
+                if (userScrollEnabled) {
+                    onRightPagerIndexChanged(rightPageIndex)
+                }
+            }
     }
 
     Box(
@@ -178,11 +192,13 @@ fun DoubleVerticalPager(
                     horizontalAlignment = Alignment.End,
                     pageSpacing = pageSpacing,
                     reverseLayout = true,
+                    userScrollEnabled = userScrollEnabled,
 //                        pageNestedScrollConnection = // TODO: Remove default nested scroll connection
                 ) { page ->
                     DoubleVerticalPagerCard(
                         style = textStyle,
-                        text = doubleVerticalPagerState.leftPagerItems[page]
+                        value = doubleVerticalPagerState.leftPagerItems[page],
+                        textFormatter = doubleVerticalPagerState.leftPagerItemsTextFormatter
                     )
                 }
             }
@@ -213,11 +229,13 @@ fun DoubleVerticalPager(
                     horizontalAlignment = Alignment.Start,
                     pageSpacing = pageSpacing,
                     reverseLayout = true,
+                    userScrollEnabled = userScrollEnabled,
 //                        pageNestedScrollConnection = // TODO: Remove default nested scroll connection
                 ) { page ->
                     DoubleVerticalPagerCard(
                         style = textStyle,
-                        text = doubleVerticalPagerState.rightPagerItems[page]
+                        value = doubleVerticalPagerState.rightPagerItems[page],
+                        textFormatter = doubleVerticalPagerState.rightPagerItemsTextFormatter
                     )
                 }
             }
@@ -266,7 +284,8 @@ fun DoubleVerticalPager(
 @Composable
 private fun DoubleVerticalPagerCard(
     style: TextStyle,
-    text: Int,
+    value: Int,
+    textFormatter: ((Int) -> String)? = null,
     textPadding: PaddingValues = PaddingValues(
         top = DoubleVerticalPagerCardDefaults.TextTopPadding,
         bottom = DoubleVerticalPagerCardDefaults.TextBottomPadding,
@@ -281,7 +300,7 @@ private fun DoubleVerticalPagerCard(
         ) {
             Text(
                 modifier = Modifier.padding(textPadding),
-                text = text.toString(),
+                text = textFormatter?.invoke(value) ?: value.toString(),
                 style = style,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis

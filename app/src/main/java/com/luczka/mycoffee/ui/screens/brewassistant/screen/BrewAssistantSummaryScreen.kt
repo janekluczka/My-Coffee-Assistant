@@ -1,4 +1,4 @@
-package com.luczka.mycoffee.ui.screens.brewassistant.screens
+package com.luczka.mycoffee.ui.screens.brewassistant.screen
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -19,9 +19,9 @@ import com.luczka.mycoffee.ui.components.icons.ScaleIcon
 import com.luczka.mycoffee.ui.components.icons.TimerIcon
 import com.luczka.mycoffee.ui.components.icons.WaterDropIcon
 import com.luczka.mycoffee.ui.screens.brewassistant.BrewAssistantAction
-import com.luczka.mycoffee.ui.screens.brewassistant.BrewAssistantUiState
-import com.luczka.mycoffee.ui.screens.brewassistant.components.AssistantSummaryCoffeeListItem
-import com.luczka.mycoffee.ui.screens.brewassistant.components.BrewAssistantSummaryParametersListItem
+import com.luczka.mycoffee.ui.screens.brewassistant.component.AssistantSummaryCoffeeListItem
+import com.luczka.mycoffee.ui.screens.brewassistant.component.BrewAssistantSummaryParametersListItem
+import com.luczka.mycoffee.ui.screens.brewassistant.state.BrewAssistantUiState
 
 @Composable
 fun BrewAssistantSummaryScreen(
@@ -65,11 +65,11 @@ fun BrewAssistantSummaryScreen(
                 }
                 item {
                     Column {
-                        uiState.selectedCoffees.entries.forEach { entry ->
-                            val integerPart = entry.value.currentLeftPagerItem()
-                            val fractionalPart = entry.value.currentRightPagerItem()
+                        uiState.selectedCoffees.forEach { (coffeeUiState, brewAssistantCoffeeAmountItemUiState) ->
+                            val integerPart = brewAssistantCoffeeAmountItemUiState.amountDoubleVerticalPagerState.currentLeftPagerItem()
+                            val fractionalPart = brewAssistantCoffeeAmountItemUiState.amountDoubleVerticalPagerState.currentRightPagerItem()
                             AssistantSummaryCoffeeListItem(
-                                coffeeUiState = entry.key,
+                                coffeeUiState = coffeeUiState,
                                 selectedAmount = stringResource(
                                     R.string.format_coffee_integer_part_decimal_part_grams,
                                     integerPart,
@@ -102,8 +102,8 @@ fun BrewAssistantSummaryScreen(
                     headlineText = stringResource(id = R.string.ratio),
                     trailingText = stringResource(
                         id = R.string.format_ratio,
-                        uiState.ratioSelectionUiState.currentLeftPagerItem(),
-                        uiState.ratioSelectionUiState.currentRightPagerItem()
+                        uiState.brewAssistantRatioItemUiState.ratioDoubleVerticalPagerState.currentLeftPagerItem(),
+                        uiState.brewAssistantRatioItemUiState.ratioDoubleVerticalPagerState.currentRightPagerItem()
                     )
                 )
                 BrewAssistantSummaryParametersListItem(
@@ -146,7 +146,7 @@ fun BrewAssistantSummaryScreen(
                     TimerIcon()
                 },
                 headlineText = "Time",
-                trailingText = uiState.formattedTime
+                trailingText = uiState.brewAssistantTimerItemUiState.formattedTime()
             )
         }
     }

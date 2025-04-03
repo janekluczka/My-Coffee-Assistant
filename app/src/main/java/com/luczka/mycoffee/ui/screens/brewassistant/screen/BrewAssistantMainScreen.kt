@@ -1,4 +1,4 @@
-package com.luczka.mycoffee.ui.screens.brewassistant.screens
+package com.luczka.mycoffee.ui.screens.brewassistant.screen
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.tween
@@ -42,10 +42,10 @@ import androidx.core.text.buildSpannedString
 import com.luczka.mycoffee.R
 import com.luczka.mycoffee.ui.components.icons.CloseIcon
 import com.luczka.mycoffee.ui.screens.brewassistant.BrewAssistantAction
-import com.luczka.mycoffee.ui.screens.brewassistant.BrewAssistantPage
-import com.luczka.mycoffee.ui.screens.brewassistant.BrewAssistantUiState
-import com.luczka.mycoffee.ui.screens.brewassistant.dialogs.BrewAssistantAbortDialog
-import com.luczka.mycoffee.ui.screens.brewassistant.dialogs.BrewAssistantSaveDialog
+import com.luczka.mycoffee.ui.screens.brewassistant.dialog.BrewAssistantAbortDialog
+import com.luczka.mycoffee.ui.screens.brewassistant.dialog.SaveBrewDialog
+import com.luczka.mycoffee.ui.screens.brewassistant.state.BrewAssistantPage
+import com.luczka.mycoffee.ui.screens.brewassistant.state.BrewAssistantUiState
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -64,7 +64,7 @@ fun BrewAssistantMainScreen(
     val sheetState = rememberModalBottomSheetState()
 
     BackHandler {
-        val action = BrewAssistantAction.OnPrevious
+        val action = BrewAssistantAction.OnBack
         onAction(action)
     }
 
@@ -84,21 +84,21 @@ fun BrewAssistantMainScreen(
                 onAction(action)
             },
             onPositive = {
-                val action = BrewAssistantAction.OnBack
+                val action = BrewAssistantAction.OnAbortClicked
                 onAction(action)
             }
         )
     }
 
     if (uiState.showFinishDialog) {
-        BrewAssistantSaveDialog(
+        SaveBrewDialog(
             uiState = uiState,
             onNegative = {
                 val action = BrewAssistantAction.OnHideFinishDialog
                 onAction(action)
             },
             onPositive = {
-                val action = BrewAssistantAction.OnFinishBrewClicked
+                val action = BrewAssistantAction.OnFinishClicked
                 onAction(action)
             }
         )
@@ -185,7 +185,7 @@ private fun BrewAssistantTopBar(onAction: (BrewAssistantAction) -> Unit) {
         navigationIcon = {
             IconButton(
                 onClick = {
-                    val action = BrewAssistantAction.OnAbort
+                    val action = BrewAssistantAction.OnCloseClicked
                     onAction(action)
                 }
             ) {
@@ -258,7 +258,7 @@ private fun AssistantBottomBar(
                 .weight(1f),
             enabled = !uiState.isFirstPage,
             onClick = {
-                val action = BrewAssistantAction.OnPrevious
+                val action = BrewAssistantAction.OnPreviousClicked
                 onAction(action)
             }
         ) {
@@ -273,7 +273,7 @@ private fun AssistantBottomBar(
                 .fillMaxWidth()
                 .weight(1f),
             onClick = {
-                val action = BrewAssistantAction.OnNext
+                val action = BrewAssistantAction.OnNextClicked
                 onAction(action)
             }
         ) {

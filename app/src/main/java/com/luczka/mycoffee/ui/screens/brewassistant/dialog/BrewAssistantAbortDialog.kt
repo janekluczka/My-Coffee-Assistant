@@ -1,4 +1,4 @@
-package com.luczka.mycoffee.ui.screens.brewassistant.dialogs
+package com.luczka.mycoffee.ui.screens.brewassistant.dialog
 
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text

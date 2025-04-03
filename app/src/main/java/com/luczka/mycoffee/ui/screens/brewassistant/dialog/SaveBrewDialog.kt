@@ -1,4 +1,4 @@
-package com.luczka.mycoffee.ui.screens.brewassistant.dialogs
+package com.luczka.mycoffee.ui.screens.brewassistant.dialog
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -11,10 +11,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.luczka.mycoffee.R
-import com.luczka.mycoffee.ui.screens.brewassistant.BrewAssistantUiState
+import com.luczka.mycoffee.ui.screens.brewassistant.state.BrewAssistantUiState
 
 @Composable
-fun BrewAssistantSaveDialog(
+fun SaveBrewDialog(
     modifier: Modifier = Modifier,
     uiState: BrewAssistantUiState,
     onNegative: () -> Unit,
@@ -53,9 +53,9 @@ private fun AssistantSaveDialogText(uiState: BrewAssistantUiState) {
         is BrewAssistantUiState.CoffeeSelected -> {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 uiState.selectedCoffees.keys.forEachIndexed { index, selectedCoffee ->
-                    val amountSelectionUiState = uiState.selectedCoffees[selectedCoffee]!!
-                    val integerPart = amountSelectionUiState.currentLeftPagerItem()
-                    val fractionalPart = amountSelectionUiState.currentRightPagerItem()
+                    val brewAssistantCoffeeAmountItemUiState = uiState.selectedCoffees[selectedCoffee]!!
+                    val integerPart = brewAssistantCoffeeAmountItemUiState.amountDoubleVerticalPagerState.currentLeftPagerItem()
+                    val fractionalPart = brewAssistantCoffeeAmountItemUiState.amountDoubleVerticalPagerState.currentRightPagerItem()
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         Text(text = "${index + 1}.")
                         Text(

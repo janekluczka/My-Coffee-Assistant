@@ -1,4 +1,4 @@
-package com.luczka.mycoffee.ui.screens.brewassistant
+package com.luczka.mycoffee.ui.screens.brewassistant.state
 
 enum class BrewAssistantPage {
     SELECTION,

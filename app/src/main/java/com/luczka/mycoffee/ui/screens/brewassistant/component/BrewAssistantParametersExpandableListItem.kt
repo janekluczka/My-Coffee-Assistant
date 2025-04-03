@@ -1,4 +1,4 @@
-package com.luczka.mycoffee.ui.screens.brewassistant.components
+package com.luczka.mycoffee.ui.screens.brewassistant.component
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope

@@ -48,7 +48,7 @@ import androidx.navigation.toRoute
 import com.luczka.mycoffee.R
 import com.luczka.mycoffee.ui.screens.brewassistant.BrewAssistantOneTimeEvent
 import com.luczka.mycoffee.ui.screens.brewassistant.BrewAssistantViewModel
-import com.luczka.mycoffee.ui.screens.brewassistant.screens.BrewAssistantMainScreen
+import com.luczka.mycoffee.ui.screens.brewassistant.screen.BrewAssistantMainScreen
 import com.luczka.mycoffee.ui.screens.brewdetails.BrewDetailsOneTimeEvent
 import com.luczka.mycoffee.ui.screens.brewdetails.BrewDetailsScreen
 import com.luczka.mycoffee.ui.screens.brewdetails.BrewDetailsViewModel
