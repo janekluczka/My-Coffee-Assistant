@@ -54,8 +54,8 @@ private fun AssistantSaveDialogText(uiState: BrewAssistantUiState) {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 uiState.selectedCoffees.keys.forEachIndexed { index, selectedCoffee ->
                     val brewAssistantCoffeeAmountItemUiState = uiState.selectedCoffees[selectedCoffee]!!
-                    val integerPart = brewAssistantCoffeeAmountItemUiState.amountDoubleVerticalPagerState.currentLeftPagerItem()
-                    val fractionalPart = brewAssistantCoffeeAmountItemUiState.amountDoubleVerticalPagerState.currentRightPagerItem()
+                    val integerPart = brewAssistantCoffeeAmountItemUiState.selectedIntegerPart()
+                    val fractionalPart = brewAssistantCoffeeAmountItemUiState.selectedFractionalPart()
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         Text(text = "${index + 1}.")
                         Text(

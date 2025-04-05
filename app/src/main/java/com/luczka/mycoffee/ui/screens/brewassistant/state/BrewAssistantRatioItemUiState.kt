@@ -1,17 +1,24 @@
 package com.luczka.mycoffee.ui.screens.brewassistant.state
 
-import com.luczka.mycoffee.ui.components.custom.doubleverticalpager.DoubleVerticalPagerState
+import androidx.annotation.StringRes
+import com.luczka.mycoffee.R
 
 data class BrewAssistantRatioItemUiState(
-    val openPicker: Boolean,
-    val openDialog: Boolean,
-    val ratioDoubleVerticalPagerState: DoubleVerticalPagerState,
+    val openPicker: Boolean = false,
+    val openDialog: Boolean = false,
+    val coffeeRatioIndex: Int = 0,
+    val coffeeRatioItems: List<Int> = (1..10).toList(),
+    val coffeeRatioItemsTextFormatter: ((Int) -> String)? = null,
+    val waterRatioIndex: Int = 0,
+    val waterRatioItems: List<Int> = (1..100).toList(),
+    val waterRatioItemsTextFormatter: ((Int) -> String)? = null,
+    @StringRes val separatorRes: Int = R.string.separator_ratio,
 ) {
-    fun coffeeRatio(): Int {
-        return ratioDoubleVerticalPagerState.currentLeftPagerItem()
+    fun selectedCoffeeRatio(): Int {
+        return coffeeRatioItems[coffeeRatioIndex]
     }
 
-    fun waterRatio(): Int {
-        return ratioDoubleVerticalPagerState.currentRightPagerItem()
+    fun selectedWaterRatio(): Int {
+        return waterRatioItems[waterRatioIndex]
     }
 }

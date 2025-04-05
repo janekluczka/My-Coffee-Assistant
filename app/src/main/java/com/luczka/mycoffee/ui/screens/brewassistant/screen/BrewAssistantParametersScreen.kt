@@ -231,8 +231,9 @@ private fun RatioSelectionListItemWithPicker(
     onLeftPagerIndexChanged: (Int) -> Unit,
     onRightPagerIndexChanged: (Int) -> Unit
 ) {
-    val coffeeRatio = brewAssistantRatioItemUiState.ratioDoubleVerticalPagerState.currentLeftPagerItem()
-    val waterRatio = brewAssistantRatioItemUiState.ratioDoubleVerticalPagerState.currentRightPagerItem()
+    val coffeeRatio = brewAssistantRatioItemUiState.selectedCoffeeRatio()
+    val waterRatio = brewAssistantRatioItemUiState.selectedWaterRatio()
+    val separatorText = stringResource(id = brewAssistantRatioItemUiState.separatorRes)
 
     BrewAssistantParametersExpandableListItem(
         onClick = onClick,
@@ -240,11 +241,17 @@ private fun RatioSelectionListItemWithPicker(
             PercentIcon()
         },
         overlineText = stringResource(id = R.string.ratio),
-        headlineText = stringResource(id = R.string.format_ratio, coffeeRatio, waterRatio),
+        headlineText = "$coffeeRatio$separatorText$waterRatio",
         expanded = brewAssistantRatioItemUiState.openPicker
     ) {
         DoubleVerticalPager(
-            doubleVerticalPagerState = brewAssistantRatioItemUiState.ratioDoubleVerticalPagerState,
+            leftPagerPageIndex = brewAssistantRatioItemUiState.coffeeRatioIndex,
+            leftPagerItems = brewAssistantRatioItemUiState.coffeeRatioItems,
+            leftPagerItemsTextFormatter = brewAssistantRatioItemUiState.coffeeRatioItemsTextFormatter,
+            rightPagerPageIndex = brewAssistantRatioItemUiState.waterRatioIndex,
+            rightPagerItems = brewAssistantRatioItemUiState.waterRatioItems,
+            rightPagerItemsTextFormatter = brewAssistantRatioItemUiState.waterRatioItemsTextFormatter,
+            separatorRes = brewAssistantRatioItemUiState.separatorRes,
             textStyle = MaterialTheme.typography.displayLarge.copy(
                 fontFamily = MyCoffeeTypography.redditMonoFontFamily,
             ),
@@ -262,8 +269,9 @@ private fun AmountSelectionListItemWithPicker(
     onLeftPagerIndexChanged: (Int) -> Unit,
     onRightPagerIndexChanged: (Int) -> Unit
 ) {
-    val integerPart = brewAssistantCoffeeAmountItemUiState.amountDoubleVerticalPagerState.currentLeftPagerItem()
-    val fractionalPart = brewAssistantCoffeeAmountItemUiState.amountDoubleVerticalPagerState.currentRightPagerItem()
+    val integerPart = brewAssistantCoffeeAmountItemUiState.selectedIntegerPart()
+    val fractionalPart = brewAssistantCoffeeAmountItemUiState.selectedFractionalPart()
+    val separatorText = stringResource(id = brewAssistantCoffeeAmountItemUiState.separatorRes)
 
     val overlineText = if (selectedCoffee == null) {
         stringResource(id = R.string.coffee)
@@ -277,11 +285,17 @@ private fun AmountSelectionListItemWithPicker(
             ScaleIcon()
         },
         overlineText = overlineText,
-        headlineText = stringResource(id = R.string.format_coffee_integer_part_decimal_part_grams, integerPart, fractionalPart),
+        headlineText = "$integerPart$separatorText$fractionalPart",
         expanded = brewAssistantCoffeeAmountItemUiState.openPicker
     ) {
         DoubleVerticalPager(
-            doubleVerticalPagerState = brewAssistantCoffeeAmountItemUiState.amountDoubleVerticalPagerState,
+            leftPagerPageIndex = brewAssistantCoffeeAmountItemUiState.leftPagerPageIndex,
+            leftPagerItems = brewAssistantCoffeeAmountItemUiState.leftPagerItems,
+            leftPagerItemsTextFormatter = brewAssistantCoffeeAmountItemUiState.leftPagerItemsTextFormatter,
+            rightPagerPageIndex = brewAssistantCoffeeAmountItemUiState.rightPagerPageIndex,
+            rightPagerItems = brewAssistantCoffeeAmountItemUiState.rightPagerItems,
+            rightPagerItemsTextFormatter = brewAssistantCoffeeAmountItemUiState.rightPagerItemsTextFormatter,
+            separatorRes = brewAssistantCoffeeAmountItemUiState.separatorRes,
             textStyle = MaterialTheme.typography.displayLarge.copy(
                 fontFamily = MyCoffeeTypography.redditMonoFontFamily,
             ),
@@ -313,7 +327,7 @@ private fun TimeSelectionListItemWithPicker(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(onClick = onStartStopTimerClicked) {
-                    if (brewAssistantTimerItemUiState.isTimerRunning) {
+                    if (brewAssistantTimerItemUiState.isRunning) {
                         PauseCircleIcon()
                     } else {
                         PlayCircleIcon()
@@ -341,8 +355,14 @@ private fun TimeSelectionListItemWithPicker(
         exit = shrinkVertically(),
         content = {
             DoubleVerticalPager(
-                doubleVerticalPagerState = brewAssistantTimerItemUiState.timeDoubleVerticalPagerState,
-                userScrollEnabled = !brewAssistantTimerItemUiState.isTimerRunning,
+                leftPagerPageIndex = brewAssistantTimerItemUiState.minutesPageIndex,
+                leftPagerItems = brewAssistantTimerItemUiState.minutesPagerItems,
+                leftPagerItemsTextFormatter = brewAssistantTimerItemUiState.minutesPagerItemsTextFormatter,
+                rightPagerPageIndex = brewAssistantTimerItemUiState.secondsPageIndex,
+                rightPagerItems = brewAssistantTimerItemUiState.secondsPagerItems,
+                rightPagerItemsTextFormatter = brewAssistantTimerItemUiState.secondsPagerItemsTextFormatter,
+                separatorRes = brewAssistantTimerItemUiState.separatorRes,
+                userScrollEnabled = !brewAssistantTimerItemUiState.isRunning,
                 textStyle = MaterialTheme.typography.displayLarge.copy(
                     fontFamily = MyCoffeeTypography.redditMonoFontFamily,
                 ),

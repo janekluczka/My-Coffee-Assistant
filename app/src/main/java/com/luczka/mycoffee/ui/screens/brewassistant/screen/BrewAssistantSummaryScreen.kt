@@ -66,8 +66,8 @@ fun BrewAssistantSummaryScreen(
                 item {
                     Column {
                         uiState.selectedCoffees.forEach { (coffeeUiState, brewAssistantCoffeeAmountItemUiState) ->
-                            val integerPart = brewAssistantCoffeeAmountItemUiState.amountDoubleVerticalPagerState.currentLeftPagerItem()
-                            val fractionalPart = brewAssistantCoffeeAmountItemUiState.amountDoubleVerticalPagerState.currentRightPagerItem()
+                            val integerPart = brewAssistantCoffeeAmountItemUiState.selectedIntegerPart()
+                            val fractionalPart = brewAssistantCoffeeAmountItemUiState.selectedFractionalPart()
                             AssistantSummaryCoffeeListItem(
                                 coffeeUiState = coffeeUiState,
                                 selectedAmount = stringResource(
@@ -102,8 +102,8 @@ fun BrewAssistantSummaryScreen(
                     headlineText = stringResource(id = R.string.ratio),
                     trailingText = stringResource(
                         id = R.string.format_ratio,
-                        uiState.brewAssistantRatioItemUiState.ratioDoubleVerticalPagerState.currentLeftPagerItem(),
-                        uiState.brewAssistantRatioItemUiState.ratioDoubleVerticalPagerState.currentRightPagerItem()
+                        uiState.brewAssistantRatioItemUiState.selectedCoffeeRatio(),
+                        uiState.brewAssistantRatioItemUiState.selectedWaterRatio()
                     )
                 )
                 BrewAssistantSummaryParametersListItem(

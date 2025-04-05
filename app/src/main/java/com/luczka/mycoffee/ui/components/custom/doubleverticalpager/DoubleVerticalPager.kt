@@ -68,7 +68,15 @@ private object DoubleVerticalPagerCardDefaults {
 
 @Composable
 fun DoubleVerticalPager(
-    doubleVerticalPagerState: DoubleVerticalPagerState,
+    leftPagerPageIndex: Int,
+    leftPagerItems: List<Int>,
+    leftPagerItemsTextFormatter: ((Int) -> String)? = null,
+    leftPagerBeyondViewportPageCount: Int = DoubleVerticalPagerDefaults.BeyondViewportPageCount,
+    rightPagerPageIndex: Int,
+    rightPagerItems: List<Int>,
+    rightPagerItemsTextFormatter: ((Int) -> String)? = null,
+    rightPagerBeyondViewportPageCount: Int = DoubleVerticalPagerDefaults.BeyondViewportPageCount,
+    separatorRes: Int,
     textStyle: TextStyle = MaterialTheme.typography.displayLarge,
     userScrollEnabled: Boolean = true,
     maxFullVisiblePages: Int = DoubleVerticalPagerDefaults.maxFullVisiblePages,
@@ -81,21 +89,21 @@ fun DoubleVerticalPager(
     val coroutineScope = rememberCoroutineScope()
 
     val leftPagerState = rememberPagerState(
-        initialPage = doubleVerticalPagerState.leftPagerPageIndex,
-        pageCount = { doubleVerticalPagerState.leftPagerItems.size }
+        initialPage = leftPagerPageIndex,
+        pageCount = { leftPagerItems.size }
     )
     val rightPagerState = rememberPagerState(
-        initialPage = doubleVerticalPagerState.rightPagerPageIndex,
-        pageCount = { doubleVerticalPagerState.rightPagerItems.size }
+        initialPage = rightPagerPageIndex,
+        pageCount = { rightPagerItems.size }
     )
 
     val leftPagerFling = PagerDefaults.flingBehavior(
         state = leftPagerState,
-        pagerSnapDistance = PagerSnapDistance.atMost(doubleVerticalPagerState.leftPagerItems.size)
+        pagerSnapDistance = PagerSnapDistance.atMost(leftPagerItems.size)
     )
     val rightPagerFling = PagerDefaults.flingBehavior(
         state = rightPagerState,
-        pagerSnapDistance = PagerSnapDistance.atMost(doubleVerticalPagerState.rightPagerItems.size)
+        pagerSnapDistance = PagerSnapDistance.atMost(rightPagerItems.size)
     )
 
     val textLineHeight = with(LocalDensity.current) {
@@ -123,25 +131,27 @@ fun DoubleVerticalPager(
         top = bottomHalfTextHeight + pageSpacing
     )
 
-    LaunchedEffect(doubleVerticalPagerState.leftPagerPageIndex) {
-        if (!leftPagerState.isScrollInProgress) {
-            coroutineScope.launch {
-                leftPagerState.animateScrollToPage(
-                    page = doubleVerticalPagerState.leftPagerPageIndex,
-                    animationSpec = tween(DoubleVerticalPagerDefaults.ScrollAnimationDuration)
-                )
-            }
+    LaunchedEffect(leftPagerPageIndex) {
+        if (leftPagerPageIndex == leftPagerState.currentPage) return@LaunchedEffect
+        if (leftPagerState.isScrollInProgress) return@LaunchedEffect
+
+        coroutineScope.launch {
+            leftPagerState.animateScrollToPage(
+                page = leftPagerPageIndex,
+                animationSpec = tween(DoubleVerticalPagerDefaults.ScrollAnimationDuration)
+            )
         }
     }
 
-    LaunchedEffect(doubleVerticalPagerState.rightPagerPageIndex) {
-        if (!rightPagerState.isScrollInProgress) {
-            coroutineScope.launch {
-                rightPagerState.animateScrollToPage(
-                    page = doubleVerticalPagerState.rightPagerPageIndex,
-                    animationSpec = tween(DoubleVerticalPagerDefaults.ScrollAnimationDuration)
-                )
-            }
+    LaunchedEffect(rightPagerPageIndex) {
+        if (rightPagerPageIndex == rightPagerState.currentPage) return@LaunchedEffect
+        if (rightPagerState.isScrollInProgress) return@LaunchedEffect
+
+        coroutineScope.launch {
+            rightPagerState.animateScrollToPage(
+                page = rightPagerPageIndex,
+                animationSpec = tween(DoubleVerticalPagerDefaults.ScrollAnimationDuration)
+            )
         }
     }
 
@@ -185,7 +195,7 @@ fun DoubleVerticalPager(
                     state = leftPagerState,
                     pageSize = pageSize,
                     modifier = Modifier.wrapContentWidth(),
-                    beyondViewportPageCount = DoubleVerticalPagerDefaults.BeyondViewportPageCount,
+                    beyondViewportPageCount = leftPagerBeyondViewportPageCount,
                     flingBehavior = leftPagerFling,
                     key = { it },
                     contentPadding = contentPadding,
@@ -197,13 +207,13 @@ fun DoubleVerticalPager(
                 ) { page ->
                     DoubleVerticalPagerCard(
                         style = textStyle,
-                        value = doubleVerticalPagerState.leftPagerItems[page],
-                        textFormatter = doubleVerticalPagerState.leftPagerItemsTextFormatter
+                        value = leftPagerItems[page],
+                        textFormatter = leftPagerItemsTextFormatter
                     )
                 }
             }
             Text(
-                text = stringResource(id = doubleVerticalPagerState.separatorRes),
+                text = stringResource(id = separatorRes),
                 style = textStyle,
                 modifier = Modifier
                     .padding(contentPadding)
@@ -222,7 +232,7 @@ fun DoubleVerticalPager(
                     state = rightPagerState,
                     pageSize = pageSize,
                     modifier = Modifier.wrapContentWidth(),
-                    beyondViewportPageCount = DoubleVerticalPagerDefaults.BeyondViewportPageCount,
+                    beyondViewportPageCount = rightPagerBeyondViewportPageCount,
                     flingBehavior = rightPagerFling,
                     key = { it },
                     contentPadding = contentPadding,
@@ -234,8 +244,8 @@ fun DoubleVerticalPager(
                 ) { page ->
                     DoubleVerticalPagerCard(
                         style = textStyle,
-                        value = doubleVerticalPagerState.rightPagerItems[page],
-                        textFormatter = doubleVerticalPagerState.rightPagerItemsTextFormatter
+                        value = rightPagerItems[page],
+                        textFormatter = rightPagerItemsTextFormatter
                     )
                 }
             }
@@ -314,16 +324,13 @@ private fun DoubleVerticalPagerCard(
 private fun DoubleVerticalPagerPreview() {
     val leftPagerItems = (1..10).toList()
     val rightPagerItems = (1..10).toList()
-    val doubleVerticalPagerState = DoubleVerticalPagerState(
-        leftPagerItems = leftPagerItems,
-        rightPagerItems = rightPagerItems,
-        leftPagerPageIndex = leftPagerItems.lastIndex,
-        rightPagerPageIndex = 0,
-        separatorRes = R.string.separator_amount
-    )
     MyCoffeeTheme {
         DoubleVerticalPager(
-            doubleVerticalPagerState = doubleVerticalPagerState,
+            leftPagerItems = leftPagerItems,
+            rightPagerItems = rightPagerItems,
+            leftPagerPageIndex = leftPagerItems.lastIndex,
+            rightPagerPageIndex = 0,
+            separatorRes = R.string.separator_amount,
             textStyle = MaterialTheme.typography.displayLarge.copy(
                 fontFamily = MyCoffeeTypography.redditMonoFontFamily,
             )
@@ -336,16 +343,13 @@ private fun DoubleVerticalPagerPreview() {
 private fun DoubleVerticalPagerWithButtonPreview() {
     val leftPagerItems = (1..10).toList()
     val rightPagerItems = (1..10).toList()
-    val doubleVerticalPagerState = DoubleVerticalPagerState(
-        leftPagerItems = leftPagerItems,
-        rightPagerItems = rightPagerItems,
-        leftPagerPageIndex = leftPagerItems.lastIndex,
-        rightPagerPageIndex = 0,
-        separatorRes = R.string.separator_amount
-    )
     MyCoffeeTheme {
         DoubleVerticalPager(
-            doubleVerticalPagerState = doubleVerticalPagerState,
+            leftPagerItems = leftPagerItems,
+            rightPagerItems = rightPagerItems,
+            leftPagerPageIndex = leftPagerItems.lastIndex,
+            rightPagerPageIndex = 0,
+            separatorRes = R.string.separator_amount,
             iconButtonIcon = { KeyboardIcon() },
             textStyle = MaterialTheme.typography.displayLarge.copy(
                 fontFamily = MyCoffeeTypography.redditMonoFontFamily,
